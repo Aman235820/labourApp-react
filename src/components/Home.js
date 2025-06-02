@@ -3,6 +3,7 @@ import { Container, Row, Col, Form, InputGroup, Pagination } from 'react-bootstr
 import { FaSearch, FaUser, FaTools, FaPhone, FaStar } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +23,9 @@ function Home() {
       cell: row => (
         <div className="d-flex align-items-center">
           <FaUser className="text-primary me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.labourName}</span>
+          <Link to={`/labour/${row.labourId}`} className="text-decoration-none">
+            <span className="fw-medium text-primary">{row.labourName}</span>
+          </Link>
         </div>
       ),
     },

@@ -1,0 +1,48 @@
+.hover-card {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.booking-details {
+  font-size: 0.95rem;
+}
+
+.badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.card-title {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.fw-medium {
+  color: #4a5568;
+}
+
+.text-primary {
+  color: #3182ce !important;
+}
+
+/* Status badge colors */
+.bg-warning {
+  background-color: #f6ad55 !important;
+}
+
+.bg-success {
+  background-color: #48bb78 !important;
+}
+
+.bg-danger {
+  background-color: #f56565 !important;
+}
+
+.bg-secondary {
+  background-color: #718096 !important;
+} 
