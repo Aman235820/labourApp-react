@@ -88,7 +88,7 @@ const UserHome = () => {
                         <div className="d-flex align-items-center">
                             <span className="me-3">
                                 <FaUser className="me-2" />
-                                {userData?.email}
+                                {userData?.name}
                             </span>
                             <Button 
                                 variant="outline-danger" 

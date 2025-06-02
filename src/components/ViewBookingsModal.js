@@ -64,10 +64,10 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
         },
         {
             name: 'Booking Date',
-            selector: row => row.bookingDate,
+            selector: row => row.bookingTime,
             sortable: true,
             cell: row => {
-                const dateString = row.bookingDate;
+                const dateString = row.bookingTime;
                 let formattedDate = 'Invalid Date';
 
                 if (dateString) {
@@ -101,14 +101,40 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
         },
         {
             name: 'Status',
-            selector: row => row.status,
+            selector: row => row.bookingStatusCode,
             sortable: true,
-            cell: row => (
-                <span className={`badge bg-${row.status === 'COMPLETED' ? 'success' : 
-                    row.status === 'PENDING' ? 'warning' : 'secondary'}`}>
-                    {row.status || 'N/A'}
-                </span>
-            ),
+            cell: row => {
+                let statusText = 'N/A';
+                let statusColor = 'secondary';
+
+                switch (row.bookingStatusCode) {
+                    case 0:
+                        statusText = 'Confirmation Pending';
+                        statusColor = 'warning';
+                        break;
+                    case 1:
+                        statusText = 'Booking Accepted';
+                        statusColor = 'success';
+                        break;
+                    case 2:
+                        statusText = 'Work Done';
+                        statusColor = 'info';
+                        break;
+                    case -1:
+                        statusText = 'Booking Rejected';
+                        statusColor = 'danger';
+                        break;
+                    default:
+                        statusText = 'Unknown Status';
+                        statusColor = 'secondary';
+                }
+
+                return (
+                    <span className={`badge bg-${statusColor}`}>
+                        {statusText}
+                    </span>
+                );
+            },
         },
     ];
 
