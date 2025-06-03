@@ -130,8 +130,13 @@ const Register = () => {
                                             pattern: {
                                                 value: /^[0-9]{10}$/,
                                                 message: 'Please enter a valid 10-digit mobile number'
+                                            },
+                                            onChange: (e) => {
+                                                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                e.target.value = value;
                                             }
                                         })}
+                                        maxLength="10"
                                     />
                                     {errors.mobileNumber && (
                                         <Form.Text className="text-danger">

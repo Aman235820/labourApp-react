@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaUser, FaTools, FaUserPlus } from 'react-icons/fa';
+import { FaUser, FaTools, FaUserPlus, FaClipboardList } from 'react-icons/fa';
 import '../styles/Navigation.css';
 
 function Navigation() {
@@ -18,6 +18,10 @@ function Navigation() {
             <Nav.Link as={Link} to="/register" className="d-flex align-items-center">
               <FaUserPlus className="me-1" />
               Register
+            </Nav.Link>
+            <Nav.Link as={Link} to="/labourRegister" className="d-flex align-items-center">
+              <FaClipboardList className="me-1" />
+              Register as Labour
             </Nav.Link>
             <Nav.Link as={Link} to="/login" className="d-flex align-items-center">
               <FaUser className="me-1" />

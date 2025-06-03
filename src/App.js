@@ -8,6 +8,7 @@ import Navigation from './components/Navigation';
 import LabourProfile from './components/LabourProfile';
 import LabourLogin from './components/LabourLogin';
 import LabourDashboard from './components/LabourDashboard';
+import LabourRegister from './components/LabourRegister';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -33,6 +34,7 @@ function App() {
             <Route path="/userHome" element={<UserHome />} />
             <Route path="/labour/:labourId" element={<LabourProfile />} />
             <Route path="/labourLogin" element={<LabourLogin />} />
+            <Route path="/labourRegister" element={<LabourRegister />} />
             <Route 
               path="/labourDashboard" 
               element={
