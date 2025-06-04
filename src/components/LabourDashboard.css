@@ -1,0 +1,49 @@
+.pending-actions-card {
+  border: none;
+  border-radius: 15px;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.pending-actions-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.pending-count {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+.pending-table {
+  margin-bottom: 0;
+}
+
+.pending-table th {
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 2px solid #dee2e6;
+  padding: 1rem;
+}
+
+.pending-table td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.pending-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.pending-table .btn {
+  padding: 0.375rem 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pending-table .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+} 

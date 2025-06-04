@@ -149,4 +149,256 @@
 /* Empty State */
 .text-muted {
   color: #718096 !important;
+}
+
+.dashboard-container {
+  max-width: 1400px;
+}
+
+.dashboard-header {
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+
+.logout-btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card {
+  border-radius: 15px;
+  border: none;
+  transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.profile-icon {
+  font-size: 2.5rem;
+  color: white;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.info-icon {
+  font-size: 1.2rem;
+  color: #0d6efd;
+  margin-right: 1rem;
+  width: 24px;
+}
+
+.rating-star {
+  color: #ffc107;
+  font-size: 1.2rem;
+  margin-right: 1rem;
+  width: 24px;
+}
+
+.stats-card {
+  border-radius: 15px;
+  border: none;
+  transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+}
+
+.stats-icon {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(13, 110, 253, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d6efd;
+  font-size: 1.5rem;
+}
+
+.booking-card {
+  border-radius: 15px;
+  border: none;
+}
+
+.refresh-btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.booking-table {
+  margin-bottom: 0;
+}
+
+.booking-table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  color: #495057;
+  font-weight: 600;
+  padding: 1rem;
+}
+
+.booking-table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.booking-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.booking-table tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.badge {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #000;
+}
+
+.badge.bg-success {
+  background-color: #198754 !important;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+.rating-overview {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.rating-number {
+  text-align: center;
+}
+
+.rating-number h2 {
+  font-size: 2.5rem;
+  color: #0d6efd;
+  line-height: 1;
+}
+
+.stars {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.rating-stats {
+  flex: 1;
+}
+
+.rating-stats p {
+  font-size: 0.95rem;
+}
+
+.reviews-card, .booking-card {
+  border: none;
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.reviews-card:hover, .booking-card:hover {
+  transform: translateY(-5px);
+}
+
+.review-item {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.review-item:hover {
+  background-color: #e9ecef;
+}
+
+.review-text {
+  font-size: 0.95rem;
+  color: #495057;
+  line-height: 1.5;
+  background-color: #fff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.review-count {
+  color: #000 !important;
+  font-weight: 500;
+}
+
+.sort-select {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  padding: 0.25rem 2rem 0.25rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-select:hover {
+  border-color: #0d6efd;
+}
+
+.sort-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.anonymous-text {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: normal;
 } 

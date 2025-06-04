@@ -33,26 +33,14 @@ function LabourRegister() {
       const response = await axios.post('http://localhost:4000/labourapp/labour/registerLabour', formData);
       console.log('Registration response:', response.data); // Debug log
       
-      // Store the response data in localStorage
-      const labourData = {
-        ...response.data,
-        isLabourLoggedIn: true
-      };
-      localStorage.setItem('labourData', JSON.stringify(labourData));
+      // Store only labourDetails in localStorage
+      const labourDetails = response.data.returnValue;
+      localStorage.setItem('labourDetails', JSON.stringify(labourDetails));
+      localStorage.setItem('isLabourLoggedIn', 'true');
       
       setSuccess('Registration successful!');
-      
-      // Check if we have a valid labourId before redirecting
-      if (response.data && response.data.labourId) {
-        setTimeout(() => {
-          navigate(`/labour/${response.data.labourId}`);
-        }, 1500);
-      } else {
-        // If no labourId, redirect to labour login
-        setTimeout(() => {
-          navigate('/labourLogin');
-        }, 1500);
-      }
+      // Redirect to labour dashboard after successful registration
+      navigate('/labourDashboard');
     } catch (err) {
       console.error('Registration error:', err); // Debug log
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
