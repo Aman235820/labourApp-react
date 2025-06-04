@@ -280,6 +280,18 @@ function LabourDashboard() {
                                   Mark Complete
                                 </Button>
                               )}
+                              {service.bookingStatusCode === -1 && (
+                                <Button 
+                                  variant="success" 
+                                  size="sm"
+                                  onClick={() => handleStatusUpdate(service.bookingId, 2)}
+                                >
+                                  Accept Again
+                                </Button>
+                              )}
+                              {service.bookingStatusCode === 3 && (
+                                <span className="text-muted">Completed</span>
+                              )}
                             </td>
                           </tr>
                         ))}

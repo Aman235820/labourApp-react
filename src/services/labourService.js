@@ -28,8 +28,8 @@ export const labourService = {
   // Update booking status
   updateBookingStatus: async (labourId, bookingId, bookingStatusCode) => {
     try {
-      const response = await axios.put(
-        `${BASE_URL}/labourReq/setBookingStatus?labourId=${labourId}&bookingId=${bookingId}&bookingStatusCode=${bookingStatusCode}`
+      const response = await axios.get(
+        `${BASE_URL}/labour/setBookingStatus?labourId=${labourId}&bookingId=${bookingId}&bookingStatusCode=${bookingStatusCode}`
       );
       return response.data;
     } catch (error) {
