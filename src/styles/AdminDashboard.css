@@ -1,0 +1,5 @@
+.action-btn-sm {
+  box-sizing: border-box;
+  padding: .25rem .5rem; /* Keep Bootstrap's btn-sm padding */
+  white-space: nowrap; /* Prevent text wrapping */
+} 

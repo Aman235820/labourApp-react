@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Spinner, Alert, Badge } from 'react-bootstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { adminService } from '../services/adminService';
+import { FaTimesCircle, FaClock, FaCheckCircle, FaStar, FaTools } from 'react-icons/fa';
+import '../styles/AdminDashboard.css';
 
 function AdminDashboard() {
   const [labours, setLabours] = useState([]);
@@ -16,6 +18,7 @@ function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [labourModalOpen, setLabourModalOpen] = useState(false);
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [showUserDetails, setShowUserDetails] = useState(false);
 
   // Pagination and Sorting State for Labours
   const [labourPageNumber, setLabourPageNumber] = useState(0);
@@ -55,12 +58,14 @@ function AdminDashboard() {
       style: {
         paddingLeft: '16px',
         paddingRight: '16px',
+        textAlign: 'left !important',
       },
     },
     cells: {
       style: {
         paddingLeft: '16px',
         paddingRight: '16px',
+        textAlign: 'left !important',
       },
     },
     pagination: {
@@ -68,6 +73,42 @@ function AdminDashboard() {
         borderTop: '1px solid #dee2e6',
       },
     },
+    rows: {
+      highlightOnHoverStyle: {
+        backgroundColor: '#e9e9e9',
+      },
+    },
+  };
+
+  // Custom styles to specifically target the content div within cells
+  customStyles.cells.style['& > div'] = {
+    textAlign: 'left !important',
+    justifyContent: 'flex-start !important',
+    alignItems: 'center !important',
+  };
+
+  // Custom styles to force left alignment for header text
+  customStyles.headCells.style['& > div'] = {
+    textAlign: 'left !important',
+    justifyContent: 'flex-start !important',
+    alignItems: 'center !important',
+  };
+
+  const getStatusBadge = (statusCode) => {
+    switch (statusCode) {
+      case -1:
+        return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+      case 0:
+        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>; // Assuming 0 is Unknown or similar default
+      case 1:
+        return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> Pending</Badge>;
+      case 2:
+        return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+      case 3:
+        return <Badge bg="success" className="px-3 py-2"><FaClock className="me-1" /> Completed</Badge>;
+      default:
+        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>;
+    }
   };
 
   // Columns Configuration for Users
@@ -86,21 +127,22 @@ function AdminDashboard() {
     },
     {
       name: 'Mobile',
-      selector: row => row.mobileNo,
+      selector: row => row.mobileNumber,
       sortable: true,
       sortField: 'mobileNo',
     },
     {
       name: 'Actions',
       cell: row => (
-        <div className="d-flex flex-wrap gap-2">
-          <button onClick={() => handleRemoveUser(row.userId)} className="btn btn-danger btn-sm">Delete</button>
-          <button onClick={() => handleViewUser(row.userId)} className="btn btn-info btn-sm">View Details</button>
+        <div className="d-flex gap-2">
+          <button onClick={() => handleRemoveUser(row.userId)} className="btn btn-danger btn-sm action-btn-sm">Delete</button>
+          <button onClick={() => handleViewUser(row.userId , row.mobileNumber)} className="btn btn-info btn-sm action-btn-sm">View Details</button>
         </div>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      width: '160px',
     },
   ];
 
@@ -111,38 +153,70 @@ function AdminDashboard() {
       selector: row => row.bookingId,
       sortable: true,
       sortField: 'bookingId',
+      width: '90px',
     },
     {
       name: 'User ID',
       selector: row => row.userId,
       sortable: true,
       sortField: 'userId',
+      width: '70px',
     },
     {
       name: 'Labour ID',
       selector: row => row.labourId,
       sortable: true,
       sortField: 'labourId',
+      width: '80px',
     },
     {
       name: 'Skill',
       selector: row => row.labourSkill,
       sortable: true,
       sortField: 'labourSkill',
+      width: '110px',
     },
     {
       name: 'Booking Time',
       selector: row => row.bookingTime ? new Date(row.bookingTime).toLocaleString() : 'N/A',
       sortable: true,
       sortField: 'bookingTime',
+      width: '160px',
     },
     {
       name: 'Status Code',
       selector: row => row.bookingStatusCode,
       sortable: true,
       sortField: 'bookingStatusCode',
+      width: '110px',
+      cell: row => getStatusBadge(row.bookingStatusCode),
     },
-    // Add other relevant booking fields as columns if needed
+    {
+      name: 'User Mobile',
+      selector: row => row.userMobileNumber,
+      sortable: true,
+      sortField: 'userMobileNumber',
+      width: '110px',
+    },
+    {
+      name: 'Labour Mobile',
+      selector: row => row.labourMobileNo,
+      sortable: true,
+      sortField: 'labourMobileNo',
+      width: '110px',
+    },
+    {
+      name: 'User Name',
+      selector: row => row.userName,
+      sortable: true,
+      sortField: 'userName',
+    },
+    {
+      name: 'Labour Name',
+      selector: row => row.labourName,
+      sortable: true,
+      sortField: 'labourName',
+    },
   ];
 
   // Fetch Labours on component mount or when pagination/sorting changes
@@ -325,9 +399,9 @@ function AdminDashboard() {
     }
   };
 
-  const handleViewUser = (userId) => {
+  const handleViewUser = (userId , mobileNumber) => {
     // Find user in the already fetched list
-    const user = users.find(user => user.userId === userId);
+    const user = users.find(user => user.userId === userId && user.mobileNumber === mobileNumber);
     if (user) {
       // Set selected user and show details view
       setSelectedUser(user);
@@ -341,42 +415,59 @@ function AdminDashboard() {
       selector: row => row.labourId,
       sortable: true,
       sortField: 'labourId',
+      width: '5rem'
     },
     {
       name: 'Name',
       selector: row => row.labourName,
       sortable: true,
       sortField: 'labourName',
+      width: '20rem'
     },
     {
       name: 'Skill',
       selector: row => row.labourSkill,
       sortable: true,
       sortField: 'labourSkill',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <FaTools className="text-success me-2" style={{ fontSize: '1.2rem' }} />
+          <span className="fw-medium">{row.labourSkill || 'N/A'}</span>
+        </div>
+      ),
     },
     {
       name: 'Rating',
       selector: row => row.rating,
       sortable: true,
       sortField: 'rating',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <FaStar className="text-warning me-2" style={{ fontSize: '1.2rem' }} />
+          <span className="fw-medium">{row.rating || 'N/A'}</span>
+        </div>
+      ),
     },
     {
       name: 'Mobile',
       selector: row => row.labourMobileNo,
       sortable: true,
       sortField: 'labourMobileNo',
+      width: '110px',
     },
     {
       name: 'Actions',
+      width: '160px',
       cell: row => (
-        <div className="d-flex flex-wrap gap-2">
-          <button onClick={() => handleRemoveLabour(row.labourId)} className="btn btn-danger btn-sm">Delete</button>
-          <button onClick={() => handleViewLabour(row.labourId)} className="btn btn-info btn-sm">View Details</button>
+        <div className="d-flex gap-2">
+          <button onClick={() => handleRemoveLabour(row.labourId)} className="btn btn-danger btn-sm action-btn-sm">Delete</button>
+          <button onClick={() => handleViewLabour(row.labourId)} className="btn btn-info btn-sm action-btn-sm">View Details</button>
         </div>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      width: '160px',
     },
   ];
 
