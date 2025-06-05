@@ -9,6 +9,7 @@ import LabourProfile from './components/LabourProfile';
 import LabourLogin from './components/LabourLogin';
 import LabourDashboard from './components/LabourDashboard';
 import LabourRegister from './components/LabourRegister';
+import AdminDashboard from './components/AdminDashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -35,6 +36,7 @@ function App() {
             <Route path="/labour/:labourId" element={<LabourProfile />} />
             <Route path="/labourLogin" element={<LabourLogin />} />
             <Route path="/labourRegister" element={<LabourRegister />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route 
               path="/labourDashboard" 
               element={

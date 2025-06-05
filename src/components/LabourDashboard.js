@@ -29,6 +29,13 @@ function LabourDashboard() {
     fetchRequestedServices();
   }, [navigate]);
 
+  // Add effect to refresh booking history on page load
+  useEffect(() => {
+    if (labourDetails?.labourId) {
+      fetchRequestedServices();
+    }
+  }, [labourDetails]);
+
   // Separate useEffect for fetching reviews when labourDetails changes
   useEffect(() => {
     if (labourDetails?.labourId) {
@@ -134,7 +141,7 @@ function LabourDashboard() {
   }
 
   return (
-    <Container className="py-5 dashboard-container">
+    <Container className="dashboard-container">
       <Row className="mb-4">
         <Col>
           <div className="d-flex justify-content-between align-items-center dashboard-header">
@@ -205,6 +212,42 @@ function LabourDashboard() {
                   <div className="rating-stats">
                     <p className="mb-1">Total Ratings: {labourDetails.ratingCount || 0}</p>
                     <p className="mb-0 review-count">Based on {labourDetails.ratingCount || 0} reviews</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="booking-stats mt-4">
+                <h5 className="card-title mb-4">Booking Statistics</h5>
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <div className="stat-card p-3 bg-light rounded shadow-sm">
+                      <h6 className="text-dark mb-2 fw-bold">Total Bookings</h6>
+                      <h4 className="mb-0 text-primary fw-bold">{requestedServices.length}</h4>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="stat-card p-3 bg-light rounded shadow-sm">
+                      <h6 className="text-dark mb-2 fw-bold">Accepted Bookings</h6>
+                      <h4 className="mb-0 text-success fw-bold">{requestedServices.filter(service => service.bookingStatusCode === 2).length}</h4>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="stat-card p-3 bg-light rounded shadow-sm">
+                      <h6 className="text-dark mb-2 fw-bold">Completed Bookings</h6>
+                      <h4 className="mb-0 text-info fw-bold">{requestedServices.filter(service => service.bookingStatusCode === 3).length}</h4>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="stat-card p-3 bg-light rounded shadow-sm">
+                      <h6 className="text-dark mb-2 fw-bold">Rejected Bookings</h6>
+                      <h4 className="mb-0 text-danger fw-bold">{requestedServices.filter(service => service.bookingStatusCode === -1).length}</h4>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="stat-card p-3 bg-light rounded shadow-sm">
+                      <h6 className="text-dark mb-2 fw-bold">Pending Bookings</h6>
+                      <h4 className="mb-0 text-warning fw-bold">{requestedServices.filter(service => service.bookingStatusCode === 1).length}</h4>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -313,7 +356,10 @@ function LabourDashboard() {
           <Card className="h-100 shadow-sm reviews-card">
             <Card.Body className="p-4">
               <div className="d-flex justify-content-between align-items-center mb-4">
-                <h5 className="card-title mb-0">Recent Reviews</h5>
+                <div className="d-flex align-items-center">
+                  <FaStar className="me-2 text-warning" style={{ fontSize: '1.5rem' }} />
+                  <h5 className="card-title mb-0">Recent Reviews</h5>
+                </div>
                 <div className="d-flex gap-2">
                   <Form.Select
                     name="sortBy"
@@ -347,34 +393,57 @@ function LabourDashboard() {
               ) : reviews.length > 0 ? (
                 <div className="reviews-list">
                   {reviews.map((review, index) => (
-                    <div key={index} className="review-item mb-3">
+                    <div key={index} className="review-item p-3 mb-3 bg-light rounded shadow-sm">
                       <div className="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                          <div className="stars mb-1">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar 
-                                key={i} 
-                                className={i < review.rating ? "text-warning" : "text-muted"}
-                                style={{ fontSize: '0.9rem' }}
-                              />
-                            ))}
+                        <div className="d-flex align-items-center">
+                          <div className="reviewer-avatar me-3">
+                            <FaUser className="text-primary" style={{ fontSize: '2rem' }} />
                           </div>
-                          <p className="mb-0 fw-bold">
-                            {review.userName || <span className="anonymous-text">Anonymous</span>}
-                          </p>
+                          <div>
+                            <div className="stars mb-1">
+                              {[...Array(5)].map((_, i) => (
+                                <FaStar 
+                                  key={i} 
+                                  className={i < review.rating ? "text-warning" : "text-muted"}
+                                  style={{ fontSize: '1rem' }}
+                                />
+                              ))}
+                            </div>
+                            <h6 className="mb-0 fw-bold">
+                              {review.userName || <span className="text-muted">Anonymous</span>}
+                            </h6>
+                          </div>
                         </div>
-                        <small className="text-muted">
-                          {new Date(review.reviewTime).toLocaleDateString()}
-                        </small>
+                        <div className="review-date text-end">
+                          <small className="text-muted d-block">
+                            {new Date(review.reviewTime).toLocaleDateString()}
+                          </small>
+                          <small className="text-muted d-block">
+                            {new Date(review.reviewTime).toLocaleTimeString()}
+                          </small>
+                        </div>
                       </div>
                       {review.review && (
-                        <p className="review-text mb-0 mt-2">{review.review}</p>
+                        <div className="review-content mt-3">
+                          <div className="review-text-container p-3 bg-white rounded">
+                            <p className="mb-0 review-text" style={{ 
+                              fontSize: '0.95rem',
+                              lineHeight: '1.6',
+                              color: '#444',
+                              whiteSpace: 'pre-wrap',
+                              wordBreak: 'break-word'
+                            }}>
+                              {review.review}
+                            </p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-3">
+                <div className="text-center py-5">
+                  <FaStar className="text-muted mb-3" style={{ fontSize: '3rem' }} />
                   <p className="text-muted mb-0">No reviews yet</p>
                 </div>
               )}

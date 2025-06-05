@@ -15,6 +15,13 @@ function Navigation() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
+            <Nav.Link as={Link} to="/" className="d-flex align-items-center">
+              Home
+            </Nav.Link>
+            <Nav.Link as={Link} to="/admin" className="d-flex align-items-center">
+              <FaUser className="me-1" />
+              Admin Dashboard
+            </Nav.Link>
             <Nav.Link as={Link} to="/register" className="d-flex align-items-center">
               <FaUserPlus className="me-1" />
               Register
