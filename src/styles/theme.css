@@ -1,0 +1,391 @@
+:root {
+  /* Light Theme Variables */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #1f2937;
+  --border-color: #e5e7eb;
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --nav-bg: #000000;
+  --nav-text: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #e5e7eb;
+  --table-header-bg: #f8f9fa;
+  --table-row-hover: #f8f9fa;
+  --btn-primary-bg: #1a237e;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #e5e7eb;
+  --btn-secondary-text: #000000;
+  --table-bg: #ffffff;
+  --table-text: #000000;
+  --table-border: #e5e7eb;
+  --table-header-text: #000000;
+  --table-row-bg: #ffffff;
+  --table-row-hover-bg: #f8f9fa;
+  --pagination-bg: #ffffff;
+  --pagination-text: #000000;
+  --pagination-border: #e5e7eb;
+  --pagination-hover-bg: #f8f9fa;
+  --card-text: #000000;
+  --input-text: #000000;
+  --modal-bg: #ffffff;
+  --modal-text: #000000;
+  --dropdown-bg: #ffffff;
+  --dropdown-text: #000000;
+  --dropdown-hover-bg: #f8f9fa;
+  --dropdown-hover-text: #000000;
+}
+
+.dark-theme {
+  /* Dark Theme Variables */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #121212;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --border-color: #2d3748;
+  --card-bg: #1a1a1a;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --nav-bg: #000000;
+  --nav-text: #ffffff;
+  --input-bg: #1a1a1a;
+  --input-border: #2d3748;
+  --table-header-bg: #1a1a1a;
+  --table-row-hover: #2d3748;
+  --btn-primary-bg: #3b82f6;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #2d3748;
+  --btn-secondary-text: #ffffff;
+  --table-bg: #1a1a1a;
+  --table-text: #ffffff;
+  --table-border: #2d3748;
+  --table-header-text: #ffffff;
+  --table-row-bg: #1a1a1a;
+  --table-row-hover-bg: #2d3748;
+  --pagination-bg: #1a1a1a;
+  --pagination-text: #ffffff;
+  --pagination-border: #2d3748;
+  --pagination-hover-bg: #2d3748;
+  --card-text: #ffffff;
+  --input-text: #ffffff;
+  --modal-bg: #1a1a1a;
+  --modal-text: #ffffff;
+  --dropdown-bg: #1a1a1a;
+  --dropdown-text: #ffffff;
+  --dropdown-hover-bg: #2d3748;
+  --dropdown-hover-text: #ffffff;
+}
+
+/* Apply theme variables */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card styles */
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--card-shadow);
+  color: var(--card-text);
+}
+
+/* Form controls */
+.form-control {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.form-control:focus {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+/* Table styles */
+.table {
+  color: var(--table-text);
+}
+
+.table thead th {
+  background-color: var(--table-header-bg);
+  border-color: var(--border-color);
+  color: var(--table-header-text);
+}
+
+.table td {
+  border-color: var(--border-color);
+  color: var(--table-text);
+}
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-secondary {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+}
+
+/* Navbar styles */
+.navbar {
+  background-color: var(--nav-bg) !important;
+}
+
+.navbar-brand, .nav-link {
+  color: var(--nav-text) !important;
+}
+
+/* Text colors */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Alert styles */
+.alert {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--card-text);
+}
+
+/* React Data Table Styles */
+.rdt_Table {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+  border-color: var(--table-border) !important;
+}
+
+.rdt_TableHead {
+  background-color: var(--table-header-bg) !important;
+}
+
+.rdt_TableHeadRow {
+  border-bottom: 2px solid var(--table-border) !important;
+  color: var(--table-header-text) !important;
+  background-color: var(--table-header-bg) !important;
+}
+
+.rdt_TableRow {
+  background-color: var(--table-row-bg) !important;
+  color: var(--table-text) !important;
+  border-bottom: 1px solid var(--table-border) !important;
+}
+
+.rdt_TableRow:hover {
+  background-color: var(--table-row-hover-bg) !important;
+}
+
+.rdt_TableCell {
+  color: var(--table-text) !important;
+  background-color: var(--table-row-bg) !important;
+}
+
+.rdt_TableCol {
+  color: var(--table-header-text) !important;
+  background-color: var(--table-header-bg) !important;
+}
+
+.rdt_Pagination {
+  background-color: var(--pagination-bg) !important;
+  color: var(--pagination-text) !important;
+  border-top: 1px solid var(--pagination-border) !important;
+}
+
+.rdt_Pagination button {
+  background-color: var(--pagination-bg) !important;
+  color: var(--pagination-text) !important;
+  border-color: var(--pagination-border) !important;
+}
+
+.rdt_Pagination button:hover {
+  background-color: var(--pagination-hover-bg) !important;
+}
+
+.rdt_Pagination button:disabled {
+  background-color: var(--pagination-bg) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.5;
+}
+
+.rdt_Pagination select {
+  background-color: var(--pagination-bg) !important;
+  color: var(--pagination-text) !important;
+  border-color: var(--pagination-border) !important;
+}
+
+.rdt_TableWrapper {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+}
+
+.rdt_TableBody {
+  background-color: var(--table-bg) !important;
+}
+
+.rdt_TableFooter {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+  border-top: 1px solid var(--table-border) !important;
+}
+
+/* DataTable Loading State */
+.rdt_Loading {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+}
+
+/* DataTable No Data State */
+.rdt_TableNoData {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+}
+
+/* DataTable Progress */
+.rdt_ProgressBar {
+  background-color: var(--btn-primary-bg) !important;
+}
+
+/* DataTable Checkbox */
+.rdt_TableHead .rdt_TableCol_Sortable {
+  color: var(--table-header-text) !important;
+}
+
+.rdt_TableHead .rdt_TableCol_Sortable:hover {
+  background-color: var(--table-row-hover-bg) !important;
+}
+
+/* DataTable Selection */
+.rdt_TableRow.rdt_TableRow_Selected {
+  background-color: var(--table-row-hover-bg) !important;
+}
+
+/* DataTable Expandable */
+.rdt_TableRow.rdt_TableRow_Expandable {
+  background-color: var(--table-row-bg) !important;
+}
+
+.rdt_TableRow.rdt_TableRow_Expandable:hover {
+  background-color: var(--table-row-hover-bg) !important;
+}
+
+/* DataTable Sub Row */
+.rdt_TableRow.rdt_TableRow_Sub {
+  background-color: var(--table-row-bg) !important;
+}
+
+/* DataTable Filter */
+.rdt_TableFilter {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+.rdt_TableFilter input {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* DataTable Search */
+.rdt_TableSearch {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+.rdt_TableSearch input {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Status badges */
+.status-badge {
+  background-color: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--border-color);
+}
+
+/* Loading spinner */
+.spinner-border {
+  color: var(--text-primary);
+}
+
+/* Modal styles */
+.modal-content {
+  background-color: var(--modal-bg);
+  color: var(--modal-text);
+  border-color: var(--border-color);
+}
+
+.modal-header {
+  border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+  border-top-color: var(--border-color);
+}
+
+/* Form labels */
+label {
+  color: var(--text-primary);
+}
+
+/* Dropdown styles */
+.dropdown-menu {
+  background-color: var(--dropdown-bg);
+  border-color: var(--border-color);
+}
+
+.dropdown-item {
+  color: var(--dropdown-text);
+}
+
+.dropdown-item:hover {
+  background-color: var(--dropdown-hover-bg);
+  color: var(--dropdown-hover-text);
+}
+
+/* Select elements */
+select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
+}
+
+/* Links */
+a {
+  color: var(--text-primary);
+}
+
+a:hover {
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+}
+
+/* List items */
+li {
+  color: var(--text-primary);
+}
+
+/* Code blocks */
+code {
+  background-color: var(--card-bg);
+  color: var(--card-text);
+}
+
+/* Blockquotes */
+blockquote {
+  border-left-color: var(--border-color);
+  color: var(--text-primary);
+} 
