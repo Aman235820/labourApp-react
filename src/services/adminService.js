@@ -45,4 +45,11 @@ export const adminService = {
     });
     return response.data;
   },
+
+  deleteBooking: async (bookingId) => {
+    const response = await axios.delete(`http://localhost:4000/labourapp/admin/deleteBooking/${bookingId}`, {
+      data: ''  // Adding empty data as per the API specification
+    });
+    return response.data;
+  },
 }; 

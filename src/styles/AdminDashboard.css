@@ -1,5 +1,141 @@
+/* Modern Table Design */
+.admin-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin: 20px 0;
+}
+
+/* Header Styles */
+.admin-table .rdt_TableHead {
+  background: #f8fafc !important;
+}
+
+.admin-table .rdt_TableHeadRow {
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.admin-table .rdt_TableHead .rdt_TableCol {
+  color: #475569 !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  padding: 20px 16px !important;
+  text-transform: none;
+  letter-spacing: 0.025em;
+}
+
+/* Body Styles */
+.admin-table .rdt_TableBody .rdt_TableRow {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.admin-table .rdt_TableBody .rdt_TableRow:hover {
+  background-color: #f8fafc !important;
+}
+
+.admin-table .rdt_TableBody .rdt_TableCell {
+  padding: 16px !important;
+  font-size: 0.875rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Action Buttons */
 .action-btn-sm {
-  box-sizing: border-box;
-  padding: .25rem .5rem; /* Keep Bootstrap's btn-sm padding */
-  white-space: nowrap; /* Prevent text wrapping */
+  padding: 6px 12px !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+}
+
+.action-btn-sm:hover {
+  transform: translateY(-1px);
+}
+
+.btn-info.action-btn-sm {
+  background-color: #0ea5e9 !important;
+  color: white !important;
+}
+
+.btn-info.action-btn-sm:hover {
+  background-color: #0284c7 !important;
+}
+
+.btn-danger.action-btn-sm {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.btn-danger.action-btn-sm:hover {
+  background-color: #dc2626 !important;
+}
+
+/* Pagination Styles */
+.admin-table .rdt_Pagination {
+  background-color: white !important;
+  border-top: 1px solid #e2e8f0 !important;
+  padding: 16px !important;
+}
+
+.admin-table .rdt_Pagination button {
+  border: 1px solid #e2e8f0 !important;
+  background-color: white !important;
+  color: #475569 !important;
+  font-weight: 500 !important;
+  padding: 6px 12px !important;
+  margin: 0 4px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-table .rdt_Pagination button:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+.admin-table .rdt_Pagination select {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-weight: 500 !important;
+  color: #475569 !important;
+  background-color: white !important;
+}
+
+/* Loading and No Data States */
+.admin-table .rdt_TableRow:first-child .rdt_TableCell {
+  text-align: center !important;
+  padding: 32px !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+}
+
+/* Card Title */
+.card-title {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Table Container */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 } 

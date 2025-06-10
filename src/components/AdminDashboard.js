@@ -4,6 +4,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { adminService } from '../services/adminService';
 import { FaTimesCircle, FaClock, FaCheckCircle, FaStar, FaTools } from 'react-icons/fa';
+import BookingDetailsModal from './BookingDetailsModal';
 import '../styles/AdminDashboard.css';
 
 function AdminDashboard() {
@@ -16,8 +17,10 @@ function AdminDashboard() {
   const [error, setError] = useState(null);
   const [selectedLabour, setSelectedLabour] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [labourModalOpen, setLabourModalOpen] = useState(false);
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [showUserDetails, setShowUserDetails] = useState(false);
 
   // Pagination and Sorting State for Labours
@@ -58,14 +61,14 @@ function AdminDashboard() {
       style: {
         paddingLeft: '16px',
         paddingRight: '16px',
-        textAlign: 'left !important',
+        textAlign: 'center !important',
       },
     },
     cells: {
       style: {
         paddingLeft: '16px',
         paddingRight: '16px',
-        textAlign: 'left !important',
+        textAlign: 'center !important',
       },
     },
     pagination: {
@@ -82,32 +85,32 @@ function AdminDashboard() {
 
   // Custom styles to specifically target the content div within cells
   customStyles.cells.style['& > div'] = {
-    textAlign: 'left !important',
-    justifyContent: 'flex-start !important',
+    textAlign: 'center !important',
+    justifyContent: 'center !important',
     alignItems: 'center !important',
   };
 
-  // Custom styles to force left alignment for header text
+  // Custom styles to force center alignment for header text
   customStyles.headCells.style['& > div'] = {
-    textAlign: 'left !important',
-    justifyContent: 'flex-start !important',
+    textAlign: 'center !important',
+    justifyContent: 'center !important',
     alignItems: 'center !important',
   };
 
   const getStatusBadge = (statusCode) => {
     switch (statusCode) {
       case -1:
-        return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+        return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> Rejected</Badge>;
       case 0:
-        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>; // Assuming 0 is Unknown or similar default
+        return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> Unknown</Badge>;
       case 1:
-        return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> Pending</Badge>;
+        return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> Pending</Badge>;
       case 2:
-        return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+        return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> Accepted</Badge>;
       case 3:
-        return <Badge bg="success" className="px-3 py-2"><FaClock className="me-1" /> Completed</Badge>;
+        return <Badge bg="success" className="status-badge"><FaClock className="me-1" /> Completed</Badge>;
       default:
-        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>;
+        return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> Unknown</Badge>;
     }
   };
 
@@ -153,69 +156,31 @@ function AdminDashboard() {
       selector: row => row.bookingId,
       sortable: true,
       sortField: 'bookingId',
-      width: '90px',
+      width: '100px',
+      center: true,
     },
     {
-      name: 'User ID',
-      selector: row => row.userId,
-      sortable: true,
-      sortField: 'userId',
-      width: '70px',
-    },
-    {
-      name: 'Labour ID',
-      selector: row => row.labourId,
-      sortable: true,
-      sortField: 'labourId',
-      width: '80px',
-    },
-    {
-      name: 'Skill',
-      selector: row => row.labourSkill,
-      sortable: true,
-      sortField: 'labourSkill',
-      width: '110px',
-    },
-    {
-      name: 'Booking Time',
-      selector: row => row.bookingTime ? new Date(row.bookingTime).toLocaleString() : 'N/A',
-      sortable: true,
-      sortField: 'bookingTime',
-      width: '160px',
-    },
-    {
-      name: 'Status Code',
+      name: 'Status',
       selector: row => row.bookingStatusCode,
       sortable: true,
       sortField: 'bookingStatusCode',
-      width: '110px',
+      width: '120px',
+      center: true,
       cell: row => getStatusBadge(row.bookingStatusCode),
     },
     {
-      name: 'User Mobile',
-      selector: row => row.userMobileNumber,
-      sortable: true,
-      sortField: 'userMobileNumber',
-      width: '110px',
-    },
-    {
-      name: 'Labour Mobile',
-      selector: row => row.labourMobileNo,
-      sortable: true,
-      sortField: 'labourMobileNo',
-      width: '110px',
-    },
-    {
-      name: 'User Name',
-      selector: row => row.userName,
-      sortable: true,
-      sortField: 'userName',
-    },
-    {
-      name: 'Labour Name',
-      selector: row => row.labourName,
-      sortable: true,
-      sortField: 'labourName',
+      name: 'Actions',
+      cell: row => (
+        <div className="d-flex gap-2 justify-content-center">
+          <button onClick={() => handleViewBooking(row)} className="btn btn-info btn-sm action-btn-sm">View Details</button>
+          <button onClick={() => handleDeleteBooking(row.bookingId)} className="btn btn-danger btn-sm action-btn-sm">Delete</button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      width: '180px',
+      center: true,
     },
   ];
 
@@ -486,8 +451,37 @@ function AdminDashboard() {
     }
   };
 
+  const handleViewBooking = (booking) => {
+    setSelectedBooking(booking);
+    setBookingModalOpen(true);
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    if (window.confirm('Are you sure you want to delete this booking?')) {
+      try {
+        await adminService.deleteBooking(bookingId);
+        // Refresh the bookings list
+        const response = await adminService.getAllBookings(bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder);
+        if (response && Array.isArray(response.content)) {
+          setBookings(response.content);
+          setTotalBookingElements(response.totalElements || 0);
+          setTotalBookingPages(response.totalPages || 0);
+        }
+      } catch (err) {
+        setError(`Failed to delete booking: ${err.message}`);
+      }
+    }
+  };
+
+  const toggleBookingModal = () => {
+    setBookingModalOpen(!bookingModalOpen);
+    if (!bookingModalOpen) {
+      setSelectedBooking(null);
+    }
+  };
+
   return (
-    <Container className="py-5">
+    <Container fluid className="py-4">
       <h2>Admin Dashboard</h2>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -603,39 +597,46 @@ function AdminDashboard() {
       {/* Bookings Section */}
       <Row className="mt-4">
         <Col>
-          <Card>
-            <Card.Body>
-              <Card.Title>Bookings</Card.Title>
-              <div className="table-responsive">
-                <DataTable
-                  columns={bookingColumns}
-                  data={Array.isArray(bookings) ? bookings : []}
-                  pagination
-                  paginationServer
-                  paginationTotalRows={totalBookingElements}
-                  paginationDefaultPage={bookingPageNumber + 1}
-                  onChangePage={page => setBookingPageNumber(page - 1)}
-                  onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                    setBookingPageSize(currentRowsPerPage);
-                    setBookingPageNumber(currentPage - 1);
-                  }}
-                  sortServer
-                  onSort={(column, sortDirection) => {
-                    // Ensure sortField is not undefined, default to 'bookingTime' if necessary
-                    setBookingSortBy(column.sortField || 'bookingTime');
-                    // Ensure sortDirection is not undefined, default to 'asc' if necessary
-                    setBookingSortOrder(sortDirection || 'asc');
-                  }}
-                  progressPending={isLoadingBookings}
-                  noDataComponent={'No bookings found.'}
-                  customStyles={customStyles}
-                  responsive
-                />
-              </div>
-            </Card.Body>
-          </Card>
+          <div className="table-container">
+            <h2 className="card-title">Bookings</h2>
+            <div className="table-responsive" style={{ maxWidth: '600px', margin: '0 auto' }}>
+              <DataTable
+                columns={bookingColumns}
+                data={Array.isArray(bookings) ? bookings : []}
+                pagination
+                paginationServer
+                paginationTotalRows={totalBookingElements}
+                paginationDefaultPage={bookingPageNumber + 1}
+                onChangePage={page => setBookingPageNumber(page - 1)}
+                onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                  setBookingPageSize(currentRowsPerPage);
+                  setBookingPageNumber(currentPage - 1);
+                }}
+                sortServer
+                onSort={(column, sortDirection) => {
+                  setBookingSortBy(column.sortField || 'bookingTime');
+                  setBookingSortOrder(sortDirection || 'asc');
+                }}
+                progressPending={isLoadingBookings}
+                noDataComponent={
+                  <div className="text-center py-4">
+                    <p className="text-muted mb-0">No bookings found</p>
+                  </div>
+                }
+                customStyles={customStyles}
+                className="admin-table"
+                responsive
+              />
+            </div>
+          </div>
         </Col>
       </Row>
+
+      <BookingDetailsModal 
+        isOpen={bookingModalOpen}
+        toggle={toggleBookingModal}
+        booking={selectedBooking}
+      />
     </Container>
   );
 }
