@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Pagination } from 'react-bootstrap';
-import { FaSearch, FaUser, FaTools, FaPhone, FaStar } from 'react-icons/fa';
+import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button } from 'react-bootstrap';
+import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/Home.css';
 
 function Home() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [labourers, setLabourers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -197,42 +199,122 @@ function Home() {
   };
 
   return (
-    <Container>
-      <Row className="mt-4 text-center">
+    <Container fluid className="home-container">
+      {/* Hero Section */}
+      <Row className="hero-section">
         <Col>
-          <h1 className="display-4 mb-4">
-            Welcome to InstaLab
-          </h1>
-          <h2 className="text-muted mb-4">
-            Connect with skilled labourers and get services at your Doorstep :)
-          </h2>
+          <div className="hero-content">
+            <h1 className="display-4 mb-4">
+              Welcome to InstaLab
+            </h1>
+            <h2 className="text-muted mb-5">
+              Connect with skilled labourers and get services at your Doorstep :)
+            </h2>
+          </div>
         </Col>
       </Row>
 
-      <Row className="justify-content-center mb-4">
-        <Col md={8}>
-          <Form onSubmit={handleSearch}>
-            <InputGroup>
-              <Form.Control
-                type="text"
-                placeholder="Search for labourers by category (e.g., sweeper, plumber)..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="py-2"
-              />
-              <InputGroup.Text 
-                onClick={handleSearch}
-                style={{ cursor: 'pointer' }}
+      {/* Navigation Cards Section */}
+      <Row className="navigation-cards mb-5">
+        <Col md={3} className="mb-4">
+          <Card className="nav-card h-100">
+            <Card.Body className="text-center">
+              <FaUserPlus className="nav-icon mb-3" />
+              <h3>Register</h3>
+              <p className="text-muted">Create your account to book services</p>
+              <Button 
+                variant="primary" 
+                className="w-100"
+                onClick={() => navigate('/register')}
               >
-                <FaSearch />
-              </InputGroup.Text>
-            </InputGroup>
-          </Form>
+                Register as User
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3} className="mb-4">
+          <Card className="nav-card h-100">
+            <Card.Body className="text-center">
+              <FaClipboardList className="nav-icon mb-3" />
+              <h3>Labour Register</h3>
+              <p className="text-muted">Join as a service provider</p>
+              <Button 
+                variant="success" 
+                className="w-100"
+                onClick={() => navigate('/labourRegister')}
+              >
+                Register as Labour
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3} className="mb-4">
+          <Card className="nav-card h-100">
+            <Card.Body className="text-center">
+              <FaUserCircle className="nav-icon mb-3" />
+              <h3>User Login</h3>
+              <p className="text-muted">Access your account</p>
+              <Button 
+                variant="info" 
+                className="w-100"
+                onClick={() => navigate('/login')}
+              >
+                Login as User
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3} className="mb-4">
+          <Card className="nav-card h-100">
+            <Card.Body className="text-center">
+              <FaToolsIcon className="nav-icon mb-3" />
+              <h3>Labour Login</h3>
+              <p className="text-muted">Access your labour account</p>
+              <Button 
+                variant="warning" 
+                className="w-100"
+                onClick={() => navigate('/labourLogin')}
+              >
+                Login as Labour
+              </Button>
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 
+      {/* Search Section */}
+      <Row className="search-section mb-5">
+        <Col md={8} className="mx-auto">
+          <Card className="search-card">
+            <Card.Body>
+              <h3 className="text-center mb-4">Find Skilled Labourers</h3>
+              <Form onSubmit={handleSearch}>
+                <InputGroup className="mb-3">
+                  <Form.Control
+                    type="text"
+                    placeholder="Search for labourers by category (e.g., sweeper, plumber)..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="py-3"
+                  />
+                  <Button 
+                    variant="primary" 
+                    type="submit"
+                    className="px-4"
+                  >
+                    <FaSearch className="me-2" />
+                    Search
+                  </Button>
+                </InputGroup>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Results Section */}
       {error && (
-        <Row className="justify-content-center">
+        <Row className="justify-content-center mb-4">
           <Col md={8}>
             <div className="alert alert-danger" role="alert">
               {error}
@@ -241,41 +323,28 @@ function Home() {
         </Row>
       )}
 
-      <Row className="justify-content-center">
-        <Col md={12} lg={11}>
-          <div className="shadow-sm rounded">
-            <DataTable
-              columns={columns}
-              data={labourers}
-              pagination
-              paginationServer
-              paginationTotalRows={totalElements}
-              onChangePage={handlePageChange}
-              onChangeRowsPerPage={handlePerRowsChange}
-              paginationPerPage={pageSize}
-              paginationRowsPerPageOptions={[10, 20, 30, 50]}
-              progressPending={isLoading}
-              progressComponent={
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-                    <span className="visually-hidden">Loading...</span>
+      <Row className="results-section">
+        <Col md={12} lg={11} className="mx-auto">
+          <Card className="results-card">
+            <Card.Body>
+              <DataTable
+                columns={columns}
+                data={labourers}
+                pagination
+                paginationServer
+                paginationTotalRows={totalElements}
+                onChangePage={handlePageChange}
+                onChangeRowsPerPage={handlePerRowsChange}
+                customStyles={customStyles}
+                progressPending={isLoading}
+                noDataComponent={
+                  <div className="text-center py-5">
+                    <p className="text-muted mb-0">No labourers found. Try a different search term.</p>
                   </div>
-                </div>
-              }
-              customStyles={customStyles}
-              highlightOnHover
-              pointerOnHover
-              striped
-              noDataComponent={
-                <div className="text-center py-5">
-                  <p className="text-muted mb-0 fs-5">
-                    {searchTerm ? 'No labourers found matching your search.' : 'Enter a category to search for labourers.'}
-                  </p>
-                </div>
-              }
-              className="border rounded"
-            />
-          </div>
+                }
+              />
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
     </Container>
