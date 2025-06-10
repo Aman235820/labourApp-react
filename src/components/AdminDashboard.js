@@ -538,6 +538,7 @@ function AdminDashboard() {
             <p><strong>Skill:</strong> {selectedLabour.labourSkill}</p>
             <p><strong>Mobile:</strong> {selectedLabour.labourMobileNo}</p>
             <p><strong>Rating:</strong> {selectedLabour.rating}</p>
+            <p><strong>Ratings Count:</strong> {selectedLabour.ratingCount}</p>
             {/* Add more labour details as needed */}
           </ModalBody>
           <ModalFooter>
@@ -589,7 +590,8 @@ function AdminDashboard() {
           <ModalHeader toggle={toggleUserModal}>User Details (ID: {selectedUser.userId})</ModalHeader>
           <ModalBody>
             <p><strong>Name:</strong> {selectedUser.fullName}</p>
-            <p><strong>Mobile:</strong> {selectedUser.mobileNo}</p>
+            <p><strong>Mobile:</strong> {selectedUser.mobileNumber}</p>
+            <p><strong>Email:</strong> {selectedUser.email}</p>
             {/* Add more user details as needed */}
           </ModalBody>
           <ModalFooter>
