@@ -23,18 +23,21 @@ function LabourLogin() {
       setError(null);
       const response = await axios.get(`http://localhost:4000/labourapp/labour/labourLogin?mobileNumber=${mobileNumber}`);
       
-      if (response.data && response.data.returnValue) {
-        // Store labour details in localStorage (excluding reviews)
+      if (response.data && !response.data.hasError) {
         const { reviews, ...labourDetails } = response.data.returnValue;
         localStorage.setItem('labourDetails', JSON.stringify(labourDetails));
         localStorage.setItem('isLabourLoggedIn', 'true');
         
-        // Redirect to labour dashboard
-        navigate('/labourDashboard');
+        // Navigate to labour dashboard with only reviews data
+        navigate('/labourDashboard', { 
+          state: { reviews: reviews }
+        });
+      } else {
+        setError('Invalid mobile number');
       }
-    } catch (error) {
-      setError('Invalid mobile number or network error');
-      console.error('Login error:', error);
+    } catch (err) {
+      setError('Error during login');
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }

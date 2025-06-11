@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert } from 'react-bootstrap';
 import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
+import axios from 'axios';
 import '../styles/LabourDashboard.css';
 
-function LabourDashboard() {
+const LabourDashboard = () => {
+  const location = useLocation();
+  const { reviews } = location.state || {};
   const [labourDetails, setLabourDetails] = useState(null);
   const [requestedServices, setRequestedServices] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,24 +26,13 @@ function LabourDashboard() {
       navigate('/labourLogin');
       return;
     }
-    const parsedDetails = JSON.parse(storedDetails);
-    setLabourDetails(parsedDetails);
-    fetchRequestedServices();
+    setLabourDetails(JSON.parse(storedDetails));
+    setIsLoading(false);
   }, [navigate]);
 
-  // Add effect to refresh booking history on page load
   useEffect(() => {
-    if (labourDetails?.labourId) {
-      fetchRequestedServices();
-    }
+    fetchRequestedServices();
   }, [labourDetails]);
-
-  // Separate useEffect for fetching reviews when labourDetails changes
-  useEffect(() => {
-    if (labourDetails?.labourId) {
-      fetchReviews();
-    }
-  }, [labourDetails, sortConfig]);
 
   const fetchRequestedServices = async () => {
     try {
@@ -55,26 +46,6 @@ function LabourDashboard() {
       console.error('Error fetching services:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchReviews = async () => {
-    try {
-      setIsReviewsLoading(true);
-      const response = await labourService.getReviews(
-        labourDetails.labourId,
-        sortConfig.sortBy,
-        sortConfig.sortOrder
-      );
-      
-      if (response && response.returnValue) {
-        setReviews(response.returnValue);
-      }
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-      setError('Failed to fetch reviews');
-    } finally {
-      setIsReviewsLoading(false);
     }
   };
 
@@ -136,8 +107,31 @@ function LabourDashboard() {
     });
   };
 
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, index) => (
+      <FaStar
+        key={index}
+        className={index < rating ? 'star-filled' : 'star-empty'}
+      />
+    ));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-4">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Alert variant="danger">{error}</Alert>;
+  }
+
   if (!labourDetails) {
-    return null;
+    return <Alert variant="warning">No labour details found</Alert>;
   }
 
   return (
@@ -200,13 +194,7 @@ function LabourDashboard() {
                   <div className="rating-number me-3">
                     <h2 className="mb-0 fw-bold">{labourDetails.rating || 0}</h2>
                     <div className="stars">
-                      {[...Array(5)].map((_, index) => (
-                        <FaStar 
-                          key={index} 
-                          className={index < Math.floor(labourDetails.rating || 0) ? "text-warning" : "text-muted"}
-                          style={{ fontSize: '1.2rem' }}
-                        />
-                      ))}
+                      {renderStars(labourDetails.rating || 0)}
                     </div>
                   </div>
                   <div className="rating-stats">
@@ -384,13 +372,7 @@ function LabourDashboard() {
                 </div>
               </div>
 
-              {isReviewsLoading ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              ) : reviews.length > 0 ? (
+              {reviews.length > 0 ? (
                 <div className="reviews-list">
                   {reviews.map((review, index) => (
                     <div key={index} className="review-item p-3 mb-3 bg-light rounded shadow-sm">
@@ -401,13 +383,7 @@ function LabourDashboard() {
                           </div>
                           <div>
                             <div className="stars mb-1">
-                              {[...Array(5)].map((_, i) => (
-                                <FaStar 
-                                  key={i} 
-                                  className={i < review.rating ? "text-warning" : "text-muted"}
-                                  style={{ fontSize: '1rem' }}
-                                />
-                              ))}
+                              {renderStars(review.rating)}
                             </div>
                             <h6 className="mb-0 fw-bold">
                               {review.userName || <span className="text-muted">Anonymous</span>}
@@ -423,7 +399,7 @@ function LabourDashboard() {
                           </small>
                         </div>
                       </div>
-                      {review.review && (
+                      {review.comment && (
                         <div className="review-content mt-3">
                           <div className="review-text-container p-3 bg-white rounded">
                             <p className="mb-0 review-text" style={{ 
@@ -433,7 +409,7 @@ function LabourDashboard() {
                               whiteSpace: 'pre-wrap',
                               wordBreak: 'break-word'
                             }}>
-                              {review.review}
+                              {review.comment}
                             </p>
                           </div>
                         </div>
@@ -520,6 +496,6 @@ function LabourDashboard() {
       </Row>
     </Container>
   );
-}
+};
 
 export default LabourDashboard; 

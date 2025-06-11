@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Form } from 'react-bootstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Form, Badge } from 'react-bootstrap';
 import DataTable from "react-data-table-component";
-import { FaTools, FaCalendar, FaPhone, FaUser, FaStar } from 'react-icons/fa';
+import { FaTools, FaCalendar, FaPhone, FaUser, FaStar, FaTimesCircle, FaClock, FaCheckCircle } from 'react-icons/fa';
 import { getUserBookings } from '../services/BookingService';
 import axios from 'axios';
 
@@ -151,6 +151,21 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
         }
     };
 
+    const getStatusBadge = (statusCode) => {
+        switch (statusCode) {
+            case -1:
+                return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+            case 1:
+                return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> Pending</Badge>;
+            case 2:
+                return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+            case 3:
+                return <Badge bg="success" className="status-badge"><FaClock className="me-1" /> Completed</Badge>;
+            default:
+                return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> Unknown</Badge>;
+        }
+    };
+
     const columns = [
         {
             name: 'Labour Name',
@@ -238,15 +253,15 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                 let statusColor = 'secondary';
 
                 switch (row.bookingStatusCode) {
-                    case 0:
+                    case 1:
                         statusText = 'Confirmation Pending';
                         statusColor = 'warning';
                         break;
-                    case 1:
+                    case 2:
                         statusText = 'Booking Accepted';
                         statusColor = 'success';
                         break;
-                    case 2:
+                    case 3:
                         statusText = 'Task Completed';
                         statusColor = 'info';
                         break;
@@ -264,7 +279,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                         <span className={`badge bg-${statusColor}`}>
                             {statusText}
                         </span>
-                        {row.bookingStatusCode === 2 && (
+                        {row.bookingStatusCode === 3 && (
                             <Button
                                 variant="outline-primary"
                                 size="sm"
