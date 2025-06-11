@@ -1,16 +1,19 @@
 .admin-stats {
   padding: 1rem;
+  animation: fadeIn 0.5s ease-out;
   background-color: var(--bg-primary);
   min-height: calc(100vh - 56px);
 }
 
 .rating-table {
   margin-bottom: 0;
+  width: 100%;
 }
 
 .rating-table th {
   font-weight: 600;
   color: #495057;
+  white-space: nowrap;
 }
 
 .rating-table td {
@@ -26,13 +29,11 @@
 }
 
 .stats-card {
-  background-color: var(--bg-secondary);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  height: 300px;
-  overflow: hidden;
 }
 
 .stats-card:hover {
@@ -40,15 +41,20 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.stats-card .card-body {
-  padding: 1rem;
-  height: 100%;
+.card-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.stats-card canvas {
-  max-height: 250px !important;
+/* Chart Container Styles */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
 }
 
 .stats-loading {
@@ -69,18 +75,26 @@
   font-size: 1rem;
 }
 
-/* Dark theme styles */
+/* Dark Theme Styles */
 .dark-theme .admin-stats {
   background-color: var(--dark-bg);
 }
 
 .dark-theme .stats-card {
-  background-color: var(--dark-card-bg);
+  background-color: #2d2d2d;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.dark-theme .stats-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+.dark-theme .card-title {
+  color: #ffffff;
+}
+
+.dark-theme .rating-table th {
+  color: #e0e0e0;
+}
+
+.dark-theme .rating-table td {
+  color: #ffffff;
 }
 
 .dark-theme .stats-loading,
@@ -89,21 +103,99 @@
   color: var(--dark-text);
 }
 
-/* Responsive styles */
+/* Responsive Styles */
 @media (max-width: 768px) {
   .admin-stats {
     padding: 0.5rem;
   }
 
   .stats-card {
+    margin-bottom: 1rem;
+  }
+
+  .chart-container {
     height: 250px;
   }
 
-  .stats-card .card-body {
+  .rating-table {
+    font-size: 0.9rem;
+  }
+
+  .rating-table th,
+  .rating-table td {
     padding: 0.75rem;
   }
 
-  .stats-card canvas {
-    max-height: 200px !important;
+  .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.loading {
+  animation: pulse 1.5s infinite;
+}
+
+/* Interactive Elements */
+.interactive-element {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interactive-element:hover {
+  transform: scale(1.02);
+}
+
+/* Custom Scrollbar for Tables */
+.table-responsive {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Print Styles */
+@media print {
+  .admin-stats {
+    padding: 0;
+  }
+
+  .stats-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .chart-container {
+    height: 200px;
   }
 } 
