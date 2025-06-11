@@ -4,18 +4,39 @@
   min-height: calc(100vh - 56px);
 }
 
+.rating-table {
+  margin-bottom: 0;
+}
+
+.rating-table th {
+  font-weight: 600;
+  color: #495057;
+}
+
+.rating-table td {
+  vertical-align: middle;
+}
+
+.rating-table .text-warning {
+  color: #ffc107 !important;
+}
+
+.rating-table .text-muted {
+  color: #dee2e6 !important;
+}
+
 .stats-card {
   background-color: var(--bg-secondary);
   border: none;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: transform 0.2s;
   height: 300px;
   overflow: hidden;
 }
 
 .stats-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
