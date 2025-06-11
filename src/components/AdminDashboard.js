@@ -5,6 +5,7 @@ import DataTable from 'react-data-table-component';
 import { adminService } from '../services/adminService';
 import { FaTimesCircle, FaClock, FaCheckCircle, FaStar, FaTools } from 'react-icons/fa';
 import BookingDetailsModal from './BookingDetailsModal';
+import AdminStats from './AdminStats';
 import '../styles/AdminDashboard.css';
 
 function AdminDashboard() {
@@ -101,8 +102,6 @@ function AdminDashboard() {
     switch (statusCode) {
       case -1:
         return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> Rejected</Badge>;
-      case 0:
-        return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> Unknown</Badge>;
       case 1:
         return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> Pending</Badge>;
       case 2:
@@ -485,6 +484,8 @@ function AdminDashboard() {
       <h2>Admin Dashboard</h2>
 
       {error && <Alert variant="danger">{error}</Alert>}
+
+      <AdminStats />
 
       {/* Labours Section */}
       <Row className="mt-4">
