@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { FaUser, FaPhone } from 'react-icons/fa';
-import axios from 'axios';
+import { labourAuthService } from '../services/labourAuthService';
 import { useNavigate } from 'react-router-dom';
 import '../styles/LabourLogin.css';
 
@@ -21,7 +21,7 @@ function LabourLogin() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get(`http://localhost:4000/labourapp/labour/labourLogin?mobileNumber=${mobileNumber}`);
+      const response = await labourAuthService.login(mobileNumber);
       
       if (response.data && !response.data.hasError) {
         const { reviews, ...labourDetails } = response.data.returnValue;

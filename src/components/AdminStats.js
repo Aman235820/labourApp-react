@@ -1,9 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Spinner, Alert, Table } from 'react-bootstrap';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { FaStar } from 'react-icons/fa';
-import axios from 'axios';
+import { adminService } from '../services/adminService';
 import '../styles/AdminStats.css';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const AdminStats = () => {
   const [stats, setStats] = useState(null);
@@ -16,9 +37,9 @@ const AdminStats = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/labourapp/admin/getAppStats');
-      if (response.data && !response.data.hasError) {
-        setStats(response.data.returnValue);
+      const response = await adminService.getAppStats();
+      if (response && !response.hasError) {
+        setStats(response.returnValue);
       } else {
         setError('Failed to fetch stats');
       }

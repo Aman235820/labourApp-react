@@ -35,5 +35,15 @@ export const labourService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Show requested services
+  showRequestedServices: async (labourId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/labour/showRequestedServices/${labourId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 }; 

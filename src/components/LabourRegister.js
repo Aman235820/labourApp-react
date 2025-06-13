@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { labourAuthService } from '../services/labourAuthService';
 import { FaUser, FaTools, FaPhone } from 'react-icons/fa';
 import '../styles/LabourRegister.css';
 
@@ -30,7 +30,7 @@ function LabourRegister() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:4000/labourapp/labour/registerLabour', formData);
+      const response = await labourAuthService.register(formData);
       console.log('Registration response:', response.data); // Debug log
       
       // Store only labourDetails in localStorage

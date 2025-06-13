@@ -3,10 +3,14 @@ import axios from 'axios';
 export const adminService = {
   getAllLabours: async (pageNumber, pageSize, sortBy, sortOrder) => {
     const response = await axios.post('http://localhost:4000/labourapp/admin/getAllLabours', {
-      pageNumber: pageNumber,
-      pageSize: pageSize,
-      sortBy: sortBy,
-      sortOrder: sortOrder,
+      pageNumber,
+      pageSize,
+      sortBy,
+      sortOrder
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     return response.data;
   },
@@ -49,6 +53,23 @@ export const adminService = {
   deleteBooking: async (bookingId) => {
     const response = await axios.delete(`http://localhost:4000/labourapp/admin/deleteBooking/${bookingId}`, {
       data: ''  // Adding empty data as per the API specification
+    });
+    return response.data;
+  },
+
+  getAppStats: async () => {
+    const response = await axios.get('http://localhost:4000/labourapp/admin/getAppStats');
+    return response.data;
+  },
+
+  uploadLabours: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await axios.post('http://localhost:4000/labourapp/admin/uploadLabours', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Spinner, Alert, Badge } from 'react-bootstrap';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Row, Col, Card, Table, Spinner, Alert, Badge, Button } from 'react-bootstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { adminService } from '../services/adminService';
-import { FaTimesCircle, FaClock, FaCheckCircle, FaStar, FaTools } from 'react-icons/fa';
+import { FaTimesCircle, FaClock, FaCheckCircle, FaStar, FaTools, FaUpload } from 'react-icons/fa';
 import BookingDetailsModal from './BookingDetailsModal';
 import AdminStats from './AdminStats';
 import '../styles/AdminDashboard.css';
@@ -23,6 +23,10 @@ function AdminDashboard() {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [showUserDetails, setShowUserDetails] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Pagination and Sorting State for Labours
   const [labourPageNumber, setLabourPageNumber] = useState(0);
@@ -479,163 +483,215 @@ function AdminDashboard() {
     }
   };
 
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check if file is an Excel file
+    if (!file.name.match(/\.(xlsx|xls)$/)) {
+      setUploadError('Please upload an Excel file (.xlsx or .xls)');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setUploadError(null);
+      setUploadSuccess(false);
+
+      const response = await adminService.uploadLabours(file);
+      
+      if (response && !response.hasError) {
+        setUploadSuccess(true);
+        // Refresh the labour list using the new API
+        const updatedResponse = await adminService.getAllLabours(labourPageNumber, labourPageSize, labourSortBy, labourSortOrder);
+        if (updatedResponse) {
+          setLabours(updatedResponse.content || []);
+          setTotalLabourElements(updatedResponse.totalElements || 0);
+          setTotalLabourPages(updatedResponse.totalPages || 0);
+        }
+      } else {
+        setUploadError(response?.message || 'Failed to upload labours');
+      }
+    } catch (error) {
+      setUploadError(error.response?.data?.message || 'Error uploading file');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
-    <Container fluid className="py-4">
-      <h2>Admin Dashboard</h2>
-
-      {error && <Alert variant="danger">{error}</Alert>}
-
+    <Container fluid className="admin-dashboard">
       <AdminStats />
-
-      {/* Labours Section */}
-      <Row className="mt-4">
-        <Col>
-          <Card>
-            <Card.Body>
-              <Card.Title>Labours</Card.Title>
-              <div className="table-responsive">
-                <DataTable
-                  columns={labourColumns}
-                  data={Array.isArray(labours) ? labours : []}
-                  pagination
-                  paginationServer
-                  paginationTotalRows={totalLabourElements}
-                  paginationDefaultPage={labourPageNumber + 1}
-                  onChangePage={page => setLabourPageNumber(page - 1)}
-                  onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                    setLabourPageSize(currentRowsPerPage);
-                    setLabourPageNumber(currentPage - 1);
-                  }}
-                  sortServer
-                  onSort={(column, sortDirection) => {
-                    // Ensure sortField is not undefined, default to 'rating' if necessary
-                    setLabourSortBy(column.sortField || 'rating'); 
-                    // Ensure sortDirection is not undefined, default to 'asc' if necessary
-                    setLabourSortOrder(sortDirection || 'asc'); 
-                  }}
-                  progressPending={isLoadingLabours}
-                  noDataComponent={'No labours found.'}
-                  customStyles={customStyles}
-                  responsive
-                />
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Labour Details Modal */}
-      {selectedLabour && (
-        <Modal isOpen={labourModalOpen} toggle={toggleLabourModal}>
-          <ModalHeader toggle={toggleLabourModal}>Labour Details (ID: {selectedLabour.labourId})</ModalHeader>
-          <ModalBody>
-            <p><strong>Name:</strong> {selectedLabour.labourName}</p>
-            <p><strong>Skill:</strong> {selectedLabour.labourSkill}</p>
-            <p><strong>Mobile:</strong> {selectedLabour.labourMobileNo}</p>
-            <p><strong>Rating:</strong> {selectedLabour.rating}</p>
-            <p><strong>Ratings Count:</strong> {selectedLabour.ratingCount}</p>
-            {/* Add more labour details as needed */}
-          </ModalBody>
-          <ModalFooter>
-            <Button color="secondary" onClick={toggleLabourModal}>Close</Button>
-          </ModalFooter>
-        </Modal>
-      )}
+      
+      {/* Labour Management Section */}
+      <Card className="mb-4">
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <h3 className="mb-0">Labour Management</h3>
+          <div className="d-flex gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx,.xls"
+              style={{ display: 'none' }}
+            />
+            <Button
+              variant="success"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>
+                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <FaUpload className="me-2" />
+                  Bulk Upload
+                </>
+              )}
+            </Button>
+          </div>
+        </Card.Header>
+        <Card.Body>
+          {uploadError && (
+            <Alert variant="danger" onClose={() => setUploadError(null)} dismissible>
+              {uploadError}
+            </Alert>
+          )}
+          {uploadSuccess && (
+            <Alert variant="success" onClose={() => setUploadSuccess(false)} dismissible>
+              Labours uploaded successfully!
+            </Alert>
+          )}
+          <div className="table-responsive">
+            <DataTable
+              columns={labourColumns}
+              data={Array.isArray(labours) ? labours : []}
+              pagination
+              paginationServer
+              paginationTotalRows={totalLabourElements}
+              paginationDefaultPage={labourPageNumber + 1}
+              onChangePage={page => setLabourPageNumber(page - 1)}
+              onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                setLabourPageSize(currentRowsPerPage);
+                setLabourPageNumber(currentPage - 1);
+              }}
+              sortServer
+              onSort={(column, sortDirection) => {
+                setLabourSortBy(column.sortField || 'rating');
+                setLabourSortOrder(sortDirection || 'asc');
+              }}
+              progressPending={isLoadingLabours}
+              noDataComponent={'No labours found.'}
+              customStyles={customStyles}
+              responsive
+            />
+          </div>
+        </Card.Body>
+      </Card>
 
       {/* Users Section */}
-      <Row className="mt-4">
-        <Col>
-          <Card>
-            <Card.Body>
-              <Card.Title>Users</Card.Title>
-              <div className="table-responsive">
-                <DataTable
-                  columns={userColumns}
-                  data={Array.isArray(users) ? users : []}
-                  pagination
-                  paginationServer
-                  paginationTotalRows={totalUserElements}
-                  paginationDefaultPage={userPageNumber + 1}
-                  onChangePage={page => setUserPageNumber(page - 1)}
-                  onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                    setUserPageSize(currentRowsPerPage);
-                    setUserPageNumber(currentPage - 1);
-                  }}
-                  sortServer
-                  onSort={(column, sortDirection) => {
-                    // Ensure sortField is not undefined, default to 'fullName' if necessary
-                    setUserSortBy(column.sortField || 'fullName'); 
-                    // Ensure sortDirection is not undefined, default to 'asc' if necessary
-                    setUserSortOrder(sortDirection || 'asc'); 
-                  }}
-                  progressPending={isLoadingUsers}
-                  noDataComponent={'No users found.'}
-                  customStyles={customStyles}
-                  responsive
-                />
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* User Details Modal */}
-      {selectedUser && (
-        <Modal isOpen={userModalOpen} toggle={toggleUserModal}>
-          <ModalHeader toggle={toggleUserModal}>User Details (ID: {selectedUser.userId})</ModalHeader>
-          <ModalBody>
-            <p><strong>Name:</strong> {selectedUser.fullName}</p>
-            <p><strong>Mobile:</strong> {selectedUser.mobileNumber}</p>
-            <p><strong>Email:</strong> {selectedUser.email}</p>
-            {/* Add more user details as needed */}
-          </ModalBody>
-          <ModalFooter>
-            <Button color="secondary" onClick={toggleUserModal}>Close</Button>
-          </ModalFooter>
-        </Modal>
-      )}
+      <Card className="mb-4">
+        <Card.Header>
+          <h3 className="mb-0">User Management</h3>
+        </Card.Header>
+        <Card.Body>
+          <div className="table-responsive">
+            <DataTable
+              columns={userColumns}
+              data={Array.isArray(users) ? users : []}
+              pagination
+              paginationServer
+              paginationTotalRows={totalUserElements}
+              paginationDefaultPage={userPageNumber + 1}
+              onChangePage={page => setUserPageNumber(page - 1)}
+              onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                setUserPageSize(currentRowsPerPage);
+                setUserPageNumber(currentPage - 1);
+              }}
+              sortServer
+              onSort={(column, sortDirection) => {
+                setUserSortBy(column.sortField || 'fullName');
+                setUserSortOrder(sortDirection || 'asc');
+              }}
+              progressPending={isLoadingUsers}
+              noDataComponent={'No users found.'}
+              customStyles={customStyles}
+              responsive
+            />
+          </div>
+        </Card.Body>
+      </Card>
 
       {/* Bookings Section */}
-      <Row className="mt-4">
-        <Col>
-          <div className="table-container">
-            <h2 className="card-title">Bookings</h2>
-            <div className="table-responsive" style={{ maxWidth: '600px', margin: '0 auto' }}>
-              <DataTable
-                columns={bookingColumns}
-                data={Array.isArray(bookings) ? bookings : []}
-                pagination
-                paginationServer
-                paginationTotalRows={totalBookingElements}
-                paginationDefaultPage={bookingPageNumber + 1}
-                onChangePage={page => setBookingPageNumber(page - 1)}
-                onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                  setBookingPageSize(currentRowsPerPage);
-                  setBookingPageNumber(currentPage - 1);
-                }}
-                sortServer
-                onSort={(column, sortDirection) => {
-                  setBookingSortBy(column.sortField || 'bookingTime');
-                  setBookingSortOrder(sortDirection || 'asc');
-                }}
-                progressPending={isLoadingBookings}
-                noDataComponent={
-                  <div className="text-center py-4">
-                    <p className="text-muted mb-0">No bookings found</p>
-                  </div>
-                }
-                customStyles={customStyles}
-                className="admin-table"
-                responsive
-              />
-            </div>
+      <Card className="mb-4">
+        <Card.Header>
+          <h3 className="mb-0">Booking Management</h3>
+        </Card.Header>
+        <Card.Body>
+          <div className="table-responsive">
+            <DataTable
+              columns={bookingColumns}
+              data={Array.isArray(bookings) ? bookings : []}
+              pagination
+              paginationServer
+              paginationTotalRows={totalBookingElements}
+              paginationDefaultPage={bookingPageNumber + 1}
+              onChangePage={page => setBookingPageNumber(page - 1)}
+              onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                setBookingPageSize(currentRowsPerPage);
+                setBookingPageNumber(currentPage - 1);
+              }}
+              sortServer
+              onSort={(column, sortDirection) => {
+                setBookingSortBy(column.sortField || 'bookingTime');
+                setBookingSortOrder(sortDirection || 'asc');
+              }}
+              progressPending={isLoadingBookings}
+              noDataComponent={'No bookings found.'}
+              customStyles={customStyles}
+              responsive
+            />
           </div>
-        </Col>
-      </Row>
+        </Card.Body>
+      </Card>
 
-      <BookingDetailsModal 
-        isOpen={bookingModalOpen}
-        toggle={toggleBookingModal}
+      {/* Modals */}
+      <Modal isOpen={labourModalOpen} toggle={toggleLabourModal} size="lg">
+        <ModalHeader toggle={toggleLabourModal}>Labour Details (ID: {selectedLabour?.labourId})</ModalHeader>
+        <ModalBody>
+          <p><strong>Name:</strong> {selectedLabour?.labourName}</p>
+          <p><strong>Skill:</strong> {selectedLabour?.labourSkill}</p>
+          <p><strong>Mobile:</strong> {selectedLabour?.labourMobileNo}</p>
+          <p><strong>Rating:</strong> {selectedLabour?.rating}</p>
+          <p><strong>Ratings Count:</strong> {selectedLabour?.ratingCount}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={toggleLabourModal}>Close</Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal isOpen={userModalOpen} toggle={toggleUserModal} size="lg">
+        <ModalHeader toggle={toggleUserModal}>User Details (ID: {selectedUser?.userId})</ModalHeader>
+        <ModalBody>
+          <p><strong>Name:</strong> {selectedUser?.fullName}</p>
+          <p><strong>Mobile:</strong> {selectedUser?.mobileNumber}</p>
+          <p><strong>Email:</strong> {selectedUser?.email}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={toggleUserModal}>Close</Button>
+        </ModalFooter>
+      </Modal>
+
+      <BookingDetailsModal
+        show={bookingModalOpen}
+        handleClose={toggleBookingModal}
         booking={selectedBooking}
       />
     </Container>

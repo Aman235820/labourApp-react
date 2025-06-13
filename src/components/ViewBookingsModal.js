@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Form, Badge } from 'react-bootstrap';
 import DataTable from "react-data-table-component";
 import { FaTools, FaCalendar, FaPhone, FaUser, FaStar, FaTimesCircle, FaClock, FaCheckCircle } from 'react-icons/fa';
-import { getUserBookings } from '../services/BookingService';
+import { getUserBookings, rateLabour } from '../services/BookingService';
 import axios from 'axios';
 
 const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview = '' }) => {
@@ -92,7 +92,8 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
         }
     };
 
-    const handleReviewSubmit = async (rating, review) => {
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
         try {
             const userDetailsStr = localStorage.getItem('user');
             if (!userDetailsStr) {
@@ -112,7 +113,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             }
 
             // Convert rating to decimal number
-            const ratingDecimal = Number(rating).toFixed(1);
+            const ratingDecimal = Number(e.target.elements.rating.value).toFixed(1);
 
             // Close the popup immediately
             setShowRatingModal(false);
@@ -121,20 +122,16 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                 userId: userDetails.userId,
                 labourId: selectedBooking.labourId,
                 labourRating: Number(ratingDecimal).toFixed(1),
-                review: review,
+                review: e.target.elements.review.value,
                 bookingId: selectedBooking.bookingId
             });
 
-            const response = await axios.post('http://localhost:4000/labourapp/user/rateLabour', {
+            const response = await rateLabour({
                 userId: userDetails.userId,
                 labourId: selectedBooking.labourId,
                 labourRating: Number(ratingDecimal).toFixed(1),
-                review: review,
+                review: e.target.elements.review.value,
                 bookingId: selectedBooking.bookingId
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
             });
 
             console.log('API Response:', response.data);

@@ -4,6 +4,7 @@ import { FaUser, FaPhone, FaCalendarAlt, FaTools, FaCheckCircle, FaClock, FaTime
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import '../styles/LabourProfile.css';
+import { labourService } from '../services/labourService';
 
 function LabourProfile() {
   const [bookings, setBookings] = useState([]);
@@ -18,7 +19,7 @@ function LabourProfile() {
   const fetchBookings = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://localhost:4000/labourapp/labour/showRequestedServices/${labourId}`);
+      const response = await labourService.showRequestedServices(labourId);
       
       if (response.data && response.data.returnValue) {
         setBookings(response.data.returnValue);

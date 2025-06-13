@@ -5,6 +5,8 @@ import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
+import { searchLabourByCategory } from '../services/LabourSearchService';
+import LabourDetailsModal from './LabourDetailsModal';
 
 function Home() {
   const navigate = useNavigate();
@@ -16,6 +18,8 @@ function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
+  const [selectedLabour, setSelectedLabour] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const columns = [
     {
@@ -25,9 +29,9 @@ function Home() {
       cell: row => (
         <div className="d-flex align-items-center">
           <FaUser className="text-primary me-2" style={{ fontSize: '1.2rem' }} />
-          <Link to={`/labour/${row.labourId}`} className="text-decoration-none">
-            <span className="fw-medium text-primary">{row.labourName}</span>
-          </Link>
+          <span className="fw-medium text-primary">
+            {row.labourName}
+          </span>
         </div>
       ),
     },
@@ -127,25 +131,11 @@ function Home() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.post(
-        `http://localhost:4000/labourapp/labourReq/findByCategory?category=${searchTerm}`,
-        {
-          pageNumber: pageNumber,
-          pageSize: size,
-          sortBy: "rating",
-          sortOrder: "desc"
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (response.data) {
-        setLabourers(response.data.content || []);
-        setTotalPages(response.data.totalPages || 0);
-        setTotalElements(response.data.totalElements || 0);
+      const response = await searchLabourByCategory(searchTerm, pageNumber, size);
+      if (response) {
+        setLabourers(response.content || []);
+        setTotalPages(response.totalPages || 0);
+        setTotalElements(response.totalElements || 0);
         setCurrentPage(pageNumber);
         setPageSize(size);
       }
@@ -171,8 +161,8 @@ function Home() {
     const items = [];
     for (let number = 0; number < totalPages; number++) {
       items.push(
-        <Pagination.Item 
-          key={number} 
+        <Pagination.Item
+          key={number}
           active={number === currentPage}
           onClick={() => handlePageChange(number + 1)}
         >
@@ -184,12 +174,12 @@ function Home() {
     return (
       <div className="d-flex justify-content-center mt-3">
         <Pagination>
-          <Pagination.Prev 
+          <Pagination.Prev
             onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 0}
           />
           {items}
-          <Pagination.Next 
+          <Pagination.Next
             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages - 1}
           />
@@ -222,8 +212,8 @@ function Home() {
               <FaUserPlus className="nav-icon mb-3" />
               <h3>Register</h3>
               <p className="text-muted">Create your account to book services</p>
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 className="w-100"
                 onClick={() => navigate('/register')}
               >
@@ -238,8 +228,8 @@ function Home() {
               <FaClipboardList className="nav-icon mb-3" />
               <h3>Labour Register</h3>
               <p className="text-muted">Join as a service provider</p>
-              <Button 
-                variant="success" 
+              <Button
+                variant="success"
                 className="w-100"
                 onClick={() => navigate('/labourRegister')}
               >
@@ -254,8 +244,8 @@ function Home() {
               <FaUserCircle className="nav-icon mb-3" />
               <h3>User Login</h3>
               <p className="text-muted">Access your account</p>
-              <Button 
-                variant="info" 
+              <Button
+                variant="info"
                 className="w-100"
                 onClick={() => navigate('/login')}
               >
@@ -270,8 +260,8 @@ function Home() {
               <FaToolsIcon className="nav-icon mb-3" />
               <h3>Labour Login</h3>
               <p className="text-muted">Access your labour account</p>
-              <Button 
-                variant="warning" 
+              <Button
+                variant="warning"
                 className="w-100"
                 onClick={() => navigate('/labourLogin')}
               >
@@ -297,8 +287,8 @@ function Home() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="py-3"
                   />
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     type="submit"
                     className="px-4"
                   >
@@ -333,20 +323,30 @@ function Home() {
                 pagination
                 paginationServer
                 paginationTotalRows={totalElements}
-                onChangePage={handlePageChange}
                 onChangeRowsPerPage={handlePerRowsChange}
+                onChangePage={handlePageChange}
                 customStyles={customStyles}
                 progressPending={isLoading}
-                noDataComponent={
-                  <div className="text-center py-5">
-                    <p className="text-muted mb-0">No labourers found. Try a different search term.</p>
-                  </div>
-                }
+                onRowClicked={(row) => {
+                  setSelectedLabour(row);
+                  setShowModal(true);
+                }}
+                pointerOnHover
               />
             </Card.Body>
           </Card>
         </Col>
       </Row>
+
+      {/* Add the modal */}
+      <LabourDetailsModal
+        show={showModal}
+        handleClose={() => {
+          setShowModal(false);
+          setSelectedLabour(null);
+        }}
+        labour={selectedLabour}
+      />
     </Container>
   );
 }
