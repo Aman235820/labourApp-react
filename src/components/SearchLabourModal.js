@@ -107,8 +107,15 @@ const SearchLabourModal = ({
             selector: row => row.labourMobileNo,
             cell: row => (
                 <div className="d-flex align-items-center">
-                    <FaPhone className="text-primary me-2" />
-                    {row.labourMobileNo}
+                    <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => window.location.href = `tel:${row.labourMobileNo}`}
+                        className="d-flex align-items-center"
+                    >
+                        <FaPhone className="me-2" />
+                        Call Now
+                    </Button>
                 </div>
             ),
         },

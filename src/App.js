@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
@@ -23,6 +23,33 @@ const ProtectedLabourRoute = ({ children }) => {
 };
 
 function App() {
+  useEffect(() => {
+    // Get user's location when app starts
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          console.log('User Location:', {
+            latitude,
+            longitude
+          });
+          // You can store the coordinates in localStorage or state management if needed
+          localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
+        },
+        (error) => {
+          console.error('Error getting location:', error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      console.log('Geolocation is not supported by this browser.');
+    }
+  }, []);
+
   return (
     <Router>
       <div className="App">
