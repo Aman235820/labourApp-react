@@ -10,6 +10,7 @@ import LabourLogin from './components/LabourLogin';
 import LabourDashboard from './components/LabourDashboard';
 import LabourRegister from './components/LabourRegister';
 import AdminDashboard from './components/AdminDashboard';
+import LocationService from './services/LocationService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -24,20 +25,23 @@ const ProtectedLabourRoute = ({ children }) => {
 
 function App() {
   useEffect(() => {
-    // Get user's location when app starts
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
-          console.log('User Location:', {
-            latitude,
-            longitude
-          });
-          // You can store the coordinates in localStorage or state management if needed
-          localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
+          try {
+            const locationData = await LocationService.getLocationFromCoordinates(latitude, longitude);
+            const locationToStore = {
+              coordinates: { latitude, longitude },
+              address: locationData
+            };
+            localStorage.setItem('userLocation', JSON.stringify(locationToStore));
+          } catch (error) {
+            // Handle error silently
+          }
         },
         (error) => {
-          console.error('Error getting location:', error.message);
+          // Handle error silently
         },
         {
           enableHighAccuracy: true,
@@ -45,8 +49,6 @@ function App() {
           maximumAge: 0
         }
       );
-    } else {
-      console.log('Geolocation is not supported by this browser.');
     }
   }, []);
 
