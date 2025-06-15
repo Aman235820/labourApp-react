@@ -1,5 +1,5 @@
 .navbar {
-  padding: 1rem 0;
+  padding: 0.5rem 1rem;
   background-color: #1a202c !important;
 }
 
@@ -45,4 +45,42 @@
 
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar .text-light {
+  color: #fff !important;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.navbar .d-flex {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar .fa-map-marker-alt {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.city-display {
+  display: flex;
+  align-items: center;
+  color: white;
+  margin: 0 1rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.city-display svg {
+  margin-right: 0.5rem;
+  color: white;
+}
+
+@media (max-width: 991.98px) {
+  .city-display {
+    margin: 0.5rem 0;
+    justify-content: center;
+  }
 } 

@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaHome, FaUserShield } from 'react-icons/fa';
+import { FaHome, FaUserShield, FaMapMarkerAlt } from 'react-icons/fa';
 import '../styles/Navigation.css';
 
 function Navigation() {
+  const [cityName, setCityName] = useState('');
+
+  useEffect(() => {
+    try {
+      const locationData = JSON.parse(localStorage.getItem('userLocation'));
+      if (locationData && locationData.address) {
+        const city = locationData.address.address.city || locationData.address.town || locationData.address.village || '';
+        setCityName(city);
+      }
+    } catch (error) {
+      setCityName('');
+    }
+  }, []);
+
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
       <Container>
@@ -18,6 +32,12 @@ function Navigation() {
           />
           InstaLab
         </Navbar.Brand>
+        
+        <div className="city-display">
+          <FaMapMarkerAlt className="me-2" />
+          <span>Showing services in {cityName || ''}</span>
+        </div>
+
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
