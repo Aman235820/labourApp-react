@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
 import Home from './components/Home';
@@ -13,15 +13,6 @@ import AdminDashboard from './components/AdminDashboard';
 import LocationService from './services/LocationService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-
-// Protected Route Component for Labour
-const ProtectedLabourRoute = ({ children }) => {
-  const isLabourLoggedIn = localStorage.getItem('isLabourLoggedIn');
-  if (!isLabourLoggedIn) {
-    return <Navigate to="/labourLogin" replace />;
-  }
-  return children;
-};
 
 function App() {
   useEffect(() => {
@@ -66,14 +57,7 @@ function App() {
             <Route path="/labourLogin" element={<LabourLogin />} />
             <Route path="/labourRegister" element={<LabourRegister />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route 
-              path="/labourDashboard" 
-              element={
-                <ProtectedLabourRoute>
-                  <LabourDashboard />
-                </ProtectedLabourRoute>
-              } 
-            />
+            <Route path="/labourDashboard" element={<LabourDashboard />} />
           </Routes>
         </div>
       </div>

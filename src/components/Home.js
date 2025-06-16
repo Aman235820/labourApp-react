@@ -36,7 +36,7 @@ function Home() {
       ),
     },
     {
-      name: 'Skill',
+      name: 'Services',
       selector: row => row.labourSkill,
       sortable: true,
       cell: row => (

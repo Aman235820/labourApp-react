@@ -23,10 +23,9 @@ function LabourLogin() {
       setError(null);
       const response = await labourAuthService.login(mobileNumber);
       
-      if (response.data && !response.data.hasError) {
-        const { reviews, ...labourDetails } = response.data.returnValue;
+      if (response && !response.hasError) {
+        const { reviews, ...labourDetails } = response.returnValue;
         localStorage.setItem('labourDetails', JSON.stringify(labourDetails));
-        localStorage.setItem('isLabourLoggedIn', 'true');
         
         // Navigate to labour dashboard with only reviews data
         navigate('/labourDashboard', { 

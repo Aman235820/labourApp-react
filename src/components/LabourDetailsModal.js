@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Button, Row, Col } from 'react-bootstrap';
-import { FaUser, FaTools, FaPhone, FaStar, FaMapMarkerAlt, FaRupeeSign, FaUserCircle } from 'react-icons/fa';
+import { FaUser, FaTools, FaPhone, FaStar, FaMapMarkerAlt, FaRupeeSign, FaUserCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import '../styles/LabourDetailsModal.css';
 
 function LabourDetailsModal({ show, handleClose, labour }) {
+  const [showReviews, setShowReviews] = useState(false);
+
   if (!labour) return null;
 
   return (
@@ -64,6 +66,56 @@ function LabourDetailsModal({ show, handleClose, labour }) {
                 <div className="description-section mt-4">
                   <h4>About</h4>
                   <p>{labour.description}</p>
+                </div>
+              )}
+
+              <Button 
+                variant="outline-primary" 
+                className="mt-3 reviews-toggle-btn"
+                onClick={() => setShowReviews(!showReviews)}
+              >
+                {showReviews ? (
+                  <>
+                    Hide Reviews <FaChevronUp className="icon" />
+                  </>
+                ) : (
+                  <>
+                    See all Reviews <FaChevronDown className="icon" />
+                  </>
+                )}
+              </Button>
+
+              {showReviews && (
+                <div className="reviews-section mt-3">
+                  {(!labour.reviews || labour.reviews.length === 0) ? (
+                    <div className="no-reviews">
+                      <p>No reviews available yet.</p>
+                      <small>Be the first to review this labour!</small>
+                    </div>
+                  ) : (
+                    <div className="reviews-container">
+                      {labour.reviews.map((review, index) => (
+                        <div key={index} className="review-item">
+                          <div className="review-header">
+                            <div className="reviewer-info">
+                              <FaUser className="reviewer-icon" />
+                              <span className="reviewer-name">{review.reviewerName || 'Anonymous'}</span>
+                            </div>
+                            <div className="review-rating">
+                              {[...Array(5)].map((_, i) => (
+                                <FaStar
+                                  key={i}
+                                  className={i < review.rating ? 'star-filled' : 'star-empty'}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="review-comment">{review.review}</p>
+                          <small className="review-date">{new Date(review.reviewTime).toLocaleDateString()}</small>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

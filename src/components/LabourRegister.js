@@ -30,20 +30,21 @@ function LabourRegister() {
     setIsLoading(true);
 
     try {
-      const response = await labourAuthService.register(formData);
-      console.log('Registration response:', response.data); // Debug log
-      
-      // Store only labourDetails in localStorage
-      const labourDetails = response.data.returnValue;
-      localStorage.setItem('labourDetails', JSON.stringify(labourDetails));
-      localStorage.setItem('isLabourLoggedIn', 'true');
-      
-      setSuccess('Registration successful!');
-      // Redirect to labour dashboard after successful registration
-      navigate('/labourDashboard');
-    } catch (err) {
-      console.error('Registration error:', err); // Debug log
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      const response = await fetch('http://localhost:8080/api/labour/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        navigate('/labourDashboard');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

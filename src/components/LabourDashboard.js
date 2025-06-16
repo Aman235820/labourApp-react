@@ -77,7 +77,6 @@ const LabourDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('labourDetails');
-    localStorage.removeItem('isLabourLoggedIn');
     navigate('/labourLogin');
   };
 
@@ -394,12 +393,9 @@ const LabourDashboard = () => {
                           <small className="text-muted d-block">
                             {new Date(review.reviewTime).toLocaleDateString()}
                           </small>
-                          <small className="text-muted d-block">
-                            {new Date(review.reviewTime).toLocaleTimeString()}
-                          </small>
                         </div>
                       </div>
-                      {review.comment && (
+                      {review.review && (
                         <div className="review-content mt-3">
                           <div className="review-text-container p-3 bg-white rounded">
                             <p className="mb-0 review-text" style={{ 
@@ -409,7 +405,7 @@ const LabourDashboard = () => {
                               whiteSpace: 'pre-wrap',
                               wordBreak: 'break-word'
                             }}>
-                              {review.comment}
+                              {review.review}
                             </p>
                           </div>
                         </div>
