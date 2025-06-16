@@ -1,0 +1,149 @@
+{
+  "services": [
+    {
+      "name": "Electrician",
+      "icon": "🔌",
+      "subCategories": [
+        "AC Repair & Servicing",
+        "Geyser Installation & Repair",
+        "Fan Repair / Installation",
+        "Switchboard & Wiring",
+        "Inverter Installation / Repair",
+        "Tube Light / LED Installation",
+        "MCB / Fuse Issues"
+      ]
+    },
+    {
+      "name": "Plumber",
+      "icon": "🚰",
+      "subCategories": [
+        "Tap / Faucet Repair",
+        "Water Pipe Leakage Fix",
+        "Bathroom Fittings Installation",
+        "Water Tank Installation / Repair",
+        "Drainage / Blockage Fix",
+        "Geyser Plumbing",
+        "Wash Basin / Sink Setup"
+      ]
+    },
+    {
+      "name": "Carpenter",
+      "icon": "🪚",
+      "subCategories": [
+        "Furniture Assembly",
+        "Modular Kitchen Work",
+        "Door Repair / Replacement",
+        "Wood Polishing",
+        "Almirah / Cupboard Repair",
+        "Curtain Rod Fitting",
+        "Bed / Table Setup"
+      ]
+    },
+    {
+      "name": "Painter",
+      "icon": "🎨",
+      "subCategories": [
+        "Interior Wall Painting",
+        "Exterior Wall Painting",
+        "Texture Painting",
+        "Waterproof Coating",
+        "Whitewash / Limewash",
+        "Furniture Paint / Polish"
+      ]
+    },
+    {
+      "name": "Home Appliance Repair",
+      "icon": "🛠️",
+      "subCategories": [
+        "Refrigerator Repair",
+        "Washing Machine Repair",
+        "Microwave Repair",
+        "TV / LED Repair",
+        "Chimney Cleaning",
+        "RO / Water Purifier Service"
+      ]
+    },
+    {
+      "name": "Cleaning Services",
+      "icon": "🧹",
+      "subCategories": [
+        "Home Deep Cleaning",
+        "Bathroom Cleaning",
+        "Kitchen Cleaning",
+        "Sofa / Mattress Cleaning",
+        "Carpet / Rug Cleaning",
+        "Water Tank Cleaning",
+        "Septic Tank Cleaning"
+      ]
+    },
+    {
+      "name": "Pest Control",
+      "icon": "🐜",
+      "subCategories": [
+        "Cockroach Control",
+        "Termite Treatment",
+        "Bed Bug Control",
+        "Mosquito Fogging",
+        "Rodent Control"
+      ]
+    },
+    {
+      "name": "Construction & Civil Work",
+      "icon": "🏗️",
+      "subCategories": [
+        "Masonry Work",
+        "Tile / Marble Laying",
+        "POP / False Ceiling",
+        "Plastering / Wall Putty",
+        "Grill / Railing Installation",
+        "Site Supervision",
+        "Skilled / Unskilled Labor Supply"
+      ]
+    },
+    {
+      "name": "Vehicle Services",
+      "icon": "🚗",
+      "subCategories": [
+        "Bike Mechanic",
+        "Car Mechanic",
+        "Car Washing",
+        "Puncture Repair",
+        "Battery Jumpstart",
+        "Towing / Breakdown Assistance"
+      ]
+    },
+    {
+      "name": "Logistics",
+      "icon": "📦",
+      "subCategories": [
+        "Packers & Movers",
+        "Tempo / Mini Truck Booking",
+        "Loading / Unloading Labor",
+        "Furniture Shifting"
+      ]
+    },
+    {
+      "name": "Personal Care",
+      "icon": "💇",
+      "subCategories": [
+        "Beautician at Home",
+        "Barber at Home",
+        "Massage Therapist",
+        "Mehndi Artist",
+        "Bridal Makeup"
+      ]
+    },
+    {
+      "name": "Farm & Rural Services",
+      "icon": "🌾",
+      "subCategories": [
+        "Borewell Mechanic",
+        "Hand Pump Repair",
+        "Solar Panel Installation",
+        "Cow Shed Cleaner",
+        "Tractor / JCB Rental",
+        "Agriculture Equipment Repair"
+      ]
+    }
+  ]
+} 

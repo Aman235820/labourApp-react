@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
+import ServicesSection from './ServicesSection';
 
 function Home() {
   const navigate = useNavigate();
@@ -197,19 +198,16 @@ function Home() {
 
   return (
     <Container fluid className="home-container">
-      {/* Hero Section */}
-      <Row className="hero-section">
-        <Col>
-          <div className="hero-content">
-            <h1 className="display-4 mb-4">
-              Welcome to InstaLab
-            </h1>
-            <h2 className="text-muted mb-5">
-              Connect with skilled labourers and get services at your Doorstep :)
-            </h2>
-          </div>
-        </Col>
-      </Row>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+        <div style={{ textAlign: 'left' }}>
+          <h1 className="display-6 mb-1" style={{ fontWeight: 800, color: '#1a202c' }}>InstaLab</h1>
+          <div className="text-muted" style={{ fontSize: '1.1rem' }}>Connect with skilled labourers and get services at your Doorstep :)</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+        <img src={require('../logo.svg').default} alt="Logo" style={{ height: 70, marginBottom: 0 }} />
+      </div>
+      <ServicesSection />
 
       {/* Navigation Cards Section */}
       <Row className="navigation-cards mb-5">
