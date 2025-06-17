@@ -690,8 +690,8 @@ function AdminDashboard() {
       </Modal>
 
       <BookingDetailsModal
-        show={bookingModalOpen}
-        handleClose={toggleBookingModal}
+        isOpen={bookingModalOpen}
+        toggle={toggleBookingModal}
         booking={selectedBooking}
       />
     </Container>

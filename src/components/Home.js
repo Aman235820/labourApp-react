@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Modal } from 'react-bootstrap';
 import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
@@ -20,7 +20,7 @@ function Home() {
   const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
   const [selectedLabour, setSelectedLabour] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showLabourModal, setShowLabourModal] = useState(false);
 
   const columns = [
     {
@@ -52,8 +52,8 @@ function Home() {
       selector: row => row.labourMobileNo,
       cell: row => (
         <div className="d-flex align-items-center">
-          <Button 
-            variant="outline-primary" 
+          <Button
+            variant="outline-primary"
             size="sm"
             onClick={() => window.location.href = `tel:${row.labourMobileNo}`}
             className="d-flex align-items-center"
@@ -127,6 +127,16 @@ function Home() {
         padding: '1rem 0',
       },
     },
+    table: {
+      style: {
+        marginBottom: '0',
+      },
+    },
+    tableWrapper: {
+      style: {
+        overflow: 'visible',
+      },
+    },
   };
 
   const handleSearch = async (e) => {
@@ -196,16 +206,217 @@ function Home() {
     );
   };
 
+  const handleLabourModalClose = () => {
+    setShowLabourModal(false);
+    setSelectedLabour(null);
+  };
+
+  const handleLabourModalShow = (labour) => {
+    setSelectedLabour(labour);
+    setShowLabourModal(true);
+  };
+
   return (
     <Container fluid className="home-container">
-      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-        <div style={{ textAlign: 'left' }}>
-          <h1 className="display-6 mb-1" style={{ fontWeight: 800, color: '#1a202c' }}>InstaLab</h1>
-          <div className="text-muted" style={{ fontSize: '1.1rem' }}>Connect with skilled labourers and get services at your Doorstep :)</div>
-        </div>
+      {/* Search Section */}
+      <div style={{
+        padding: '1rem 1rem',
+        marginBottom: '1rem',
+        position: 'relative'
+      }}>
+        <Container>
+          <Form onSubmit={handleSearch}>
+            <Row className="justify-content-center">
+              <Col md={8} lg={6}>
+                <InputGroup className="mb-3">
+                  <InputGroup.Text style={{ 
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
+                    borderRight: 'none'
+                  }}>
+                    <FaSearch className="text-primary" />
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search for skilled labourers..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                      border: '1px solid #e2e8f0',
+                      padding: '0.75rem 1rem',
+                      fontSize: '1.1rem',
+                      boxShadow: 'none'
+                    }}
+                  />
+                  <Button 
+                    variant="primary" 
+                    type="submit"
+                    style={{
+                      padding: '0.75rem 2rem',
+                      fontSize: '1.1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    Search
+                  </Button>
+                </InputGroup>
+              </Col>
+            </Row>
+          </Form>
+
+          {/* Results Dropdown */}
+          {searchTerm && labourers.length > 0 && (
+            <>
+              {/* Backdrop */}
+              <div 
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  zIndex: 999
+                }}
+                onClick={() => setSearchTerm('')}
+              />
+              
+              {/* Results Container */}
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '100%',
+                maxWidth: '800px',
+                zIndex: 1000,
+                background: 'white',
+                borderRadius: '0.5rem',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                marginTop: '0.5rem',
+                maxHeight: '80vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {/* Header */}
+                <div style={{
+                  padding: '1rem',
+                  borderBottom: '1px solid #e2e8f0',
+                  background: '#f8fafc',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <h5 className="mb-0" style={{ color: '#2d3748', fontWeight: 600 }}>
+                    Search Results
+                  </h5>
+                  <Button 
+                    variant="link" 
+                    className="text-muted p-0"
+                    onClick={() => setSearchTerm('')}
+                  >
+                    Close
+                  </Button>
+                </div>
+
+                {/* Results Table */}
+                <div style={{ overflow: 'auto', flex: 1 }}>
+                  <Card className="border-0">
+                    <Card.Body style={{ padding: '1rem' }}>
+                      <DataTable
+                        columns={columns}
+                        data={labourers}
+                        pagination
+                        paginationServer
+                        paginationTotalRows={totalElements}
+                        onChangeRowsPerPage={handlePerRowsChange}
+                        onChangePage={handlePageChange}
+                        customStyles={customStyles}
+                        progressPending={isLoading}
+                        onRowClicked={(row) => handleLabourModalShow(row)}
+                        pointerOnHover
+                        noHeader
+                      />
+                    </Card.Body>
+                  </Card>
+                </div>
+              </div>
+            </>
+          )}
+        </Container>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-        <img src={require('../logo.svg').default} alt="Logo" style={{ height: 70, marginBottom: 0 }} />
+
+      {/* Header Section */}
+      <div className="header-section" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '1rem 1rem',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+        borderRadius: '1rem',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.5rem',
+          marginBottom: '1rem'
+        }}>
+          <img
+            src={require('../logo.svg').default}
+            alt="InstaLab Logo"
+            style={{
+              height: 80,
+              transition: 'transform 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+          />
+          <div>
+            <h1 className="display-4 mb-2" style={{
+              fontWeight: 800,
+              color: '#1a202c',
+              letterSpacing: '-0.5px',
+              background: 'linear-gradient(45deg, #2d3748, #4a5568)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              InstaLab
+            </h1>
+            <div className="tagline" style={{
+              fontSize: '1.2rem',
+              color: '#4a5568',
+              fontWeight: 500,
+              maxWidth: '600px',
+              lineHeight: '1.5'
+            }}>
+              Connect with skilled labourers and get services at your doorstep
+              <span style={{
+                display: 'inline-block',
+                marginLeft: '0.5rem',
+                animation: 'wave 1.5s infinite',
+                transformOrigin: '70% 70%'
+              }}>✨</span>
+            </div>
+          </div>
+        </div>
+        <style>
+          {`
+            @keyframes wave {
+              0% { transform: rotate(0deg); }
+              10% { transform: rotate(14deg); }
+              20% { transform: rotate(-8deg); }
+              30% { transform: rotate(14deg); }
+              40% { transform: rotate(-4deg); }
+              50% { transform: rotate(10deg); }
+              60% { transform: rotate(0deg); }
+              100% { transform: rotate(0deg); }
+            }
+          `}
+        </style>
       </div>
       <ServicesSection />
 
@@ -277,80 +488,11 @@ function Home() {
         </Col>
       </Row>
 
-      {/* Search Section */}
-      <Row className="search-section mb-5">
-        <Col md={8} className="mx-auto">
-          <Card className="search-card">
-            <Card.Body>
-              <h3 className="text-center mb-4">Find Skilled Labourers</h3>
-              <Form onSubmit={handleSearch}>
-                <InputGroup className="mb-3">
-                  <Form.Control
-                    type="text"
-                    placeholder="Search for labourers by category (e.g., sweeper, plumber)..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="py-3"
-                  />
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    className="px-4"
-                  >
-                    <FaSearch className="me-2" />
-                    Search
-                  </Button>
-                </InputGroup>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Results Section */}
-      {error && (
-        <Row className="justify-content-center mb-4">
-          <Col md={8}>
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          </Col>
-        </Row>
-      )}
-
-      <Row className="results-section">
-        <Col md={12} lg={11} className="mx-auto">
-          <Card className="results-card">
-            <Card.Body>
-              <DataTable
-                columns={columns}
-                data={labourers}
-                pagination
-                paginationServer
-                paginationTotalRows={totalElements}
-                onChangeRowsPerPage={handlePerRowsChange}
-                onChangePage={handlePageChange}
-                customStyles={customStyles}
-                progressPending={isLoading}
-                onRowClicked={(row) => {
-                  setSelectedLabour(row);
-                  setShowModal(true);
-                }}
-                pointerOnHover
-              />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Add the modal */}
+      {/* Labour Details Modal */}
       <LabourDetailsModal
-        show={showModal}
-        handleClose={() => {
-          setShowModal(false);
-          setSelectedLabour(null);
-        }}
-        labour={selectedLabour}
+        show={showLabourModal}
+        onHide={handleLabourModalClose}
+        selectedLabour={selectedLabour}
       />
     </Container>
   );

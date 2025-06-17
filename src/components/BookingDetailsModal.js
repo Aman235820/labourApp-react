@@ -1,6 +1,5 @@
 import React from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { Badge } from 'react-bootstrap';
+import { Modal, Button, Badge } from 'react-bootstrap';
 import { FaTimesCircle, FaClock, FaCheckCircle } from 'react-icons/fa';
 
 const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
@@ -24,11 +23,11 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
   if (!booking) return null;
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="lg">
-      <ModalHeader toggle={toggle}>
-        Booking Details (ID: {booking.bookingId})
-      </ModalHeader>
-      <ModalBody>
+    <Modal show={isOpen} onHide={toggle} size="lg" centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Booking Details (ID: {booking.bookingId})</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
         <div className="row">
           <div className="col-md-6">
             <h5 className="mb-3">User Information</h5>
@@ -52,12 +51,12 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
             <p><strong>Status:</strong> {getStatusBadge(booking.bookingStatusCode)}</p>
           </div>
         </div>
-      </ModalBody>
-      <ModalFooter>
-        <Button color="secondary" onClick={toggle}>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={toggle}>
           Close
         </Button>
-      </ModalFooter>
+      </Modal.Footer>
     </Modal>
   );
 };
