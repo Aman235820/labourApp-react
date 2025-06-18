@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
+import LabourList from './LabourList';
 
 function Home() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ function Home() {
   const [showLabourModal, setShowLabourModal] = useState(false);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-  const [showSubserviceModal, setShowSubserviceModal] = useState(false);
+  const [showLabourListModal, setShowLabourListModal] = useState(false);
 
   const columns = [
     {
@@ -149,9 +150,19 @@ function Home() {
   }, []);
 
   const handleSearch = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    // Always clear previous results before searching
+    setLabourers([]);
+    setTotalPages(0);
+    setTotalElements(0);
+    setCurrentPage(0);
     if (!searchTerm.trim()) return;
     await fetchLabourers(0, pageSize);
+    // Only clear the search bar if results are set (labourers is not empty)
+    // We'll use a setTimeout to ensure state is updated after fetchLabourers
+    setTimeout(() => {
+      if (labourers.length > 0) setSearchTerm('');
+    }, 0);
   };
 
   const fetchLabourers = async (pageNumber, size) => {
@@ -231,7 +242,6 @@ function Home() {
 
   const handleSubserviceClick = async (sub) => {
     try {
-      setSearchTerm(sub); // Set the search term to the subservice name for clarity
       setIsLoading(true);
       setError(null);
       const res = await searchLabourByCategory(sub, 0, pageSize);
@@ -240,13 +250,13 @@ function Home() {
         setTotalPages(res.totalPages || 0);
         setTotalElements(res.totalElements || 0);
         setCurrentPage(0);
-        setShowSubserviceModal(true);
+        setShowLabourListModal(true);
       } else {
         setLabourers([]);
         setTotalPages(0);
         setTotalElements(0);
         setCurrentPage(0);
-        setShowSubserviceModal(true);
+        setShowLabourListModal(true);
         alert('No labourers found for this subservice.');
       }
     } catch (err) {
@@ -254,7 +264,7 @@ function Home() {
       setTotalPages(0);
       setTotalElements(0);
       setCurrentPage(0);
-      setShowSubserviceModal(true);
+      setShowLabourListModal(true);
       alert('API error for ' + sub);
       console.error('API error for', sub, err);
     } finally {
@@ -262,8 +272,20 @@ function Home() {
     }
   };
 
-  // Add a helper to check if the searchTerm matches a subservice
-  const isSubserviceSearch = selectedService && selectedService.subCategories.includes(searchTerm);
+  // Handler for clicking a row in LabourList
+  const handleLabourListRowClick = (labour) => {
+    setSelectedLabour(labour);
+    setShowLabourModal(true);
+  };
+
+  // Handler for closing LabourList modal
+  const handleLabourListClose = () => {
+    setShowLabourListModal(false);
+    setLabourers([]);
+    setTotalPages(0);
+    setTotalElements(0);
+    setCurrentPage(0);
+  };
 
   return (
     <Container fluid className="home-container">
@@ -289,7 +311,15 @@ function Home() {
                     type="text"
                     placeholder="Search for skilled labourers..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      if (e.target.value === '') {
+                        setLabourers([]);
+                        setTotalPages(0);
+                        setTotalElements(0);
+                        setCurrentPage(0);
+                      }
+                    }}
                     style={{
                       border: '1px solid #e2e8f0',
                       padding: '0.75rem 1rem',
@@ -314,7 +344,7 @@ function Home() {
           </Form>
 
           {/* Results Dropdown */}
-          {searchTerm && labourers.length > 0 && !isSubserviceSearch && (
+          {searchTerm && labourers.length > 0 && (
             <>
               {/* Backdrop */}
               <div 
@@ -541,61 +571,12 @@ function Home() {
       </div>
 
       {/* Modal Results Table for Subservice Clicks */}
-      {isSubserviceSearch && showSubserviceModal && (
-        <>
-          {/* Modal Backdrop */}
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              background: 'rgba(0,0,0,0.45)',
-              zIndex: 2000
-            }}
-            onClick={() => setShowSubserviceModal(false)}
-          />
-          {/* Modal Content */}
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 2100,
-              background: '#fff',
-              borderRadius: '1rem',
-              boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
-              padding: '2rem 1.2rem',
-              maxWidth: 900,
-              width: '95vw',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h5 style={{ fontWeight: 700, color: '#2563eb', margin: 0 }}>Results for: {searchTerm}</h5>
-              <Button variant="light" onClick={() => setShowSubserviceModal(false)} style={{ fontWeight: 700, fontSize: 22, lineHeight: 1, color: '#222', border: 'none' }}>&times;</Button>
-            </div>
-            <DataTable
-              columns={columns}
-              data={labourers}
-              pagination
-              paginationServer
-              paginationTotalRows={totalElements}
-              onChangeRowsPerPage={handlePerRowsChange}
-              onChangePage={handlePageChange}
-              customStyles={customStyles}
-              progressPending={isLoading}
-              onRowClicked={(row) => handleLabourModalShow(row)}
-              pointerOnHover
-              noHeader
-            />
-          </div>
-        </>
-      )}
+      <LabourList
+        show={showLabourListModal}
+        onHide={handleLabourListClose}
+        labourers={labourers}
+        onRowClick={handleLabourListRowClick}
+      />
 
       {/* Navigation Cards Section */}
       <Row className="navigation-cards mb-5">
