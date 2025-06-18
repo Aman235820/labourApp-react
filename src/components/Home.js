@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Modal } from 'react-bootstrap';
 import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
@@ -7,7 +7,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
-import ServicesSection from './ServicesSection';
 
 function Home() {
   const navigate = useNavigate();
@@ -21,6 +20,9 @@ function Home() {
   const [totalElements, setTotalElements] = useState(0);
   const [selectedLabour, setSelectedLabour] = useState(null);
   const [showLabourModal, setShowLabourModal] = useState(false);
+  const [services, setServices] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+  const [showSubserviceModal, setShowSubserviceModal] = useState(false);
 
   const columns = [
     {
@@ -139,6 +141,13 @@ function Home() {
     },
   };
 
+  useEffect(() => {
+    fetch('/services.json')
+      .then(res => res.json())
+      .then(data => setServices(data.services))
+      .catch(err => console.error('Failed to load services.json', err));
+  }, []);
+
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -216,6 +225,46 @@ function Home() {
     setShowLabourModal(true);
   };
 
+  const handleServiceClick = (service) => {
+    setSelectedService(service);
+  };
+
+  const handleSubserviceClick = async (sub) => {
+    try {
+      setSearchTerm(sub); // Set the search term to the subservice name for clarity
+      setIsLoading(true);
+      setError(null);
+      const res = await searchLabourByCategory(sub, 0, pageSize);
+      if (res && res.content) {
+        setLabourers(res.content);
+        setTotalPages(res.totalPages || 0);
+        setTotalElements(res.totalElements || 0);
+        setCurrentPage(0);
+        setShowSubserviceModal(true);
+      } else {
+        setLabourers([]);
+        setTotalPages(0);
+        setTotalElements(0);
+        setCurrentPage(0);
+        setShowSubserviceModal(true);
+        alert('No labourers found for this subservice.');
+      }
+    } catch (err) {
+      setLabourers([]);
+      setTotalPages(0);
+      setTotalElements(0);
+      setCurrentPage(0);
+      setShowSubserviceModal(true);
+      alert('API error for ' + sub);
+      console.error('API error for', sub, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add a helper to check if the searchTerm matches a subservice
+  const isSubserviceSearch = selectedService && selectedService.subCategories.includes(searchTerm);
+
   return (
     <Container fluid className="home-container">
       {/* Search Section */}
@@ -265,7 +314,7 @@ function Home() {
           </Form>
 
           {/* Results Dropdown */}
-          {searchTerm && labourers.length > 0 && (
+          {searchTerm && labourers.length > 0 && !isSubserviceSearch && (
             <>
               {/* Backdrop */}
               <div 
@@ -418,7 +467,135 @@ function Home() {
           `}
         </style>
       </div>
-      <ServicesSection />
+
+      {/* Services & Subservices Section */}
+      <div style={{ margin: '1.5rem 0', background: '#f6f8fa', borderRadius: '1rem', padding: '1.5rem 0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1.2rem' }}>
+          {services.map(service => (
+            <div
+              key={service.name}
+              style={{
+                textAlign: 'center',
+                cursor: 'pointer',
+                color: selectedService && selectedService.name === service.name ? '#2563eb' : '#444',
+                fontWeight: selectedService && selectedService.name === service.name ? 700 : 500,
+                background: selectedService && selectedService.name === service.name ? 'rgba(37,99,235,0.10)' : 'transparent',
+                borderRadius: '1rem',
+                padding: '0.3rem 0.8rem',
+                transition: 'all 0.18s',
+                boxShadow: selectedService && selectedService.name === service.name ? '0 2px 8px rgba(37,99,235,0.10)' : 'none',
+                minWidth: 80,
+                minHeight: 80,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 15,
+                border: selectedService && selectedService.name === service.name ? '1.5px solid #2563eb' : '1.5px solid #e5e7eb',
+                boxSizing: 'border-box',
+              }}
+              onClick={() => handleServiceClick(service)}
+              onMouseOver={e => e.currentTarget.style.background = 'rgba(37,99,235,0.07)'}
+              onMouseOut={e => e.currentTarget.style.background = selectedService && selectedService.name === service.name ? 'rgba(37,99,235,0.10)' : 'transparent'}
+            >
+              <div style={{ fontSize: 28, marginBottom: 2 }}>{service.icon}</div>
+              <div style={{ fontSize: 15, marginTop: 2 }}>{service.name}</div>
+            </div>
+          ))}
+        </div>
+        {selectedService && (
+          <div style={{ marginTop: '1.2rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.7rem' }}>
+            {selectedService.subCategories.map(sub => (
+              <button
+                key={sub}
+                style={{
+                  border: '1.5px solid #d1d5db',
+                  borderRadius: '1.5rem',
+                  padding: '0.45rem 1.2rem',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  background: '#fff',
+                  color: '#222',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s',
+                  outline: 'none',
+                }}
+                onClick={() => handleSubserviceClick(sub)}
+                onMouseOver={e => {
+                  e.currentTarget.style.background = '#f1f5f9';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.10)';
+                  e.currentTarget.style.borderColor = '#2563eb';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.background = '#fff';
+                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal Results Table for Subservice Clicks */}
+      {isSubserviceSearch && showSubserviceModal && (
+        <>
+          {/* Modal Backdrop */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.45)',
+              zIndex: 2000
+            }}
+            onClick={() => setShowSubserviceModal(false)}
+          />
+          {/* Modal Content */}
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 2100,
+              background: '#fff',
+              borderRadius: '1rem',
+              boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
+              padding: '2rem 1.2rem',
+              maxWidth: 900,
+              width: '95vw',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h5 style={{ fontWeight: 700, color: '#2563eb', margin: 0 }}>Results for: {searchTerm}</h5>
+              <Button variant="light" onClick={() => setShowSubserviceModal(false)} style={{ fontWeight: 700, fontSize: 22, lineHeight: 1, color: '#222', border: 'none' }}>&times;</Button>
+            </div>
+            <DataTable
+              columns={columns}
+              data={labourers}
+              pagination
+              paginationServer
+              paginationTotalRows={totalElements}
+              onChangeRowsPerPage={handlePerRowsChange}
+              onChangePage={handlePageChange}
+              customStyles={customStyles}
+              progressPending={isLoading}
+              onRowClicked={(row) => handleLabourModalShow(row)}
+              pointerOnHover
+              noHeader
+            />
+          </div>
+        </>
+      )}
 
       {/* Navigation Cards Section */}
       <Row className="navigation-cards mb-5">

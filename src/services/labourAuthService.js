@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:4000/labourapp/labour';
+const BASE_URL = 'http://localhost:8080/api/labour';
 
 export const labourAuthService = {
   login: async (mobileNumber) => {
@@ -9,7 +9,7 @@ export const labourAuthService = {
   },
 
   register: async (formData) => {
-    const response = await axios.post(`${BASE_URL}/registerLabour`, formData);
+    const response = await axios.post(`${BASE_URL}/register`, formData);
     return response.data;
   }
 }; 

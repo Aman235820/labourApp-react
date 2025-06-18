@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Card, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { labourAuthService } from '../services/labourAuthService';
 import { FaUser, FaTools, FaPhone } from 'react-icons/fa';
+import Select from 'react-select';
 import '../styles/LabourRegister.css';
 
 function LabourRegister() {
@@ -10,17 +11,56 @@ function LabourRegister() {
   const [formData, setFormData] = useState({
     labourName: '',
     labourSkill: '',
+    labourSubSkill: [],
     labourMobileNo: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [services, setServices] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+
+  useEffect(() => {
+    // Fetch services data
+    fetch('/services.json')
+      .then(response => response.json())
+      .then(data => setServices(data.services))
+      .catch(error => console.error('Error loading services:', error));
+  }, []);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // If main skill changes, reset subskill and update selected service
+    if (name === 'labourSkill') {
+      const service = services.find(s => s.name === value);
+      setSelectedService(service);
+      setFormData(prev => ({
+        ...prev,
+        labourSubSkill: []
+      }));
+    }
+  };
+
+  const handleSubSkillChange = (selectedOptions) => {
+    if (selectedOptions && selectedOptions.some(option => option.value === 'all')) {
+      // If 'Select All' is chosen, select all subcategories
+      setFormData(prev => ({
+        ...prev,
+        labourSubSkill: selectedService.subCategories
+      }));
+    } else {
+      // Otherwise, set selected options normally
+      setFormData(prev => ({
+        ...prev,
+        labourSubSkill: selectedOptions ? selectedOptions.map(option => option.value) : []
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -29,22 +69,17 @@ function LabourRegister() {
     setSuccess('');
     setIsLoading(true);
 
-    try {
-      const response = await fetch('http://localhost:8080/api/labour/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    if (selectedService && formData.labourSubSkill.length === 0) {
+      setError('Please select at least one sub skill.');
+      setIsLoading(false);
+      return;
+    }
 
-      if (response.ok) {
-        navigate('/labourDashboard');
-      } else {
-        setError('Registration failed. Please try again.');
-      }
+    try {
+      await labourAuthService.register(formData);
+      navigate('/labourDashboard');
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      setError('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -92,18 +127,51 @@ function LabourRegister() {
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaTools className="me-2" />
-                    <Form.Label className="fw-bold mb-0">Skill</Form.Label>
+                    <Form.Label className="fw-bold mb-0">Main Skill</Form.Label>
                   </div>
-                  <Form.Control
-                    type="text"
+                  <Form.Select
                     name="labourSkill"
                     value={formData.labourSkill}
                     onChange={handleChange}
                     required
                     className="form-control-lg"
-                    placeholder="Enter your skill (e.g., cook, plumber, electrician)"
-                  />
+                  >
+                    <option value="">Select your main skill</option>
+                    {services.map((service, index) => (
+                      <option key={index} value={service.name}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </Form.Select>
                 </Form.Group>
+
+                {selectedService && (
+                  <Form.Group className="mb-4">
+                    <div className="d-flex align-items-center">
+                      <FaTools className="me-2" />
+                      <Form.Label className="fw-bold mb-0">Sub Skill</Form.Label>
+                    </div>
+                    <Select
+                      name="labourSubSkill"
+                      isMulti
+                      options={[
+                        { value: 'all', label: 'Select All' },
+                        ...selectedService.subCategories.map(subCategory => ({
+                          value: subCategory,
+                          label: subCategory
+                        }))
+                      ]}
+                      onChange={handleSubSkillChange}
+                      value={formData.labourSubSkill.map(subCategory => ({
+                        value: subCategory,
+                        label: subCategory
+                      }))}
+                      className="basic-multi-select"
+                      classNamePrefix="select"
+                      placeholder="Select your sub skills"
+                    />
+                  </Form.Group>
+                )}
 
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
