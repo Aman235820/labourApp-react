@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Modal } from 'react-bootstrap';
-import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon } from 'react-icons/fa';
+import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon, FaTimes } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -395,7 +395,7 @@ function Home() {
                     className="text-muted p-0"
                     onClick={() => setSearchTerm('')}
                   >
-                    Close
+                    <FaTimes size={20} />
                   </Button>
                 </div>
 
