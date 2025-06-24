@@ -68,3 +68,16 @@ function App() {
 }
 
 export default App;
+
+export const requestLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          LocationService.setLocation(position.coords);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    }
+  };

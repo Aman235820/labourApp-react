@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Card, Alert, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Form, Button, Card, Alert, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { labourAuthService } from '../services/labourAuthService';
-import { FaUser, FaTools, FaPhone } from 'react-icons/fa';
+import { labourService } from '../services/labourService';
+import { FaUser, FaTools, FaPhone, FaKey } from 'react-icons/fa';
 import Select from 'react-select';
 import '../styles/LabourRegister.css';
 
@@ -14,6 +14,9 @@ function LabourRegister() {
     labourSubSkill: [],
     labourMobileNo: ''
   });
+  const [otp, setOtp] = useState('');
+  const [otpStatus, setOtpStatus] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,13 +33,10 @@ function LabourRegister() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-
-    // If main skill changes, reset subskill and update selected service
     if (name === 'labourSkill') {
       const service = services.find(s => s.name === value);
       setSelectedService(service);
@@ -49,17 +49,34 @@ function LabourRegister() {
 
   const handleSubSkillChange = (selectedOptions) => {
     if (selectedOptions && selectedOptions.some(option => option.value === 'all')) {
-      // If 'Select All' is chosen, select all subcategories
       setFormData(prev => ({
         ...prev,
         labourSubSkill: selectedService.subCategories
       }));
     } else {
-      // Otherwise, set selected options normally
       setFormData(prev => ({
         ...prev,
         labourSubSkill: selectedOptions ? selectedOptions.map(option => option.value) : []
       }));
+    }
+  };
+
+  const handleRequestOTP = async () => {
+    setOtpStatus('');
+    setOtpLoading(true);
+    const mobile = formData.labourMobileNo;
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      setOtpStatus('Please enter a valid 10-digit mobile number before requesting OTP.');
+      setOtpLoading(false);
+      return;
+    }
+    try {
+      await labourService.requestOTP(mobile, 'LABOUR');
+      setOtpStatus('OTP sent successfully!');
+    } catch (err) {
+      setOtpStatus(err.message || 'Failed to send OTP.');
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -68,16 +85,26 @@ function LabourRegister() {
     setError('');
     setSuccess('');
     setIsLoading(true);
-
     if (selectedService && formData.labourSubSkill.length === 0) {
       setError('Please select at least one sub skill.');
       setIsLoading(false);
       return;
     }
-
     try {
-      await labourAuthService.register(formData);
-      navigate('/labourDashboard');
+      // Prepare subSkills array for API
+      const labourData = {
+        labourName: formData.labourName,
+        labourSkill: formData.labourSkill,
+        labourSubSkills: formData.labourSubSkill.map(subSkill => ({ subSkillName: subSkill })),
+        labourMobileNo: formData.labourMobileNo
+      };
+      const response = await labourService.registerLabour(labourData, otp);
+      if (response.token && response.returnValue) {
+        localStorage.setItem('labour', JSON.stringify({ ...response.returnValue, token: response.token }));
+        navigate('/labourDashboard');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } catch (error) {
       setError('Registration failed. Please try again.');
     } finally {
@@ -95,7 +122,6 @@ function LabourRegister() {
                 <h2 className="fw-bold text-primary">Labour Registration</h2>
                 <p className="text-muted">Join InstaLab as a skilled professional</p>
               </div>
-
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
@@ -106,7 +132,6 @@ function LabourRegister() {
                   {success}
                 </div>
               )}
-
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
@@ -123,7 +148,6 @@ function LabourRegister() {
                     placeholder="Enter your full name"
                   />
                 </Form.Group>
-
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaTools className="me-2" />
@@ -144,7 +168,6 @@ function LabourRegister() {
                     ))}
                   </Form.Select>
                 </Form.Group>
-
                 {selectedService && (
                   <Form.Group className="mb-4">
                     <div className="d-flex align-items-center">
@@ -169,34 +192,64 @@ function LabourRegister() {
                       className="basic-multi-select"
                       classNamePrefix="select"
                       placeholder="Select your sub skills"
+                      menuPortalTarget={document.body}
+                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                     />
                   </Form.Group>
                 )}
-
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaPhone className="me-2" />
                     <Form.Label className="fw-bold mb-0">Mobile Number</Form.Label>
                   </div>
+                  <InputGroup>
+                    <Form.Control
+                      type="tel"
+                      name="labourMobileNo"
+                      value={formData.labourMobileNo}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setFormData({
+                          ...formData,
+                          labourMobileNo: value
+                        });
+                      }}
+                      required
+                      pattern="[0-9]{10}"
+                      className="form-control-lg"
+                      placeholder="Enter 10-digit mobile number"
+                      maxLength="10"
+                    />
+                    <Button
+                      variant="outline-primary"
+                      type="button"
+                      onClick={handleRequestOTP}
+                      disabled={otpLoading}
+                    >
+                      {otpLoading ? 'Sending OTP...' : 'Request OTP'}
+                    </Button>
+                  </InputGroup>
+                  {otpStatus && (
+                    <Form.Text className={otpStatus.includes('success') ? 'text-success' : 'text-danger'}>
+                      {otpStatus}
+                    </Form.Text>
+                  )}
+                </Form.Group>
+                <Form.Group className="mb-4">
+                  <div className="d-flex align-items-center">
+                    <FaKey className="me-2" />
+                    <Form.Label className="fw-bold mb-0">OTP</Form.Label>
+                  </div>
                   <Form.Control
-                    type="tel"
-                    name="labourMobileNo"
-                    value={formData.labourMobileNo}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                      setFormData({
-                        ...formData,
-                        labourMobileNo: value
-                      });
-                    }}
-                    required
-                    pattern="[0-9]{10}"
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     className="form-control-lg"
-                    placeholder="Enter 10-digit mobile number"
-                    maxLength="10"
+                    maxLength="6"
+                    required
                   />
                 </Form.Group>
-
                 <div className="d-grid gap-2">
                   <Button 
                     variant="primary" 
@@ -221,7 +274,6 @@ function LabourRegister() {
                     )}
                   </Button>
                 </div>
-
                 <div className="text-center mt-4">
                   <p className="mb-0">
                     Already have an account?{' '}

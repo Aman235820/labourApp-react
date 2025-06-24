@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Badge } from 'react-bootstrap';
+import { Modal, Button, Badge, Card } from 'react-bootstrap';
 import { FaTimesCircle, FaClock, FaCheckCircle } from 'react-icons/fa';
 
 const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
@@ -28,29 +28,37 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
         <Modal.Title>Booking Details (ID: {booking.bookingId})</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className="row">
+        <div className="row g-4">
           <div className="col-md-6">
-            <h5 className="mb-3">User Information</h5>
-            <p><strong>Name:</strong> {booking.userName}</p>
-            <p><strong>Mobile:</strong> {booking.userMobileNumber}</p>
-            <p><strong>User ID:</strong> {booking.userId}</p>
+            <Card className="shadow-sm border-0 h-100">
+              <Card.Body>
+                <h5 className="mb-3 text-primary">User Information</h5>
+                <div className="mb-2"><strong>Name: </strong>{booking.userName}</div>
+                <div className="mb-2"><strong>Mobile: </strong><span className="badge bg-info text-dark">{booking.userMobileNumber}</span></div>
+                <div className="mb-2"><strong>User ID: </strong><span className="badge bg-secondary">{booking.userId}</span></div>
+              </Card.Body>
+            </Card>
           </div>
           <div className="col-md-6">
-            <h5 className="mb-3">Labour Information</h5>
-            <p><strong>Name:</strong> {booking.labourName}</p>
-            <p><strong>Mobile:</strong> {booking.labourMobileNo}</p>
-            <p><strong>Labour ID:</strong> {booking.labourId}</p>
-            <p><strong>Skill:</strong> {booking.labourSkill}</p>
+            <Card className="shadow-sm border-0 h-100">
+              <Card.Body>
+                <h5 className="mb-3 text-primary">Labour Information</h5>
+                <div className="mb-2"><strong>Name: </strong>{booking.labourName}</div>
+                <div className="mb-2"><strong>Mobile: </strong><span className="badge bg-info text-dark">{booking.labourMobileNo}</span></div>
+                <div className="mb-2"><strong>Labour ID: </strong><span className="badge bg-secondary">{booking.labourId}</span></div>
+                <div className="mb-2"><strong>Service: </strong><span className="badge bg-info text-dark">{booking.labourSkill}</span></div>
+              </Card.Body>
+            </Card>
           </div>
         </div>
         <hr />
-        <div className="row mt-3">
-          <div className="col-12">
-            <h5 className="mb-3">Booking Information</h5>
-            <p><strong>Booking Time:</strong> {booking.bookingTime ? new Date(booking.bookingTime).toLocaleString() : 'N/A'}</p>
-            <p><strong>Status:</strong> {getStatusBadge(booking.bookingStatusCode)}</p>
-          </div>
-        </div>
+        <Card className="shadow-sm border-0 mt-3">
+          <Card.Body>
+            <h5 className="mb-3 text-primary">Booking Information</h5>
+            <div className="mb-2"><strong>Booking Time: </strong>{booking.bookingTime ? new Date(booking.bookingTime).toLocaleString() : 'N/A'}</div>
+            <div className="mb-2"><strong>Status: </strong>{getStatusBadge(booking.bookingStatusCode)}</div>
+          </Card.Body>
+        </Card>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={toggle}>

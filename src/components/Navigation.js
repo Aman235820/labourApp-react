@@ -3,20 +3,29 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaHome, FaUserShield, FaMapMarkerAlt } from 'react-icons/fa';
 import '../styles/Navigation.css';
+import { requestLocation } from '../App';
 
 function Navigation() {
   const [cityName, setCityName] = useState('');
 
   useEffect(() => {
-    try {
-      const locationData = JSON.parse(localStorage.getItem('userLocation'));
-      if (locationData && locationData.address) {
+    const updateCity = () => {
+      try {
+        const locationData = JSON.parse(localStorage.getItem('userLocation'));
+        if (!locationData || !locationData.address) {
+          requestLocation();
+          setCityName('');
+          return;
+        }
         const city = locationData.address.address.city || locationData.address.town || locationData.address.village || '';
         setCityName(city);
+      } catch (error) {
+        setCityName('');
       }
-    } catch (error) {
-      setCityName('');
-    }
+    };
+    updateCity();
+    window.addEventListener('locationUpdated', updateCity);
+    return () => window.removeEventListener('locationUpdated', updateCity);
   }, []);
 
   return (

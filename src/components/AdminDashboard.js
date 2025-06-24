@@ -102,6 +102,13 @@ function AdminDashboard() {
     alignItems: 'center !important',
   };
 
+  const [deletingLabourId, setDeletingLabourId] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
+  const [viewingLabourId, setViewingLabourId] = useState(null);
+  const [viewingUserId, setViewingUserId] = useState(null);
+  const [deletingBookingId, setDeletingBookingId] = useState(null);
+  const [viewingBookingId, setViewingBookingId] = useState(null);
+
   const getStatusBadge = (statusCode) => {
     switch (statusCode) {
       case -1:
@@ -141,8 +148,12 @@ function AdminDashboard() {
       name: 'Actions',
       cell: row => (
         <div className="d-flex gap-2">
-          <button onClick={() => handleRemoveUser(row.userId)} className="btn btn-danger btn-sm action-btn-sm">Delete</button>
-          <button onClick={() => handleViewUser(row.userId , row.mobileNumber)} className="btn btn-info btn-sm action-btn-sm">View Details</button>
+          <button onClick={() => handleRemoveUser(row.userId)} className="btn btn-danger btn-sm action-btn-sm" disabled={deletingUserId === row.userId}>
+            {deletingUserId === row.userId ? <Spinner as="span" animation="border" size="sm" /> : 'Delete'}
+          </button>
+          <button onClick={() => handleViewUser(row.userId , row.mobileNumber)} className="btn btn-info btn-sm action-btn-sm" disabled={viewingUserId === row.userId}>
+            {viewingUserId === row.userId ? <Spinner as="span" animation="border" size="sm" /> : 'View Details'}
+          </button>
         </div>
       ),
       ignoreRowClick: true,
@@ -175,8 +186,12 @@ function AdminDashboard() {
       name: 'Actions',
       cell: row => (
         <div className="d-flex gap-2 justify-content-center">
-          <button onClick={() => handleViewBooking(row)} className="btn btn-info btn-sm action-btn-sm">View Details</button>
-          <button onClick={() => handleDeleteBooking(row.bookingId)} className="btn btn-danger btn-sm action-btn-sm">Delete</button>
+          <button onClick={() => handleViewBooking(row)} className="btn btn-info btn-sm action-btn-sm" disabled={viewingBookingId === row.bookingId}>
+            {viewingBookingId === row.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'View Details'}
+          </button>
+          <button onClick={() => handleDeleteBooking(row.bookingId)} className="btn btn-danger btn-sm action-btn-sm" disabled={deletingBookingId === row.bookingId}>
+            {deletingBookingId === row.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Delete'}
+          </button>
         </div>
       ),
       ignoreRowClick: true,
@@ -295,86 +310,82 @@ function AdminDashboard() {
     }, [bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder]);
 
   const handleRemoveLabour = async (labourId) => {
+    if (!window.confirm('Are you sure you want to delete this labour?')) return;
+    setDeletingLabourId(labourId);
     try {
-      // Add confirmation dialog later if needed
       await adminService.removeLabour(labourId);
-      // Refresh the labour list after successful deletion by re-fetching with current params
       const response = await adminService.getAllLabours(labourPageNumber, labourPageSize, labourSortBy, labourSortOrder);
       if (response && Array.isArray(response.content)) {
         setLabours(response.content);
         setTotalLabourElements(response.totalElements || 0);
         setTotalLabourPages(response.totalPages || 0);
       } else {
-        console.error('API response for labours is not an array after deletion:', response);
-        setLabours([]); // Ensure it's always an array
+        setLabours([]);
         setTotalLabourElements(0);
         setTotalLabourPages(0);
         setError('Unexpected response format after deleting labour');
       }
     } catch (err) {
-      console.error('Error removing labour:', err);
       setError('Failed to remove labour');
-      setLabours([]); // Ensure it's always an array on error
+      setLabours([]);
       setTotalLabourElements(0);
       setTotalLabourPages(0);
+    } finally {
+      setDeletingLabourId(null);
     }
   };
 
   const handleRemoveUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    setDeletingUserId(userId);
     try {
-      // Add confirmation dialog later if needed
       await adminService.removeUser(userId);
-      // Refresh the user list after successful deletion by re-fetching with current params
       const response = await adminService.getAllUsers(userPageNumber, userPageSize, userSortBy, userSortOrder);
       if (response && Array.isArray(response.content)) {
         setUsers(response.content);
         setTotalUserElements(response.totalElements || 0);
         setTotalUserPages(response.totalPages || 0);
       } else {
-        console.error('API response for users is not an array after deletion:', response);
-        setUsers([]); // Ensure it's always an array
+        setUsers([]);
         setTotalUserElements(0);
         setTotalUserPages(0);
         setError('Unexpected response format after deleting user');
       }
     } catch (err) {
-      console.error('Error removing user:', err);
       setError('Failed to remove user');
-      setUsers([]); // Ensure it's always an array on error
+      setUsers([]);
       setTotalUserElements(0);
       setTotalUserPages(0);
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
   const handleViewLabour = async (labourId) => {
-    console.log('handleViewLabour called with ID:', labourId);
+    setViewingLabourId(labourId);
     try {
-      // Fetch specific labour details
       const response = await adminService.getLabourById(labourId);
-      console.log('getLabourById response:', response);
       if (response && response.returnValue) {
-        // Set selected labour and show details view
         setSelectedLabour(response.returnValue);
         setLabourModalOpen(true);
-        console.log('Labour details fetched, modal state set to true');
       } else {
-        console.log('getLabourById did not return expected data:', response);
         setError('Failed to fetch labour details: Invalid response');
       }
     } catch (err) {
-      console.error('Error fetching labour details:', err.response?.data || err.message);
       setError('Failed to fetch labour details');
+    } finally {
+      setViewingLabourId(null);
     }
   };
 
   const handleViewUser = (userId , mobileNumber) => {
-    // Find user in the already fetched list
+    setViewingUserId(userId);
     const user = users.find(user => user.userId === userId && user.mobileNumber === mobileNumber);
     if (user) {
-      // Set selected user and show details view
       setSelectedUser(user);
       setUserModalOpen(true);
     }
+    setViewingUserId(null);
   };
 
   const labourColumns = [
@@ -428,8 +439,12 @@ function AdminDashboard() {
       width: '160px',
       cell: row => (
         <div className="d-flex gap-2">
-          <button onClick={() => handleRemoveLabour(row.labourId)} className="btn btn-danger btn-sm action-btn-sm">Delete</button>
-          <button onClick={() => handleViewLabour(row.labourId)} className="btn btn-info btn-sm action-btn-sm">View Details</button>
+          <button onClick={() => handleRemoveLabour(row.labourId)} className="btn btn-danger btn-sm action-btn-sm" disabled={deletingLabourId === row.labourId}>
+            {deletingLabourId === row.labourId ? <Spinner as="span" animation="border" size="sm" /> : 'Delete'}
+          </button>
+          <button onClick={() => handleViewLabour(row.labourId)} className="btn btn-info btn-sm action-btn-sm" disabled={viewingLabourId === row.labourId}>
+            {viewingLabourId === row.labourId ? <Spinner as="span" animation="border" size="sm" /> : 'View Details'}
+          </button>
         </div>
       ),
       ignoreRowClick: true,
@@ -455,15 +470,17 @@ function AdminDashboard() {
   };
 
   const handleViewBooking = (booking) => {
+    setViewingBookingId(booking.bookingId);
     setSelectedBooking(booking);
     setBookingModalOpen(true);
+    setTimeout(() => setViewingBookingId(null), 500); // Simulate loading for UI feedback
   };
 
   const handleDeleteBooking = async (bookingId) => {
     if (window.confirm('Are you sure you want to delete this booking?')) {
+      setDeletingBookingId(bookingId);
       try {
         await adminService.deleteBooking(bookingId);
-        // Refresh the bookings list
         const response = await adminService.getAllBookings(bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder);
         if (response && Array.isArray(response.content)) {
           setBookings(response.content);
@@ -472,6 +489,8 @@ function AdminDashboard() {
         }
       } catch (err) {
         setError(`Failed to delete booking: ${err.message}`);
+      } finally {
+        setDeletingBookingId(null);
       }
     }
   };
@@ -666,11 +685,21 @@ function AdminDashboard() {
       <Modal isOpen={labourModalOpen} toggle={toggleLabourModal} size="lg">
         <ModalHeader toggle={toggleLabourModal}>Labour Details (ID: {selectedLabour?.labourId})</ModalHeader>
         <ModalBody>
-          <p><strong>Name:</strong> {selectedLabour?.labourName}</p>
-          <p><strong>Skill:</strong> {selectedLabour?.labourSkill}</p>
-          <p><strong>Mobile:</strong> {selectedLabour?.labourMobileNo}</p>
-          <p><strong>Rating:</strong> {selectedLabour?.rating}</p>
-          <p><strong>Ratings Count:</strong> {selectedLabour?.ratingCount}</p>
+          <Card className="shadow-sm border-0 p-3">
+            <Card.Body>
+              <h4 className="mb-3 text-primary">Labour Details</h4>
+              <div className="mb-2"><strong>Name: </strong> {selectedLabour?.labourName}</div>
+              <div className="mb-2"><strong>Skill: </strong> <span className="badge bg-info text-dark">{selectedLabour?.labourSkill}</span></div>
+              <div className="mb-2"><strong>Mobile: </strong>{selectedLabour?.labourMobileNo}</div>
+              {Array.isArray(selectedLabour?.labourSubSkills) && selectedLabour.labourSubSkills.length > 0 && (
+                <div className="mb-2"><strong>Sub Skills: </strong> <span className="d-flex flex-wrap gap-2 mt-2">{selectedLabour.labourSubSkills.map((sub, idx) => (
+                  <span key={sub.subSkillId || idx} className="badge bg-info text-dark mb-1" style={{ fontSize: '0.97em', padding: '0.5em 1em', borderRadius: '1em' }}>{sub.subSkillName}</span>
+                ))}</span></div>
+              )}
+              <div className="mb-2"><strong>Rating: </strong> {selectedLabour?.rating && Number(selectedLabour.rating) > 0 ? selectedLabour.rating : <span className="text-muted">No Ratings Yet</span>}</div>
+              <div className="mb-2"><strong>Ratings Count: </strong> {selectedLabour?.ratingCount && Number(selectedLabour.ratingCount) > 0 ? selectedLabour.ratingCount : 0}</div>
+            </Card.Body>
+          </Card>
         </ModalBody>
         <ModalFooter>
           <Button color="secondary" onClick={toggleLabourModal}>Close</Button>
@@ -680,9 +709,14 @@ function AdminDashboard() {
       <Modal isOpen={userModalOpen} toggle={toggleUserModal} size="lg">
         <ModalHeader toggle={toggleUserModal}>User Details (ID: {selectedUser?.userId})</ModalHeader>
         <ModalBody>
-          <p><strong>Name:</strong> {selectedUser?.fullName}</p>
-          <p><strong>Mobile:</strong> {selectedUser?.mobileNumber}</p>
-          <p><strong>Email:</strong> {selectedUser?.email}</p>
+          <Card className="shadow-sm border-0 p-3">
+            <Card.Body>
+              <h4 className="mb-3 text-primary">User Details</h4>
+              <div className="mb-2"><strong>Name: </strong> {selectedUser?.fullName}</div>
+              <div className="mb-2"><strong>Mobile: </strong> <span className="badge bg-info">{selectedUser?.mobileNumber}</span></div>
+              <div className="mb-2"><strong>Email: </strong> <span className="badge bg-info text-dark">{selectedUser?.email}</span></div>
+            </Card.Body>
+          </Card>
         </ModalBody>
         <ModalFooter>
           <Button color="secondary" onClick={toggleUserModal}>Close</Button>

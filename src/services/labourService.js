@@ -54,5 +54,33 @@ export const labourService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  registerLabour: async (labourData, otp) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/registerLabour?otp=${otp}`, labourData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  loginLabour: async (mobileNumber, otp) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/auth/labourLogin?mobileNumber=${mobileNumber}&otp=${otp}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  requestOTP: async (mobile, role) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/requestOTP`, { mobile, role });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   }
-}; 
+};
+

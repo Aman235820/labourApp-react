@@ -18,10 +18,11 @@ const LabourDashboard = () => {
     sortBy: 'reviewTime',
     sortOrder: 'desc'
   });
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedDetails = localStorage.getItem('labourDetails');
+    const storedDetails = localStorage.getItem('labour');
     if (!storedDetails) {
       navigate('/labourLogin');
       return;
@@ -31,12 +32,12 @@ const LabourDashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    fetchRequestedServices();
+    fetchRequestedServices(true);
   }, [labourDetails]);
 
-  const fetchRequestedServices = async () => {
+  const fetchRequestedServices = async (initial = false) => {
     try {
-      setIsLoading(true);
+      if (initial) setIsLoading(true);
       const response = await labourService.getRequestedServices(labourDetails?.labourId);
       
       if (response && response.returnValue) {
@@ -45,12 +46,13 @@ const LabourDashboard = () => {
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
-      setIsLoading(false);
+      if (initial) setIsLoading(false);
     }
   };
 
   const handleStatusUpdate = async (bookingId, newStatus) => {
     try {
+      setStatusUpdatingId(bookingId);
       const response = await labourService.updateBookingStatus(
         labourDetails.labourId,
         bookingId,
@@ -58,12 +60,13 @@ const LabourDashboard = () => {
       );
 
       if (response && response.returnValue) {
-        // Refresh the services list after successful update
-        await fetchRequestedServices();
+        await fetchRequestedServices(false);
       }
     } catch (error) {
       console.error('Error updating service status:', error);
       setError('Failed to update service status');
+    } finally {
+      setStatusUpdatingId(null);
     }
   };
 
@@ -76,7 +79,7 @@ const LabourDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('labourDetails');
+    localStorage.removeItem('labour');
     navigate('/labourLogin');
   };
 
@@ -175,6 +178,20 @@ const LabourDashboard = () => {
                   <FaTools className="info-icon" />
                   <span>{labourDetails.labourSkill}</span>
                 </div>
+                {Array.isArray(labourDetails.labourSubSkills) && labourDetails.labourSubSkills.length > 0 && (
+                  <div className="info-item mb-3 p-3 bg-light rounded shadow-sm">
+                    <div className="mb-2" style={{ fontWeight: 600, fontSize: '1rem', color: '#0d6efd' }}>
+                      <FaTools className="me-2 text-primary" />Sub Skills
+                    </div>
+                    <div className="d-flex flex-wrap gap-2">
+                      {labourDetails.labourSubSkills.map((sub, idx) => (
+                        <span key={sub.subSkillId || idx} className="badge bg-info text-dark mb-1" style={{ fontSize: '0.97em', padding: '0.5em 1em', borderRadius: '1em' }}>
+                          {sub.subSkillName}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="info-item">
                   <FaStar className="rating-star" />
                   <span>{labourDetails.rating || 0} ({labourDetails.ratingCount || 0} ratings)</span>
@@ -209,31 +226,31 @@ const LabourDashboard = () => {
                   <div className="col-md-4">
                     <div className="stat-card p-3 bg-light rounded shadow-sm">
                       <h6 className="text-dark mb-2 fw-bold">Total Bookings</h6>
-                      <h4 className="mb-0 text-primary fw-bold">{requestedServices.length}</h4>
+                      <h4 className="mb-0 text-primary fw-bold">{(requestedServices || []).length}</h4>
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="stat-card p-3 bg-light rounded shadow-sm">
                       <h6 className="text-dark mb-2 fw-bold">Accepted Bookings</h6>
-                      <h4 className="mb-0 text-success fw-bold">{requestedServices.filter(service => service.bookingStatusCode === 2).length}</h4>
+                      <h4 className="mb-0 text-success fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === 2).length}</h4>
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="stat-card p-3 bg-light rounded shadow-sm">
                       <h6 className="text-dark mb-2 fw-bold">Completed Bookings</h6>
-                      <h4 className="mb-0 text-info fw-bold">{requestedServices.filter(service => service.bookingStatusCode === 3).length}</h4>
+                      <h4 className="mb-0 text-info fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === 3).length}</h4>
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="stat-card p-3 bg-light rounded shadow-sm">
                       <h6 className="text-dark mb-2 fw-bold">Rejected Bookings</h6>
-                      <h4 className="mb-0 text-danger fw-bold">{requestedServices.filter(service => service.bookingStatusCode === -1).length}</h4>
+                      <h4 className="mb-0 text-danger fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === -1).length}</h4>
                     </div>
                   </div>
                   <div className="col-md-4">
                     <div className="stat-card p-3 bg-light rounded shadow-sm">
                       <h6 className="text-dark mb-2 fw-bold">Pending Bookings</h6>
-                      <h4 className="mb-0 text-warning fw-bold">{requestedServices.filter(service => service.bookingStatusCode === 1).length}</h4>
+                      <h4 className="mb-0 text-warning fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === 1).length}</h4>
                     </div>
                   </div>
                 </div>
@@ -253,11 +270,11 @@ const LabourDashboard = () => {
                   <h5 className="card-title mb-0">Pending Actions</h5>
                 </div>
                 <Badge bg="warning" className="pending-count">
-                  {requestedServices.filter(service => service.bookingStatusCode !== 3).length} Pending
+                  {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).length} Pending
                 </Badge>
               </div>
 
-              {requestedServices.filter(service => service.bookingStatusCode !== 3).length > 0 ? (
+              {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).length > 0 ? (
                 <div className="table-responsive">
                   <Table hover className="align-middle pending-table">
                     <thead>
@@ -272,59 +289,61 @@ const LabourDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {requestedServices
-                        .filter(service => service.bookingStatusCode !== 3)
-                        .map((service) => (
-                          <tr key={service.bookingId}>
-                            <td className="fw-bold">#{service.bookingId}</td>
-                            <td>{service.userName || 'Anonymous'}</td>
-                            <td>{service.labourSkill}</td>
-                            <td>{service.userMobileNumber}</td>
-                            <td>{formatDate(service.bookingTime)}</td>
-                            <td>{getStatusBadge(service.bookingStatusCode)}</td>
-                            <td>
-                              {service.bookingStatusCode === 1 && (
-                                <div className="d-flex gap-2">
-                                  <Button 
-                                    variant="success" 
-                                    size="sm"
-                                    onClick={() => handleStatusUpdate(service.bookingId, 2)}
-                                  >
-                                    Accept
-                                  </Button>
-                                  <Button 
-                                    variant="danger" 
-                                    size="sm"
-                                    onClick={() => handleStatusUpdate(service.bookingId, -1)}
-                                  >
-                                    Reject
-                                  </Button>
-                                </div>
-                              )}
-                              {service.bookingStatusCode === 2 && (
-                                <Button 
-                                  variant="primary" 
-                                  size="sm"
-                                  onClick={() => handleStatusUpdate(service.bookingId, 3)}
-                                >
-                                  Mark Complete
-                                </Button>
-                              )}
-                              {service.bookingStatusCode === -1 && (
+                      {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).map((service) => (
+                        <tr key={service.bookingId}>
+                          <td className="fw-bold">#{service.bookingId}</td>
+                          <td>{service.userName || 'Anonymous'}</td>
+                          <td>{service.labourSkill}</td>
+                          <td>{service.userMobileNumber}</td>
+                          <td>{formatDate(service.bookingTime)}</td>
+                          <td>{getStatusBadge(service.bookingStatusCode)}</td>
+                          <td>
+                            {service.bookingStatusCode === 1 && (
+                              <div className="d-flex gap-2">
                                 <Button 
                                   variant="success" 
                                   size="sm"
                                   onClick={() => handleStatusUpdate(service.bookingId, 2)}
+                                  disabled={statusUpdatingId === service.bookingId}
                                 >
-                                  Accept Again
+                                  {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Accept'}
                                 </Button>
-                              )}
-                              {service.bookingStatusCode === 3 && (
-                                <span className="text-muted">Completed</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                                <Button 
+                                  variant="danger" 
+                                  size="sm"
+                                  onClick={() => handleStatusUpdate(service.bookingId, -1)}
+                                  disabled={statusUpdatingId === service.bookingId}
+                                >
+                                  {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Reject'}
+                                </Button>
+                              </div>
+                            )}
+                            {service.bookingStatusCode === 2 && (
+                              <Button 
+                                variant="primary" 
+                                size="sm"
+                                onClick={() => handleStatusUpdate(service.bookingId, 3)}
+                                disabled={statusUpdatingId === service.bookingId}
+                              >
+                                {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Mark Complete'}
+                              </Button>
+                            )}
+                            {service.bookingStatusCode === -1 && (
+                              <Button 
+                                variant="success" 
+                                size="sm"
+                                onClick={() => handleStatusUpdate(service.bookingId, 2)}
+                                disabled={statusUpdatingId === service.bookingId}
+                              >
+                                {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Accept Again'}
+                              </Button>
+                            )}
+                            {service.bookingStatusCode === 3 && (
+                              <span className="text-muted">Completed</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </Table>
                 </div>
@@ -371,9 +390,9 @@ const LabourDashboard = () => {
                 </div>
               </div>
 
-              {reviews.length > 0 ? (
+              {(reviews || []).length > 0 ? (
                 <div className="reviews-list">
-                  {reviews.map((review, index) => (
+                  {(reviews || []).map((review, index) => (
                     <div key={index} className="review-item p-3 mb-3 bg-light rounded shadow-sm">
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <div className="d-flex align-items-center">
@@ -433,7 +452,7 @@ const LabourDashboard = () => {
                 </div>
                 <Button 
                   variant="outline-primary" 
-                  onClick={fetchRequestedServices}
+                  onClick={() => fetchRequestedServices(true)}
                   disabled={isLoading}
                   className="refresh-btn"
                 >
@@ -454,7 +473,7 @@ const LabourDashboard = () => {
                 </div>
               )}
 
-              {requestedServices.length > 0 ? (
+              {(requestedServices || []).length > 0 ? (
                 <div className="table-responsive">
                   <Table hover className="align-middle booking-table">
                     <thead>
@@ -468,7 +487,7 @@ const LabourDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {requestedServices.map((service) => (
+                      {(requestedServices || []).map((service) => (
                         <tr key={service.bookingId}>
                           <td className="fw-bold">#{service.bookingId}</td>
                           <td>{service.userName || 'Anonymous'}</td>
