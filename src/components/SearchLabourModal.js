@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import DataTable from "react-data-table-component";
-import { FaStar, FaPhone, FaTools, FaComments } from 'react-icons/fa';
+import { FaStar, FaPhone, FaTools } from 'react-icons/fa';
 import { bookLabour } from '../services/BookingService';
+import { labourService } from '../services/labourService';
+import LabourDetailsModal from './LabourDetailsModal';
 
 const SearchLabourModal = ({ 
     show, 
@@ -14,34 +16,34 @@ const SearchLabourModal = ({
     userId,
     userMobileNumber
 }) => {
-    const [selectedLabour, setSelectedLabour] = useState(null);
-    const [showReviews, setShowReviews] = useState(false);
     const [bookingStatus, setBookingStatus] = useState(null);
     const [isBooking, setIsBooking] = useState(false);
+    const [selectedLabourDetails, setSelectedLabourDetails] = useState(null);
+    const [showLabourDetails, setShowLabourDetails] = useState(false);
+    const [loadingLabourDetails, setLoadingLabourDetails] = useState(false);
+    const [labourDetailsError, setLabourDetailsError] = useState('');
 
-    const handleViewReviews = (labour) => {
-        setSelectedLabour(labour);
-        setShowReviews(true);
-    };
+    // Auto-dismiss success message after 3 seconds
+    useEffect(() => {
+        if (bookingStatus && bookingStatus.type === 'success') {
+            const timer = setTimeout(() => setBookingStatus(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [bookingStatus]);
 
     const handleBookLabour = async (labour) => {
         try {
             setIsBooking(true);
             setBookingStatus(null);
-
-            // Get user data from localStorage
             const storedUser = localStorage.getItem('user');
             if (!storedUser) {
                 throw new Error('User data not found. Please login again.');
             }
             const userData = JSON.parse(storedUser);
-
-            // Prepare booking data with only userId and labourId
             const bookingData = {
                 userId: userData.userId,
                 labourId: labour.labourId,
             };
-
             const response = await bookLabour(bookingData);
             setBookingStatus({
                 type: 'success',
@@ -74,6 +76,23 @@ const SearchLabourModal = ({
         );
     };
 
+    // Use external LabourDetailsModal
+    const handleRowClicked = async (row) => {
+        setLoadingLabourDetails(true);
+        setLabourDetailsError('');
+        setSelectedLabourDetails(null);
+        try {
+            const data = await labourService.getLabourById(row.labourId);
+            setSelectedLabourDetails(data);
+            setShowLabourDetails(true);
+        } catch (err) {
+            setLabourDetailsError(err.message || 'Failed to fetch labour details.');
+            setShowLabourDetails(true);
+        } finally {
+            setLoadingLabourDetails(false);
+        }
+    };
+
     const columns = [
         {
             name: 'Name',
@@ -98,7 +117,9 @@ const SearchLabourModal = ({
             cell: row => (
                 <div className="d-flex align-items-center">
                     <FaStar className="text-warning me-2" />
-                    {row.rating} ({row.ratingCount} reviews)
+                    {row.rating && parseFloat(row.rating) > 0
+                        ? `${row.rating} (${row.ratingCount} reviews)`
+                        : 'No Ratings Yet'}
                 </div>
             ),
         },
@@ -124,15 +145,6 @@ const SearchLabourModal = ({
             cell: row => (
                 <div>
                     <Button 
-                        variant="primary" 
-                        size="sm" 
-                        className="me-2"
-                        onClick={() => handleViewReviews(row)}
-                    >
-                        <FaComments className="me-1" />
-                        Reviews
-                    </Button>
-                    <Button 
                         variant="outline-primary" 
                         size="sm"
                         onClick={() => handleBookLabour(row)}
@@ -155,55 +167,17 @@ const SearchLabourModal = ({
         rows: {
             style: {
                 minHeight: '72px',
+                borderRadius: '8px',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                transition: 'background 0.2s, box-shadow 0.2s, font-weight 0.2s',
+            },
+            highlightOnHoverStyle: {
+                backgroundColor: '#cce3ff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(0,123,255,0.18)',
+                fontWeight: 'bold',
             },
         },
-    };
-
-    const ReviewsModal = ({ show, onHide, labour }) => {
-        if (!labour) return null;
-
-        return (
-            <Modal show={show} onHide={onHide} size="lg">
-                <ModalHeader closeButton>
-                    <Modal.Title>Reviews for {labour.labourName}</Modal.Title>
-                </ModalHeader>
-                <ModalBody>
-                    <div className="mb-4">
-                        <h5>Overall Rating</h5>
-                        <div className="d-flex align-items-center">
-                            <FaStar className="text-warning me-2" size={24} />
-                            <span className="h4 mb-0">{labour.rating}</span>
-                            <span className="text-muted ms-2">({labour.ratingCount} reviews)</span>
-                        </div>
-                    </div>
-                    <div className="reviews-list">
-                        {labour.reviews.map((review, index) => (
-                            <Card key={index} className="mb-3">
-                                <Card.Body>
-                                    <div className="d-flex justify-content-between align-items-center mb-2">
-                                        <div className="d-flex align-items-center">
-                                            <FaStar className="text-warning me-2" />
-                                            <span>{review.rating}</span>
-                                        </div>
-                                        {review.reviewTime && (
-                                            <small className="text-muted">
-                                                {new Date(review.reviewTime).toLocaleDateString()}
-                                            </small>
-                                        )}
-                                    </div>
-                                    <p className="mb-0">{review.review}</p>
-                                </Card.Body>
-                            </Card>
-                        ))}
-                    </div>
-                </ModalBody>
-                <ModalFooter>
-                    <Button variant="secondary" onClick={onHide}>
-                        Close
-                    </Button>
-                </ModalFooter>
-            </Modal>
-        );
     };
 
     return (
@@ -247,6 +221,7 @@ const SearchLabourModal = ({
                                 <p className="text-muted mb-0">No results found</p>
                             </div>
                         }
+                        onRowClicked={handleRowClicked}
                     />
                 </ModalBody>
                 <ModalFooter>
@@ -256,10 +231,10 @@ const SearchLabourModal = ({
                 </ModalFooter>
             </Modal>
 
-            <ReviewsModal 
-                show={showReviews} 
-                onHide={() => setShowReviews(false)} 
-                labour={selectedLabour}
+            <LabourDetailsModal
+                show={showLabourDetails}
+                onHide={() => setShowLabourDetails(false)}
+                selectedLabour={selectedLabourDetails}
             />
         </>
     );

@@ -12,18 +12,27 @@ const api = axios.create({
     withCredentials: true // This is important for CORS
 });
 
-export const registerUser = async (userData) => {
+export const registerUser = async (userData, otp) => {
     try {
-        const response = await api.post('/user/registerUser', userData);
+        const response = await api.post(`/auth/registerUser?otp=${otp}`, userData);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
     }
 };
 
-export const loginUser = async (credentials) => {
+export const loginUser = async ({ mobileNumber, otp }) => {
     try {
-        const response = await api.post('/user/userLogin', credentials);
+        const response = await api.post(`/auth/userLogin?otp=${otp}`, { mobileNumber });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+export const requestOTP = async (mobile, role) => {
+    try {
+        const response = await api.post('/auth/requestOTP', { mobile, role });
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;

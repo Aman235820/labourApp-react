@@ -42,7 +42,6 @@ const UserHome = () => {
             return;
         }
 
-        console.log(`Searching for category: ${searchCategory}`);
 
         try {
             setIsLoading(true);
@@ -88,7 +87,7 @@ const UserHome = () => {
                         <div className="d-flex align-items-center">
                             <span className="me-3">
                                 <FaUser className="me-2" />
-                                {userData?.name}
+                                {userData?.fullName}
                             </span>
                             <Button 
                                 variant="outline-danger" 

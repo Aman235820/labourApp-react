@@ -45,5 +45,14 @@ export const labourService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  getLabourById: async (labourId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/labourReq/getLabourById/${labourId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 }; 
