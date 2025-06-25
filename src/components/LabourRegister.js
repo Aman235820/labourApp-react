@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Card, Alert, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
-import { FaUser, FaTools, FaPhone, FaKey } from 'react-icons/fa';
+import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import Select from 'react-select';
 import '../styles/LabourRegister.css';
 
@@ -22,6 +22,7 @@ function LabourRegister() {
   const [isLoading, setIsLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [showOtp, setShowOtp] = useState(false);
 
   useEffect(() => {
     // Fetch services data
@@ -123,12 +124,14 @@ function LabourRegister() {
                 <p className="text-muted">Join InstaLab as a skilled professional</p>
               </div>
               {error && (
-                <div className="alert alert-danger" role="alert">
+                <div className="alert alert-danger d-flex align-items-center" role="alert">
+                  <FaExclamationCircle className="me-2" />
                   {error}
                 </div>
               )}
               {success && (
-                <div className="alert alert-success" role="alert">
+                <div className="alert alert-success d-flex align-items-center" role="alert">
+                  <FaCheckCircle className="me-2" />
                   {success}
                 </div>
               )}
@@ -240,21 +243,31 @@ function LabourRegister() {
                     <FaKey className="me-2" />
                     <Form.Label className="fw-bold mb-0">OTP</Form.Label>
                   </div>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="form-control-lg"
-                    maxLength="6"
-                    required
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showOtp ? "text" : "password"}
+                      placeholder="Enter OTP"
+                      value={otp}
+                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="form-control-lg"
+                      maxLength="6"
+                      required
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      type="button"
+                      onClick={() => setShowOtp(v => !v)}
+                      tabIndex={-1}
+                    >
+                      {showOtp ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </InputGroup>
                 </Form.Group>
                 <div className="d-grid gap-2">
                   <Button 
                     variant="primary" 
                     type="submit" 
-                    className="btn-lg fw-bold"
+                    className="btn-lg fw-bold d-flex align-items-center justify-content-center"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -270,7 +283,9 @@ function LabourRegister() {
                         Creating Account...
                       </>
                     ) : (
-                      'Create Account'
+                      <>
+                        Create Account <FaArrowRight className="ms-2" />
+                      </>
                     )}
                   </Button>
                 </div>

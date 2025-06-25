@@ -3,7 +3,7 @@ import { Form, Button, Container, Row, Col, Card, Spinner, InputGroup } from 're
 import { useForm } from 'react-hook-form';
 import { loginUser, requestOTP } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
-import { FaPhone, FaKey } from 'react-icons/fa';
+import { FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors }, getValues } = useForm();
@@ -12,6 +12,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [otpStatus, setOtpStatus] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
+    const [showOtp, setShowOtp] = useState(false);
 
     const onSubmit = async (data) => {
         try {
@@ -66,7 +67,8 @@ const Login = () => {
                             </div>
 
                             {error && (
-                                <div className="alert alert-danger" role="alert">
+                                <div className="alert alert-danger d-flex align-items-center" role="alert">
+                                    <FaExclamationCircle className="me-2" />
                                     {error}
                                 </div>
                             )}
@@ -121,19 +123,29 @@ const Login = () => {
                                         <FaKey className="me-2" />
                                         <Form.Label className="fw-bold mb-0">OTP</Form.Label>
                                     </div>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter OTP"
-                                        className={`form-control-lg ${errors.otp ? 'is-invalid' : ''}`}
-                                        {...register('otp', {
-                                            required: 'OTP is required',
-                                            pattern: {
-                                                value: /^[0-9]{4,6}$/,
-                                                message: 'Please enter a valid 4 to 6-digit OTP'
-                                            }
-                                        })}
-                                        maxLength="6"
-                                    />
+                                    <InputGroup>
+                                        <Form.Control
+                                            type={showOtp ? "text" : "password"}
+                                            placeholder="Enter OTP"
+                                            className={`form-control-lg ${errors.otp ? 'is-invalid' : ''}`}
+                                            {...register('otp', {
+                                                required: 'OTP is required',
+                                                pattern: {
+                                                    value: /^[0-9]{4,6}$/,
+                                                    message: 'Please enter a valid 4 to 6-digit OTP'
+                                                }
+                                            })}
+                                            maxLength="6"
+                                        />
+                                        <Button
+                                            variant="outline-secondary"
+                                            type="button"
+                                            onClick={() => setShowOtp(v => !v)}
+                                            tabIndex={-1}
+                                        >
+                                            {showOtp ? <FaEyeSlash /> : <FaEye />}
+                                        </Button>
+                                    </InputGroup>
                                     {errors.otp && (
                                         <Form.Text className="text-danger">
                                             {errors.otp.message}
@@ -145,7 +157,7 @@ const Login = () => {
                                     <Button
                                         variant="primary"
                                         type="submit"
-                                        className="btn-lg fw-bold"
+                                        className="btn-lg fw-bold d-flex align-items-center justify-content-center"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -161,7 +173,9 @@ const Login = () => {
                                                 Signing In...
                                             </>
                                         ) : (
-                                            'Sign In'
+                                            <>
+                                                Sign In <FaArrowRight className="ms-2" />
+                                            </>
                                         )}
                                     </Button>
                                 </div>

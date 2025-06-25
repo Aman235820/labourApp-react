@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, InputGroup, Spinner } from 'react-bootstrap';
-import { FaUser, FaPhone, FaKey } from 'react-icons/fa';
+import { FaUser, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import { labourService } from '../services/labourService';
 import { useNavigate } from 'react-router-dom';
 import '../styles/LabourLogin.css';
@@ -12,6 +12,7 @@ function LabourLogin() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
   const navigate = useNavigate();
 
   const handleRequestOTP = async () => {
@@ -71,7 +72,8 @@ function LabourLogin() {
                 <p className="text-muted">Enter your mobile number to access your account</p>
               </div>
               {error && (
-                <Alert variant="danger" className="mb-4">
+                <Alert variant="danger" className="mb-4 d-flex align-items-center">
+                  <FaExclamationCircle className="me-2" />
                   {error}
                 </Alert>
               )}
@@ -112,20 +114,30 @@ function LabourLogin() {
                     <FaKey className="me-2" />
                     OTP
                   </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="py-2"
-                    maxLength="6"
-                    required
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showOtp ? "text" : "password"}
+                      placeholder="Enter OTP"
+                      value={otp}
+                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="py-2"
+                      maxLength="6"
+                      required
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      type="button"
+                      onClick={() => setShowOtp(v => !v)}
+                      tabIndex={-1}
+                    >
+                      {showOtp ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </InputGroup>
                 </Form.Group>
                 <Button
                   variant="primary"
                   type="submit"
-                  className="w-100 py-2"
+                  className="w-100 py-2 d-flex align-items-center justify-content-center"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -141,7 +153,9 @@ function LabourLogin() {
                       Logging in...
                     </>
                   ) : (
-                    'Login'
+                    <>
+                      Login <FaArrowRight className="ms-2" />
+                    </>
                   )}
                 </Button>
               </Form>
