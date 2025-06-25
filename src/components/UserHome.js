@@ -5,6 +5,7 @@ import { FaUser, FaSignOutAlt, FaTools, FaHistory, FaBell, FaSearch } from 'reac
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import SearchLabourModal from './SearchLabourModal';
 import ViewBookingsModal from './ViewBookingsModal';
+import { deleteUser } from '../services/userService';
 
 const UserHome = () => {
     const navigate = useNavigate();
@@ -77,6 +78,22 @@ const UserHome = () => {
         navigate('/login');
     };
 
+    const handleDeleteAccount = async () => {
+        if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+        try {
+            setIsLoading(true);
+            await deleteUser(userData.userId);
+            localStorage.removeItem('user');
+            localStorage.removeItem('rememberedEmail');
+            alert('Your account has been deleted.');
+            navigate('/login');
+        } catch (err) {
+            alert('Failed to delete account. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Container fluid className="px-4 py-3">
             {/* Header Section */}
@@ -96,6 +113,14 @@ const UserHome = () => {
                             >
                                 <FaSignOutAlt className="me-2" />
                                 Logout
+                            </Button>
+                            <Button 
+                                variant="danger" 
+                                onClick={handleDeleteAccount}
+                                className="d-flex align-items-center ms-2"
+                                disabled={isLoading}
+                            >
+                                Delete Account
                             </Button>
                         </div>
                     </div>

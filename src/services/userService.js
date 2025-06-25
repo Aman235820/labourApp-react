@@ -37,4 +37,13 @@ export const requestOTP = async (mobile, role) => {
     } catch (error) {
         throw error.response?.data || error.message;
     }
+};
+
+export const deleteUser = async (userId) => {
+    try {
+        const response = await api.delete(`/admin/removeUser/${userId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
 }; 

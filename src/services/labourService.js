@@ -81,6 +81,15 @@ export const labourService = {
     } catch (error) {
       throw error.response?.data || error.message;
     }
+  },
+
+  deleteLabour: async (labourId) => {
+    try {
+      const response = await axios.delete(`${BASE_URL}/admin/removeLabour/${labourId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   }
 };
 

@@ -83,6 +83,21 @@ const LabourDashboard = () => {
     navigate('/labourLogin');
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+    try {
+      setIsLoading(true);
+      await labourService.deleteLabour(labourDetails.labourId);
+      localStorage.removeItem('labour');
+      alert('Your account has been deleted.');
+      navigate('/labourLogin');
+    } catch (err) {
+      alert('Failed to delete account. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getStatusBadge = (statusCode) => {
     switch (statusCode) {
       case -1:
@@ -197,6 +212,14 @@ const LabourDashboard = () => {
                   <span>{labourDetails.rating || 0} ({labourDetails.ratingCount || 0} ratings)</span>
                 </div>
               </div>
+              <Button
+                variant="danger"
+                className="d-flex align-items-center w-100 mt-3"
+                onClick={handleDeleteAccount}
+                disabled={isLoading}
+              >
+                Delete Account
+              </Button>
             </Card.Body>
           </Card>
         </Col>

@@ -237,7 +237,11 @@ function Home() {
   };
 
   const handleServiceClick = (service) => {
-    setSelectedService(service);
+    if (selectedService && selectedService.name === service.name) {
+      setSelectedService(null); // Close if already open
+    } else {
+      setSelectedService(service); // Open if not open
+    }
   };
 
   const handleSubserviceClick = async (sub) => {
