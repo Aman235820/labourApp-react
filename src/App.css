@@ -25,6 +25,41 @@ body {
   background-color: #f5f5f5;
 }
 
+/* App Container Layout */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 70px; /* Reduced for compact navbar */
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Desktop layout */
+@media (min-width: 992px) {
+  .main-content {
+    margin-left: 280px;
+  }
+  
+  .main-content.sidebar-closed {
+    margin-left: 70px;
+  }
+}
+
+/* Mobile layout */
+@media (max-width: 991.98px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .main-content.sidebar-closed {
+    margin-left: 0;
+  }
+}
+
 .app {
   min-height: 100vh;
   display: flex;

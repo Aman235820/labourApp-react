@@ -1,7 +1,8 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 import Navigation from './components/Navigation';
+import Sidebar from './components/Sidebar';
 import LocationService from './services/LocationService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -33,6 +34,26 @@ const LoadingFallback = () => (
 );
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile and manage sidebar state
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 992;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarOpen(false); // Start closed on mobile
+      } else {
+        setSidebarOpen(true); // Start open on desktop
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Move geolocation request to a user-triggered event
   const requestLocation = () => {
     if (navigator.geolocation) {
@@ -49,20 +70,33 @@ function App() {
 
   return (
     <Router future={{ v7_startTransition: true }}>
-      <Navigation />
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-        <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/userHome" element={<UserHome />} />
-            <Route path="/labour/:labourId" element={<LabourProfile />} />
-            <Route path="/labourLogin" element={<LabourLogin />} />
-            <Route path="/labourRegister" element={<LabourRegister />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/labourDashboard" element={<LabourDashboard />} />
-        </Routes>
-      </Suspense>
+      <div className="app-container">
+        <Navigation 
+          sidebarOpen={sidebarOpen}
+          setIsOpen={setSidebarOpen}
+          isMobile={isMobile}
+        />
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          setIsOpen={setSidebarOpen}
+          isMobile={isMobile}
+        />
+        <div className={`main-content ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+            <Route path="/" element={<Home />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/userHome" element={<UserHome />} />
+                <Route path="/labour/:labourId" element={<LabourProfile />} />
+                <Route path="/labourLogin" element={<LabourLogin />} />
+                <Route path="/labourRegister" element={<LabourRegister />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/labourDashboard" element={<LabourDashboard />} />
+            </Routes>
+          </Suspense>
+        </div>
+      </div>
     </Router>
   );
 }
