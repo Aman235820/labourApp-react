@@ -20,6 +20,10 @@ const Login = () => {
             const response = await loginUser({ mobileNumber: data.mobileNumber, otp: data.otp });
             if (response.token && response.returnValue) {
                 localStorage.setItem('user', JSON.stringify({ ...response.returnValue, token: response.token }));
+                
+                // Dispatch custom event to notify sidebar about login status change
+                window.dispatchEvent(new Event('userLoginStatusChanged'));
+                
                 navigate('/userHome');
             } else {
                 setError('Login failed. Please try again.');

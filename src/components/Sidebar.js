@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Nav, Container, Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -14,13 +14,56 @@ import {
   FaClipboardList,
   FaUserShield,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
+  FaSignOutAlt
 } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 
 function Sidebar({ isOpen, setIsOpen, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkUserLoginStatus = () => {
+      const userData = localStorage.getItem('user');
+      
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          
+          if (parsedUser && parsedUser.token) {
+            setIsUserLoggedIn(true);
+            setUserData(parsedUser);
+          } else {
+            setIsUserLoggedIn(false);
+            setUserData(null);
+          }
+        } catch (error) {
+          setIsUserLoggedIn(false);
+          setUserData(null);
+        }
+      } else {
+        setIsUserLoggedIn(false);
+        setUserData(null);
+      }
+    };
+
+    checkUserLoginStatus();
+    
+    // Listen for storage changes (works across tabs)
+    window.addEventListener('storage', checkUserLoginStatus);
+    
+    // Listen for custom events (for same tab changes)
+    window.addEventListener('userLoginStatusChanged', checkUserLoginStatus);
+    
+    return () => {
+      window.removeEventListener('storage', checkUserLoginStatus);
+      window.removeEventListener('userLoginStatusChanged', checkUserLoginStatus);
+    };
+  }, []);
 
   const closeSidebar = () => {
     if (isMobile) {
@@ -57,6 +100,25 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
       // User is not logged in, navigate to login page
       navigate('/login');
     }
+  };
+
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('rememberedEmail');
+    
+    // Dispatch custom event to notify about logout
+    window.dispatchEvent(new Event('userLoginStatusChanged'));
+    
+    // Update state
+    setIsUserLoggedIn(false);
+    setUserData(null);
+    
+    // Close sidebar
+    closeSidebar();
+    
+    // Navigate to home page
+    navigate('/');
   };
 
   return (
@@ -195,6 +257,29 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             </Nav.Link>
           </div>
         </Nav>
+
+        {/* Logout Section - Only show if user is logged in */}
+        {isUserLoggedIn && (
+          <div className="sidebar-logout-section">
+            {isOpen && (
+              <div className="user-info">
+                <p className="text-muted small mb-2">
+                  Logged in as: <strong>{userData?.name || 'Customer'}</strong>
+                </p>
+              </div>
+            )}
+            <Button
+              variant="outline-light"
+              size="sm"
+              onClick={handleLogout}
+              className="sidebar-logout-btn"
+              title={!isOpen ? 'Logout' : ''}
+            >
+              <FaSignOutAlt className="me-2" />
+              {isOpen && 'Logout'}
+            </Button>
+          </div>
+        )}
 
         <div className="sidebar-footer">
           {isOpen && (
