@@ -502,10 +502,80 @@ function Home() {
         </style>
       </div>
 
+      {/* Service Images Section */}
+      <div className="service-images-section" style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '2rem',
+        margin: '2rem 0',
+      }}>
+        {[
+          { name: 'Cleaning Services', img: '/images/cleaning1.webp' },
+          { name: 'Electrician', img: '/images/electrician1.jpg' },
+          { name: 'Plumber', img: '/images/plumber1.webp' },
+          { name: 'Painter', img: '/images/painter1.webp' },
+          { name: 'Pest Control', img: '/images/pestcontrol1.jpeg' },
+          { name: 'Logistics', img: '/images/logistics1.webp' },
+          { name: 'Personal Care', img: '/images/personalcare1.jpg' },
+          { name: 'Carpenter', img: '/images/carpenter1.jpg' },
+          { name: 'Home Appliance Repair', img: '/images/homeappliance1.jpg' },
+          { name: 'Construction & Civil Work', img: '/images/construction1.jpg' },
+          { name: 'Vehicle Services', img: '/images/mechanic1.jpg' },
+          { name: 'Farm & Rural Services', img: '/images/farm1.jpg' },
+        ].map(serviceCard => (
+          <div key={serviceCard.name} style={{
+            width: 180,
+            textAlign: 'center',
+            background: '#fff',
+            borderRadius: '1rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+            padding: '1rem',
+            transition: 'transform 0.2s',
+            cursor: 'pointer',
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.04)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+          onClick={() => {
+            // Find the matching service object from the services array
+            const match = services.find(s => s.name === serviceCard.name);
+            if (match) handleServiceClick(match);
+          }}
+          >
+            <img
+              src={serviceCard.img}
+              alt={serviceCard.name}
+              style={{
+                width: '100%',
+                height: 110,
+                objectFit: 'cover',
+                borderRadius: '0.7rem',
+                marginBottom: '0.7rem',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
+              }}
+            />
+            <div style={{ fontWeight: 600, fontSize: 18, color: '#222' }}>{serviceCard.name}</div>
+          </div>
+        ))}
+      </div>
+
       {/* Services & Subservices Section */}
       <div style={{ margin: '1.5rem 0', background: '#f6f8fa', borderRadius: '1rem', padding: '1.5rem 0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1.2rem' }}>
-          {services.map(service => (
+          {services.filter(service => ![
+            'Cleaning Services',
+            'Electrician',
+            'Plumber',
+            'Painter',
+            'Pest Control',
+            'Logistics',
+            'Personal Care',
+            'Carpenter',
+            'Home Appliance Repair',
+            'Construction & Civil Work',
+            'Vehicle Services',
+            'Farm & Rural Services',
+          ].includes(service.name)).map(service => (
             <div
               key={service.name}
               style={{
@@ -532,7 +602,8 @@ function Home() {
               onMouseOver={e => e.currentTarget.style.background = 'rgba(37,99,235,0.07)'}
               onMouseOut={e => e.currentTarget.style.background = selectedService && selectedService.name === service.name ? 'rgba(37,99,235,0.10)' : 'transparent'}
             >
-              <div style={{ fontSize: 28, marginBottom: 2 }}>{service.icon}</div>
+              {/* Only show icon for non-image services */}
+              {/* <div style={{ fontSize: 28, marginBottom: 2 }}>{service.icon}</div> */}
               <div style={{ fontSize: 15, marginTop: 2 }}>{service.name}</div>
             </div>
           ))}
