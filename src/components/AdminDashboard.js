@@ -542,6 +542,20 @@ function AdminDashboard() {
     }
   };
 
+  useEffect(() => {
+    if (uploadSuccess) {
+      const timer = setTimeout(() => setUploadSuccess(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadSuccess]);
+
+  useEffect(() => {
+    if (uploadError) {
+      const timer = setTimeout(() => setUploadError(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadError]);
+
   return (
     <Container fluid className="admin-dashboard">
       <AdminStats />

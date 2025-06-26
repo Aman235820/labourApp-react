@@ -34,7 +34,7 @@ const LoadingFallback = () => (
 );
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Check if device is mobile and manage sidebar state
@@ -42,11 +42,7 @@ function App() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 992;
       setIsMobile(mobile);
-      if (mobile) {
-        setSidebarOpen(false); // Start closed on mobile
-      } else {
-        setSidebarOpen(true); // Start open on desktop
-      }
+      setSidebarOpen(false); // Always start closed
     };
 
     checkMobile();

@@ -653,68 +653,80 @@ function Home() {
         onRowClick={handleLabourListRowClick}
       />
 
-      {/* Navigation Cards Section */}
-      <Row className="navigation-cards mb-5">
-        <Col md={3} className="mb-4">
-          <Card className="nav-card h-100">
-            <Card.Body className="text-center">
-              <FaUserPlus className="nav-icon mb-3" />
-              <h3>Register</h3>
-              <p className="text-muted">Create your account to book services</p>
+      {/* Onboarding CTA Section */}
+      <Row className="cta-section my-5" style={{ gap: '2rem', justifyContent: 'center' }}>
+        <Col md={5} className="mb-4">
+          <Card className="cta-card h-100 shadow" style={{ borderRadius: '1.5rem', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', height: 220 }}>
+              <img
+                src="/images/carpenter1.jpg"
+                alt="Skilled Professional"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                background: 'linear-gradient(90deg, rgba(0,0,0,0.5) 40%, transparent 100%)'
+              }} />
+            </div>
+            <Card.Body>
+              <h2 className="fw-bold mb-2">Skilled Professional?</h2>
+              <p className="mb-3">Join us to grow your business.<br />Register as a service provider and reach more customers.</p>
               <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => navigate('/register')}
-              >
-                Register as User
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3} className="mb-4">
-          <Card className="nav-card h-100">
-            <Card.Body className="text-center">
-              <FaClipboardList className="nav-icon mb-3" />
-              <h3>Labour Register</h3>
-              <p className="text-muted">Join as a service provider</p>
-              <Button
+                style={{
+                  background: 'linear-gradient(90deg, #16a34a 0%, #22d3ee 100%)',
+                  border: 'none',
+                  borderRadius: '2rem',
+                  boxShadow: '0 2px 8px rgba(34,211,238,0.15)',
+                  fontWeight: 700,
+                  fontSize: '1.2rem',
+                  padding: '0.85rem 2.2rem',
+                  transition: 'background 0.2s, transform 0.2s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #22d3ee 0%, #16a34a 100%)'}
+                onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #16a34a 0%, #22d3ee 100%)'}
                 variant="success"
-                className="w-100"
+                size="lg"
                 onClick={() => navigate('/labourRegister')}
               >
-                Register as Labour
+                Join as Professional
               </Button>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3} className="mb-4">
-          <Card className="nav-card h-100">
-            <Card.Body className="text-center">
-              <FaUserCircle className="nav-icon mb-3" />
-              <h3>User Login</h3>
-              <p className="text-muted">Access your account</p>
+        <Col md={5} className="mb-4">
+          <Card className="cta-card h-100 shadow" style={{ borderRadius: '1.5rem', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', height: 220 }}>
+              <img
+                src="/images/cleaning1.webp"
+                alt="Book Service"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                background: 'linear-gradient(90deg, rgba(0,0,0,0.5) 40%, transparent 100%)'
+              }} />
+            </div>
+            <Card.Body>
+              <h2 className="fw-bold mb-2">Want help for household tasks?</h2>
+              <p className="mb-3">Book your service today.<br />Create your account and get instant access to trusted professionals.</p>
               <Button
-                variant="info"
-                className="w-100"
-                onClick={() => navigate('/login')}
+                style={{
+                  background: 'linear-gradient(90deg, #2563eb 0%, #38bdf8 100%)',
+                  border: 'none',
+                  borderRadius: '2rem',
+                  boxShadow: '0 2px 8px rgba(56,189,248,0.15)',
+                  fontWeight: 700,
+                  fontSize: '1.2rem',
+                  padding: '0.85rem 2.2rem',
+                  transition: 'background 0.2s, transform 0.2s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #38bdf8 0%, #2563eb 100%)'}
+                onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #2563eb 0%, #38bdf8 100%)'}
+                variant="primary"
+                size="lg"
+                onClick={() => navigate('/register')}
               >
-                Login as User
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3} className="mb-4">
-          <Card className="nav-card h-100">
-            <Card.Body className="text-center">
-              <FaToolsIcon className="nav-icon mb-3" />
-              <h3>Labour Login</h3>
-              <p className="text-muted">Access your labour account</p>
-              <Button
-                variant="warning"
-                className="w-100"
-                onClick={() => navigate('/labourLogin')}
-              >
-                Login as Labour
+                Join as Customer
               </Button>
             </Card.Body>
           </Card>

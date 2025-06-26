@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col, Card, Spinner, InputGroup } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { registerUser, requestOTP } from '../services/userService';
@@ -13,6 +13,13 @@ const Register = () => {
     const [otpStatus, setOtpStatus] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
     const [showOtp, setShowOtp] = useState(false);
+
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(''), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
 
     const onSubmit = async (data) => {
         try {
