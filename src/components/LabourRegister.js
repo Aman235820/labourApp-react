@@ -46,6 +46,13 @@ function LabourRegister() {
     }
   }, [success]);
 
+  useEffect(() => {
+    if (otpStatus && otpStatus.toLowerCase().includes('success')) {
+      const timer = setTimeout(() => setOtpStatus(''), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpStatus]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({

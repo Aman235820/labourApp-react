@@ -68,6 +68,13 @@ function LabourLogin() {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (otpStatus && otpStatus.toLowerCase().includes('success')) {
+      const timer = setTimeout(() => setOtpStatus(''), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpStatus]);
+
   return (
     <Container className="py-5">
       <Row className="justify-content-center">

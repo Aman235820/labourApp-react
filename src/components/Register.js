@@ -21,6 +21,13 @@ const Register = () => {
         }
     }, [error]);
 
+    useEffect(() => {
+        if (otpStatus && otpStatus.toLowerCase().includes('success')) {
+            const timer = setTimeout(() => setOtpStatus(''), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [otpStatus]);
+
     const onSubmit = async (data) => {
         try {
             setIsLoading(true);

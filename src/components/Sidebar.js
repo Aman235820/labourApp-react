@@ -134,8 +134,14 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="sidebar-header">
-          <h5 className="mb-0">
-            <FaTools className="me-2" />
+          <h5 className="mb-0" style={{ display: 'flex', alignItems: 'center', cursor: !isOpen ? 'pointer' : 'default' }}>
+            <span
+              onClick={() => { if (!isOpen) setIsOpen(true); }}
+              style={{ cursor: !isOpen ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
+              title={!isOpen ? 'Open Sidebar' : ''}
+            >
+              <FaTools className="me-2" />
+            </span>
             {isOpen && 'InstaLab'}
           </h5>
           {isOpen && <p className="text-muted small mb-0">Quick Navigation</p>}

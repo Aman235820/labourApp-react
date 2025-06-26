@@ -39,6 +39,11 @@
 
 .sidebar-closed .sidebar-header h5 {
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
 }
 
 .sidebar-nav {
@@ -80,6 +85,8 @@
 .sidebar-closed .sidebar-link {
   padding: 0.75rem !important;
   justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .sidebar-link:hover {
