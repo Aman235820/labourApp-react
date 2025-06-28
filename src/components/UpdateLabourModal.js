@@ -121,12 +121,38 @@ const UpdateLabourModal = ({ show, onHide, labourDetails, onUpdateSuccess }) => 
         .filter(sub => sub.trim() !== '')
         .map(subSkill => ({ subSkillName: subSkill }));
       
+      // Only include changed values in the update data
       const updateData = {
-        labourId: parseInt(formData.labourId),
-        labourName: formData.labourName,
-        labourSkill: formData.labourSkill,
-        labourSubSkills: filteredSubSkills
+        labourId: parseInt(formData.labourId)
       };
+      
+      // Only add labourName if it changed
+      if (formData.labourName.trim() !== labourDetails.labourName) {
+        updateData.labourName = formData.labourName;
+      }
+      
+      // Only add labourSkill if it changed
+      if (formData.labourSkill !== labourDetails.labourSkill) {
+        updateData.labourSkill = formData.labourSkill;
+      }
+      
+      // Only add labourSubSkills if they changed
+      const originalSubSkills = labourDetails.labourSubSkills || [];
+      const originalSubSkillNames = originalSubSkills.map(sub => 
+        typeof sub === 'string' ? sub : (sub.subSkillName || sub.name || '')
+      ).filter(name => name.trim() !== '');
+      
+      const newSubSkillNames = filteredSubSkills.map(sub => sub.subSkillName);
+      
+      // Check if sub-skills actually changed
+      const subSkillsChanged = originalSubSkillNames.length !== newSubSkillNames.length ||
+        !originalSubSkillNames.every((skill, index) => skill === newSubSkillNames[index]);
+      
+      if (subSkillsChanged) {
+        updateData.labourSubSkills = filteredSubSkills;
+      }
+
+      console.log('Update Data:', updateData);
 
       const response = await labourService.updateLabourDetails(updateData);
       
@@ -134,9 +160,7 @@ const UpdateLabourModal = ({ show, onHide, labourDetails, onUpdateSuccess }) => 
         // Update the local storage with new data
         const updatedLabourDetails = {
           ...labourDetails,
-          labourName: formData.labourName,
-          labourSkill: formData.labourSkill,
-          labourSubSkills: filteredSubSkills
+          ...updateData
         };
         localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
         
@@ -149,10 +173,11 @@ const UpdateLabourModal = ({ show, onHide, labourDetails, onUpdateSuccess }) => 
         onHide();
         alert('Labour details updated successfully!');
       } else {
-        setError(response.message || 'Failed to update labour details');
+        setError('Failed to update labour details. Please try again.');
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while updating labour details');
+      console.error('Update error:', err);
+      setError('An error occurred while updating labour details. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -250,7 +275,7 @@ const UpdateLabourModal = ({ show, onHide, labourDetails, onUpdateSuccess }) => 
           </div>
 
           <Form.Group className="mb-3">
-            <Form.Label>
+            <Form.Label className="fw-bold">
               Sub Skills
               {hasSkillChanged && (
                 <span className="text-danger ms-2">* Required (skill changed)</span>
@@ -258,80 +283,121 @@ const UpdateLabourModal = ({ show, onHide, labourDetails, onUpdateSuccess }) => 
             </Form.Label>
             
             {formData.labourSkill ? (
-              <Select
-                isMulti
-                name="labourSubSkills"
-                options={[
-                  { value: 'all', label: 'Select All' },
-                  ...getSubSkillsForSkill(formData.labourSkill).map(subCategory => ({
+              <div className="sub-skills-container">
+                <Select
+                  isMulti
+                  name="labourSubSkills"
+                  options={[
+                    { value: 'all', label: 'Select All' },
+                    ...getSubSkillsForSkill(formData.labourSkill).map(subCategory => ({
+                      value: subCategory,
+                      label: subCategory
+                    }))
+                  ]}
+                  onChange={handleSubSkillChange}
+                  value={formData.labourSubSkills.map(subCategory => ({
                     value: subCategory,
                     label: subCategory
-                  }))
-                ]}
-                onChange={handleSubSkillChange}
-                value={formData.labourSubSkills.map(subCategory => ({
-                  value: subCategory,
-                  label: subCategory
-                }))}
-                className="basic-multi-select"
-                classNamePrefix="select"
-                placeholder="Select your sub skills"
-                menuPortalTarget={document.body}
-                styles={{
-                  menuPortal: base => ({ 
-                    ...base, 
-                    zIndex: 9999 
-                  }),
-                  menu: base => ({
-                    ...base,
-                    zIndex: 9999,
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px'
-                  }),
-                  control: base => ({
-                    ...base,
-                    minHeight: '38px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    '&:hover': {
-                      borderColor: '#9ca3af'
-                    }
-                  }),
-                  option: base => ({
-                    ...base,
-                    padding: '8px 12px',
-                    '&:hover': {
-                      backgroundColor: '#f3f4f6'
-                    }
-                  }),
-                  multiValue: base => ({
-                    ...base,
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: '4px'
-                  }),
-                  multiValueLabel: base => ({
-                    ...base,
-                    color: '#374151',
-                    fontWeight: '500'
-                  }),
-                  multiValueRemove: base => ({
-                    ...base,
-                    color: '#6b7280',
-                    '&:hover': {
-                      backgroundColor: '#d1d5db',
+                  }))}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  placeholder="Select your sub skills"
+                  menuPortalTarget={document.body}
+                  styles={{
+                    menuPortal: base => ({ 
+                      ...base, 
+                      zIndex: 9999 
+                    }),
+                    menu: base => ({
+                      ...base,
+                      zIndex: 9999,
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      padding: '8px 0',
+                      maxHeight: '300px'
+                    }),
+                    control: base => ({
+                      ...base,
+                      minHeight: '44px',
+                      border: '2px solid #d1d5db',
+                      borderRadius: '8px',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        borderColor: '#9ca3af'
+                      },
+                      '&:focus-within': {
+                        borderColor: '#3b82f6',
+                        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                      }
+                    }),
+                    option: base => ({
+                      ...base,
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      '&:hover': {
+                        backgroundColor: '#f3f4f6'
+                      },
+                      '&:active': {
+                        backgroundColor: '#e5e7eb'
+                      }
+                    }),
+                    multiValue: base => ({
+                      ...base,
+                      backgroundColor: '#3b82f6',
+                      borderRadius: '6px',
+                      margin: '2px'
+                    }),
+                    multiValueLabel: base => ({
+                      ...base,
+                      color: '#ffffff',
+                      fontWeight: '500',
+                      fontSize: '13px',
+                      padding: '4px 8px'
+                    }),
+                    multiValueRemove: base => ({
+                      ...base,
+                      color: '#ffffff',
+                      '&:hover': {
+                        backgroundColor: '#2563eb',
+                        color: '#ffffff'
+                      }
+                    }),
+                    placeholder: base => ({
+                      ...base,
+                      color: '#9ca3af',
+                      fontSize: '14px'
+                    }),
+                    singleValue: base => ({
+                      ...base,
+                      fontSize: '14px',
                       color: '#374151'
-                    }
-                  })
-                }}
-              />
+                    }),
+                    input: base => ({
+                      ...base,
+                      fontSize: '14px'
+                    }),
+                    valueContainer: base => ({
+                      ...base,
+                      padding: '8px 12px'
+                    }),
+                    indicatorsContainer: base => ({
+                      ...base,
+                      paddingRight: '8px'
+                    })
+                  }}
+                />
+              </div>
             ) : (
-              <div className="text-center py-3 bg-light rounded">
-                <p className="text-muted mb-0">Please select a main skill first</p>
+              <div className="text-center py-4 bg-light rounded border">
+                <p className="text-muted mb-0">
+                  <i className="fas fa-info-circle me-2"></i>
+                  Please select a main skill first
+                </p>
               </div>
             )}
             
-            <Form.Text className="text-muted">
+            <Form.Text className="text-muted mt-2">
               {hasSkillChanged 
                 ? 'Please select sub-skills for your new skill'
                 : 'Select sub-skills related to your main skill'

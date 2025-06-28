@@ -183,115 +183,205 @@ const LabourDashboard = () => {
       </Row>
 
       <Row className="mb-4">
-        <Col md={4} className="mb-4">
-          <Card className="h-100 shadow-sm profile-card">
-            <Card.Body className="p-4">
-              <div className="text-center mb-4">
-                <div className="profile-avatar mb-3">
-                  <FaUser className="profile-icon" />
+        <Col lg={5} className="mb-4">
+          <Card className="h-100 shadow-lg profile-card border-0">
+            <Card.Body className="p-5">
+              <div className="text-center mb-5">
+                <div className="profile-avatar mb-4">
+                  <div className="avatar-circle">
+                    <FaUser className="profile-icon" />
+                  </div>
                 </div>
-                <h3 className="mb-1">{labourDetails.labourName}</h3>
-                <p className="text-muted mb-0">ID: {labourDetails.labourId}</p>
+                <h2 className="mb-2 fw-bold text-primary">{labourDetails.labourName}</h2>
+                <p className="text-muted mb-0 fs-6">Labour ID: {labourDetails.labourId}</p>
               </div>
 
               <div className="border-top pt-4">
-                <div className="info-item mb-3">
-                  <FaPhone className="info-icon" />
-                  <span>{labourDetails.labourMobileNo}</span>
-                </div>
-                <div className="info-item mb-3">
-                  <FaTools className="info-icon" />
-                  <span>{labourDetails.labourSkill}</span>
-                </div>
-                {Array.isArray(labourDetails.labourSubSkills) && labourDetails.labourSubSkills.length > 0 && (
-                  <div className="info-item mb-3 p-3 bg-light rounded shadow-sm">
-                    <div className="mb-2" style={{ fontWeight: 600, fontSize: '1rem', color: '#0d6efd' }}>
-                      <FaTools className="me-2 text-primary" />Sub Skills
+                <div className="info-item mb-4">
+                  <div className="d-flex align-items-center p-3 bg-light rounded-3">
+                    <div className="info-icon-wrapper me-3">
+                      <FaPhone className="info-icon" />
                     </div>
-                    <div className="d-flex flex-wrap gap-2">
-                      {labourDetails.labourSubSkills.map((sub, idx) => (
-                        <span key={sub.subSkillId || idx} className="badge bg-info text-dark mb-1" style={{ fontSize: '0.97em', padding: '0.5em 1em', borderRadius: '1em' }}>
-                          {sub.subSkillName}
-                        </span>
-                      ))}
+                    <div>
+                      <small className="text-muted d-block">Mobile Number</small>
+                      <span className="fw-semibold">{labourDetails.labourMobileNo}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="info-item mb-4">
+                  <div className="d-flex align-items-center p-3 bg-light rounded-3">
+                    <div className="info-icon-wrapper me-3">
+                      <FaTools className="info-icon" />
+                    </div>
+                    <div>
+                      <small className="text-muted d-block">Primary Skill</small>
+                      <span className="fw-semibold">{labourDetails.labourSkill}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {Array.isArray(labourDetails.labourSubSkills) && labourDetails.labourSubSkills.length > 0 && (
+                  <div className="info-item mb-4">
+                    <div className="p-3 bg-light rounded-3">
+                      <div className="d-flex align-items-center mb-3">
+                        <div className="info-icon-wrapper me-3">
+                          <FaTools className="info-icon" />
+                        </div>
+                        <div>
+                          <small className="text-muted d-block">Sub Skills</small>
+                          <span className="fw-semibold">Specializations</span>
+                        </div>
+                      </div>
+                      <div className="d-flex flex-wrap gap-2">
+                        {labourDetails.labourSubSkills.map((sub, idx) => (
+                          <span key={sub.subSkillId || idx} className="badge bg-primary text-white" style={{ fontSize: '0.9em', padding: '0.6em 1em', borderRadius: '1.5em' }}>
+                            {sub.subSkillName}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
-                <div className="info-item">
-                  <FaStar className="rating-star" />
-                  <span>{labourDetails.rating || 0} ({labourDetails.ratingCount || 0} ratings)</span>
+                
+                <div className="info-item mb-4">
+                  <div className="d-flex align-items-center p-3 bg-light rounded-3">
+                    <div className="info-icon-wrapper me-3">
+                      <FaStar className="info-icon text-warning" />
+                    </div>
+                    <div>
+                      <small className="text-muted d-block">Rating</small>
+                      <span className="fw-semibold">{labourDetails.rating || 0} ({labourDetails.ratingCount || 0} ratings)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <Button
-                variant="primary"
-                className="d-flex align-items-center w-100 mb-2"
-                onClick={handleUpdateDetails}
-              >
-                <FaEdit className="me-2" />
-                Update Details
-              </Button>
-              <Button
-                variant="danger"
-                className="d-flex align-items-center w-100"
-                onClick={handleDeleteAccount}
-                disabled={isLoading}
-              >
-                Delete Account
-              </Button>
+              
+              <div className="mt-5">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="d-flex align-items-center justify-content-center w-100 mb-3 fw-semibold"
+                  onClick={handleUpdateDetails}
+                >
+                  <FaEdit className="me-2" />
+                  Update Profile Details
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  size="lg"
+                  className="d-flex align-items-center justify-content-center w-100 fw-semibold"
+                  onClick={handleDeleteAccount}
+                  disabled={isLoading}
+                >
+                  Delete Account
+                </Button>
+              </div>
             </Card.Body>
           </Card>
         </Col>
 
-        <Col md={8}>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body className="p-4">
-              <h5 className="card-title mb-4">Rating Overview</h5>
+        <Col lg={7}>
+          <Card className="h-100 shadow-lg stats-card border-0">
+            <Card.Body className="p-5">
+              <h4 className="card-title mb-4 fw-bold text-primary">Rating Overview</h4>
               <div className="rating-overview">
-                <div className="d-flex align-items-center mb-3">
-                  <div className="rating-number me-3">
-                    <h2 className="mb-0 fw-bold">{labourDetails.rating || 0}</h2>
-                    <div className="stars">
-                      {renderStars(labourDetails.rating || 0)}
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="rating-number">
+                      <h1 className="mb-0">{labourDetails.rating || 0}</h1>
+                      <div className="stars">
+                        {renderStars(labourDetails.rating || 0)}
+                      </div>
+                      <small>Overall Rating</small>
                     </div>
                   </div>
-                  <div className="rating-stats">
-                    <p className="mb-1">Total Ratings: {labourDetails.ratingCount || 0}</p>
-                    <p className="mb-0 review-count">Based on {labourDetails.ratingCount || 0} reviews</p>
+                  <div className="col-md-6">
+                    <div className="rating-stats">
+                      <h6>Performance Summary</h6>
+                      <p>Total Ratings: <span className="fw-semibold">{labourDetails.ratingCount || 0}</span></p>
+                      <p>Based on <span className="text-dark">{labourDetails.ratingCount || 0}</span> customer reviews</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="booking-stats mt-4">
-                <h5 className="card-title mb-4">Booking Statistics</h5>
-                <div className="row g-3">
-                  <div className="col-md-4">
-                    <div className="stat-card p-3 bg-light rounded shadow-sm">
-                      <h6 className="text-dark mb-2 fw-bold">Total Bookings</h6>
-                      <h4 className="mb-0 text-primary fw-bold">{(requestedServices || []).length}</h4>
+              <div className="booking-stats">
+                <h4 className="card-title">Booking Statistics</h4>
+                <div className="row g-4">
+                  <div className="col-md-6 col-lg-4">
+                    <div className="stat-card p-4 bg-primary">
+                      <div className="d-flex align-items-center">
+                        <div className="stat-icon me-3">
+                          <div className="bg-primary text-white rounded-circle p-2">
+                            <span>{(requestedServices || []).length}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <h6>Total Bookings</h6>
+                          <p>All time</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="col-md-4">
-                    <div className="stat-card p-3 bg-light rounded shadow-sm">
-                      <h6 className="text-dark mb-2 fw-bold">Accepted Bookings</h6>
-                      <h4 className="mb-0 text-success fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === 2).length}</h4>
+                  <div className="col-md-6 col-lg-4">
+                    <div className="stat-card p-4 bg-success">
+                      <div className="d-flex align-items-center">
+                        <div className="stat-icon me-3">
+                          <div className="bg-success text-white rounded-circle p-2">
+                            <span>{(requestedServices || []).filter(service => service.bookingStatusCode === 2).length}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <h6>Accepted</h6>
+                          <p>Bookings</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="col-md-4">
-                    <div className="stat-card p-3 bg-light rounded shadow-sm">
-                      <h6 className="text-dark mb-2 fw-bold">Completed Bookings</h6>
-                      <h4 className="mb-0 text-info fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === 3).length}</h4>
+                  <div className="col-md-6 col-lg-4">
+                    <div className="stat-card p-4 bg-info">
+                      <div className="d-flex align-items-center">
+                        <div className="stat-icon me-3">
+                          <div className="bg-info text-white rounded-circle p-2">
+                            <span>{(requestedServices || []).filter(service => service.bookingStatusCode === 3).length}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <h6>Completed</h6>
+                          <p>Bookings</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="col-md-4">
-                    <div className="stat-card p-3 bg-light rounded shadow-sm">
-                      <h6 className="text-dark mb-2 fw-bold">Rejected Bookings</h6>
-                      <h4 className="mb-0 text-danger fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === -1).length}</h4>
+                  <div className="col-md-6 col-lg-4">
+                    <div className="stat-card p-4 bg-danger">
+                      <div className="d-flex align-items-center">
+                        <div className="stat-icon me-3">
+                          <div className="bg-danger text-white rounded-circle p-2">
+                            <span>{(requestedServices || []).filter(service => service.bookingStatusCode === -1).length}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <h6>Rejected</h6>
+                          <p>Bookings</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="col-md-4">
-                    <div className="stat-card p-3 bg-light rounded shadow-sm">
-                      <h6 className="text-dark mb-2 fw-bold">Pending Bookings</h6>
-                      <h4 className="mb-0 text-warning fw-bold">{(requestedServices || []).filter(service => service.bookingStatusCode === 1).length}</h4>
+                  <div className="col-md-6 col-lg-4">
+                    <div className="stat-card p-4 bg-warning">
+                      <div className="d-flex align-items-center">
+                        <div className="stat-icon me-3">
+                          <div className="bg-warning text-white rounded-circle p-2">
+                            <span>{(requestedServices || []).filter(service => service.bookingStatusCode === 1).length}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <h6>Pending</h6>
+                          <p>Bookings</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -303,85 +393,148 @@ const LabourDashboard = () => {
 
       <Row className="mb-4">
         <Col>
-          <Card className="shadow-sm pending-actions-card">
-            <Card.Body className="p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
+          <Card className="shadow-lg pending-actions-card border-0">
+            <Card.Body className="p-5">
+              <div className="d-flex justify-content-between align-items-center mb-5">
                 <div className="d-flex align-items-center">
-                  <FaClock className="me-2 text-warning" style={{ fontSize: '1.5rem' }} />
-                  <h5 className="card-title mb-0">Pending Actions</h5>
+                  <div className="section-icon-wrapper me-3">
+                    <FaClock className="section-icon" />
+                  </div>
+                  <div>
+                    <h3 className="card-title mb-1 fw-bold text-primary">Pending Actions</h3>
+                    <p className="text-muted mb-0">Manage your service requests and bookings</p>
+                  </div>
                 </div>
-                <Badge bg="warning" className="pending-count">
-                  {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).length} Pending
-                </Badge>
+                <div className="d-flex align-items-center">
+                  <Badge bg="warning" className="pending-count fs-6 px-3 py-2">
+                    {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).length} Pending Requests
+                  </Badge>
+                </div>
               </div>
 
               {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).length > 0 ? (
                 <div className="table-responsive">
                   <Table hover className="align-middle pending-table">
                     <thead>
-                      <tr>
-                        <th>Booking ID</th>
-                        <th>Client</th>
-                        <th>Service</th>
-                        <th>Phone</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                      <tr className="table-header">
+                        <th className="fw-bold text-primary">Booking ID</th>
+                        <th className="fw-bold text-primary">Client Details</th>
+                        <th className="fw-bold text-primary">Service Type</th>
+                        <th className="fw-bold text-primary">Contact</th>
+                        <th className="fw-bold text-primary">Request Date</th>
+                        <th className="fw-bold text-primary">Current Status</th>
+                        <th className="fw-bold text-primary text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).map((service) => (
-                        <tr key={service.bookingId}>
-                          <td className="fw-bold">#{service.bookingId}</td>
-                          <td>{service.userName || 'Anonymous'}</td>
-                          <td>{service.labourSkill}</td>
-                          <td>{service.userMobileNumber}</td>
-                          <td>{formatDate(service.bookingTime)}</td>
+                        <tr key={service.bookingId} className="table-row">
+                          <td className="fw-bold fs-6">#{service.bookingId}</td>
+                          <td>
+                            <div>
+                              <div className="fw-semibold">{service.userName || 'Anonymous'}</div>
+                              <small className="text-muted">Customer</small>
+                            </div>
+                          </td>
+                          <td>
+                            <Badge bg="info" className="px-3 py-2">
+                              {service.labourSkill}
+                            </Badge>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <FaPhone className="me-2 text-muted" />
+                              <span className="fw-semibold">{service.userMobileNumber}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <div className="fw-semibold">{formatDate(service.bookingTime)}</div>
+                              <small className="text-muted">Requested</small>
+                            </div>
+                          </td>
                           <td>{getStatusBadge(service.bookingStatusCode)}</td>
                           <td>
-                            {service.bookingStatusCode === 1 && (
-                              <div className="d-flex gap-2">
+                            <div className="d-flex gap-2 justify-content-center">
+                              {service.bookingStatusCode === 1 && (
+                                <>
+                                  <Button 
+                                    variant="success" 
+                                    size="sm"
+                                    className="action-btn accept-btn"
+                                    onClick={() => handleStatusUpdate(service.bookingId, 2)}
+                                    disabled={statusUpdatingId === service.bookingId}
+                                  >
+                                    {statusUpdatingId === service.bookingId ? (
+                                      <Spinner as="span" animation="border" size="sm" />
+                                    ) : (
+                                      <>
+                                        <FaCheckCircle className="me-1" />
+                                        Accept
+                                      </>
+                                    )}
+                                  </Button>
+                                  <Button 
+                                    variant="danger" 
+                                    size="sm"
+                                    className="action-btn reject-btn"
+                                    onClick={() => handleStatusUpdate(service.bookingId, -1)}
+                                    disabled={statusUpdatingId === service.bookingId}
+                                  >
+                                    {statusUpdatingId === service.bookingId ? (
+                                      <Spinner as="span" animation="border" size="sm" />
+                                    ) : (
+                                      <>
+                                        <FaTimesCircle className="me-1" />
+                                        Reject
+                                      </>
+                                    )}
+                                  </Button>
+                                </>
+                              )}
+                              {service.bookingStatusCode === 2 && (
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  className="action-btn complete-btn"
+                                  onClick={() => handleStatusUpdate(service.bookingId, 3)}
+                                  disabled={statusUpdatingId === service.bookingId}
+                                >
+                                  {statusUpdatingId === service.bookingId ? (
+                                    <Spinner as="span" animation="border" size="sm" />
+                                  ) : (
+                                    <>
+                                      <FaCheckCircle className="me-1" />
+                                      Mark Complete
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                              {service.bookingStatusCode === -1 && (
                                 <Button 
                                   variant="success" 
                                   size="sm"
+                                  className="action-btn accept-again-btn"
                                   onClick={() => handleStatusUpdate(service.bookingId, 2)}
                                   disabled={statusUpdatingId === service.bookingId}
                                 >
-                                  {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Accept'}
+                                  {statusUpdatingId === service.bookingId ? (
+                                    <Spinner as="span" animation="border" size="sm" />
+                                  ) : (
+                                    <>
+                                      <FaCheckCircle className="me-1" />
+                                      Accept Again
+                                    </>
+                                  )}
                                 </Button>
-                                <Button 
-                                  variant="danger" 
-                                  size="sm"
-                                  onClick={() => handleStatusUpdate(service.bookingId, -1)}
-                                  disabled={statusUpdatingId === service.bookingId}
-                                >
-                                  {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Reject'}
-                                </Button>
-                              </div>
-                            )}
-                            {service.bookingStatusCode === 2 && (
-                              <Button 
-                                variant="primary" 
-                                size="sm"
-                                onClick={() => handleStatusUpdate(service.bookingId, 3)}
-                                disabled={statusUpdatingId === service.bookingId}
-                              >
-                                {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Mark Complete'}
-                              </Button>
-                            )}
-                            {service.bookingStatusCode === -1 && (
-                              <Button 
-                                variant="success" 
-                                size="sm"
-                                onClick={() => handleStatusUpdate(service.bookingId, 2)}
-                                disabled={statusUpdatingId === service.bookingId}
-                              >
-                                {statusUpdatingId === service.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Accept Again'}
-                              </Button>
-                            )}
-                            {service.bookingStatusCode === 3 && (
-                              <span className="text-muted">Completed</span>
-                            )}
+                              )}
+                              {service.bookingStatusCode === 3 && (
+                                <span className="text-success fw-semibold">
+                                  <FaCheckCircle className="me-1" />
+                                  Completed
+                                </span>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -389,8 +542,12 @@ const LabourDashboard = () => {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-4">
-                  <p className="text-muted mb-0">No pending actions</p>
+                <div className="text-center py-5">
+                  <div className="empty-state">
+                    <FaClock className="empty-icon mb-3" />
+                    <h5 className="text-muted mb-2">No Pending Actions</h5>
+                    <p className="text-muted mb-0">All your service requests have been processed</p>
+                  </div>
                 </div>
               )}
             </Card.Body>
