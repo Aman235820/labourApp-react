@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert } from 'react-bootstrap';
-import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort } from 'react-icons/fa';
+import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import axios from 'axios';
+import UpdateLabourModal from './UpdateLabourModal';
 import '../styles/LabourDashboard.css';
 
 const LabourDashboard = () => {
@@ -19,6 +20,7 @@ const LabourDashboard = () => {
     sortOrder: 'desc'
   });
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -96,6 +98,14 @@ const LabourDashboard = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleUpdateDetails = () => {
+    setShowUpdateModal(true);
+  };
+
+  const handleUpdateSuccess = (updatedDetails) => {
+    setLabourDetails(updatedDetails);
   };
 
   const getStatusBadge = (statusCode) => {
@@ -213,8 +223,16 @@ const LabourDashboard = () => {
                 </div>
               </div>
               <Button
+                variant="primary"
+                className="d-flex align-items-center w-100 mb-2"
+                onClick={handleUpdateDetails}
+              >
+                <FaEdit className="me-2" />
+                Update Details
+              </Button>
+              <Button
                 variant="danger"
-                className="d-flex align-items-center w-100 mt-3"
+                className="d-flex align-items-center w-100"
                 onClick={handleDeleteAccount}
                 disabled={isLoading}
               >
@@ -532,6 +550,13 @@ const LabourDashboard = () => {
           </Card>
         </Col>
       </Row>
+
+      <UpdateLabourModal
+        show={showUpdateModal}
+        onHide={() => setShowUpdateModal(false)}
+        labourDetails={labourDetails}
+        onUpdateSuccess={handleUpdateSuccess}
+      />
     </Container>
   );
 };

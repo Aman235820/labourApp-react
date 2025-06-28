@@ -64,7 +64,7 @@
       ]
     },
     {
-      "name": "Cleaning Services",
+      "name": "Cleaner",
       "icon": "🧹",
       "subCategories": [
         "Home Deep Cleaning",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "name": "Construction & Civil Work",
+      "name": "Mason",
       "icon": "🏗️",
       "subCategories": [
         "Masonry Work",
@@ -101,7 +101,7 @@
       ]
     },
     {
-      "name": "Vehicle Services",
+      "name": "Mechanic",
       "icon": "🚗",
       "subCategories": [
         "Bike Mechanic",
@@ -113,7 +113,7 @@
       ]
     },
     {
-      "name": "Logistics",
+      "name": "Driver",
       "icon": "📦",
       "subCategories": [
         "Packers & Movers",

@@ -90,6 +90,16 @@ export const labourService = {
     } catch (error) {
       throw error.response?.data || error.message;
     }
+  },
+
+  // Update labour details
+  updateLabourDetails: async (labourData) => {
+    try {
+      const response = await axios.patch(`${BASE_URL}/labour/updateLabourDetails`, labourData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   }
 };
 
