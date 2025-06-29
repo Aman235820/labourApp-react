@@ -142,7 +142,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             >
               <FaTools className="me-2" />
             </span>
-            {isOpen && 'InstaLab'}
+            {isOpen && 'InstaHelp'}
           </h5>
           {isOpen && <p className="text-muted small mb-0">Quick Navigation</p>}
         </div>
@@ -290,7 +290,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
         <div className="sidebar-footer">
           {isOpen && (
             <p className="text-muted small mb-0">
-              © 2024 InstaLab
+              © 2024 InstaHelp
             </p>
           )}
         </div>

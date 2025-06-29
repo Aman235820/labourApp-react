@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Form, Badge } from 'react-bootstrap';
 import DataTable from "react-data-table-component";
-import { FaTools, FaCalendar, FaPhone, FaUser, FaStar, FaTimesCircle, FaClock, FaCheckCircle } from 'react-icons/fa';
+import { FaTools, FaCalendar, FaPhone, FaUser, FaStar, FaTimesCircle, FaClock, FaCheckCircle, FaClipboardList, FaEdit } from 'react-icons/fa';
 import { getUserBookings, rateLabour } from '../services/BookingService';
 import axios from 'axios';
 
@@ -10,7 +10,9 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
     const [review, setReview] = useState(initialReview);
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
         onSubmit(rating, review);
     };
 
@@ -92,8 +94,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
         }
     };
 
-    const handleReviewSubmit = async (e) => {
-        e.preventDefault();
+    const handleReviewSubmit = async (rating, review) => {
         try {
             const userDetailsStr = localStorage.getItem('user');
             if (!userDetailsStr) {
@@ -113,7 +114,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             }
 
             // Convert rating to decimal number
-            const ratingDecimal = Number(e.target.elements.rating.value).toFixed(1);
+            const ratingDecimal = Number(rating).toFixed(1);
 
             // Close the popup immediately
             setShowRatingModal(false);
@@ -121,26 +122,27 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             console.log('Submitting review with data:', {
                 userId: userDetails.userId,
                 labourId: selectedBooking.labourId,
-                labourRating: Number(ratingDecimal).toFixed(1),
-                review: e.target.elements.review.value,
+                labourRating: ratingDecimal,
+                review: review,
                 bookingId: selectedBooking.bookingId
             });
 
             const response = await rateLabour({
                 userId: userDetails.userId,
                 labourId: selectedBooking.labourId,
-                labourRating: Number(ratingDecimal).toFixed(1),
-                review: e.target.elements.review.value,
+                labourRating: ratingDecimal,
+                review: review,
                 bookingId: selectedBooking.bookingId
             });
 
-            console.log('API Response:', response.data);
+            console.log('API Response:', response);
 
-            if (response.data && response.data.success) {
+            // Check the actual API response structure
+            if (response && !response.hasError) {
                 alert('Review submitted successfully!');
-                fetchBookings();
+                fetchBookings(); // Refresh the bookings list
             } else {
-                throw new Error(response.data?.message || 'Failed to submit review');
+                throw new Error(response?.message || 'Failed to submit review');
             }
         } catch (error) {
             console.error('Error submitting review:', error);
@@ -279,19 +281,21 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                 }
 
                 return (
-                    <div className="d-flex align-items-center gap-2">
+                    <div className="d-flex align-items-center gap-3 flex-wrap">
                         <span className={`badge bg-${statusColor}`}>
                             {statusText}
                         </span>
                         {row.bookingStatusCode === 3 && (
                             <Button
-                                variant="outline-primary"
+                                variant="outline-success"
                                 size="sm"
+                                className="review-btn"
                                 onClick={() => {
                                     setSelectedBooking(row);
                                     setShowRatingModal(true);
                                 }}
                             >
+                                <FaEdit className="me-1" />
                                 Review Service
                             </Button>
                         )}
@@ -317,11 +321,19 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
 
     return (
         <>
-            <Modal show={show} onHide={onHide} size="xl">
-                <ModalHeader closeButton>
-                    <Modal.Title>My Bookings</Modal.Title>
+            <Modal show={show} onHide={onHide} size="xl" dialogClassName="view-bookings-modal">
+                <ModalHeader closeButton className="border-0 pb-0 bg-light">
+                    <div className="d-flex align-items-center gap-3 w-100">
+                        <div className="rounded-circle bg-primary bg-gradient d-flex align-items-center justify-content-center" style={{ width: 48, height: 48 }}>
+                            <FaClipboardList className="text-white" size={24} />
+                        </div>
+                        <div>
+                            <Modal.Title as="h3" className="fw-bold mb-0 text-primary">My Bookings</Modal.Title>
+                            <div className="text-muted small">All your service requests and history</div>
+                        </div>
+                    </div>
                 </ModalHeader>
-                <ModalBody>
+                <ModalBody className="bg-light pt-4 pb-0 px-4">
                     {error && (
                         <Alert variant="danger" role="alert">
                             {error}
@@ -334,23 +346,31 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                             </Spinner>
                         </div>
                     ) : (
-                        <DataTable
-                            columns={columns}
-                            data={bookings}
-                            pagination
-                            customStyles={customStyles}
-                            highlightOnHover
-                            pointerOnHover
-                            noDataComponent={
-                                <div className="text-center py-4">
-                                    <p className="text-muted mb-0">No bookings found</p>
-                                </div>
-                            }
-                        />
+                        <div className="bookings-table-wrapper p-3 bg-white rounded-4 shadow-sm mb-3">
+                            <DataTable
+                                columns={columns}
+                                data={bookings}
+                                pagination
+                                customStyles={{
+                                    ...customStyles,
+                                    table: { style: { borderRadius: '1.5rem', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.07)' } },
+                                    rows: { style: { ...customStyles.rows.style, borderBottom: '1px solid #f1f3f4', transition: 'all 0.2s', background: 'white' } },
+                                    headRow: { style: { ...customStyles.headRow.style, borderRadius: '1.5rem 1.5rem 0 0', fontWeight: 700, fontSize: '1.1rem', color: '#2563eb', background: 'linear-gradient(90deg, #f8fafc 60%, #e0e7ff 100%)' } },
+                                }}
+                                highlightOnHover
+                                pointerOnHover
+                                noDataComponent={
+                                    <div className="text-center py-4">
+                                        <p className="text-muted mb-0">No bookings found</p>
+                                    </div>
+                                }
+                            />
+                        </div>
                     )}
                 </ModalBody>
-                <ModalFooter>
-                    <Button variant="secondary" onClick={onHide}>
+                <div className="w-100" style={{ borderTop: '1.5px solid #e5e7eb' }}></div>
+                <ModalFooter className="bg-light border-0 pt-3 pb-4 px-4">
+                    <Button variant="secondary" onClick={onHide} className="px-4 py-2 rounded-3 fw-semibold">
                         Close
                     </Button>
                 </ModalFooter>
@@ -360,6 +380,103 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                 onHide={() => setShowRatingModal(false)}
                 onSubmit={handleReviewSubmit}
             />
+            <style>{`
+                .view-bookings-modal .modal-content {
+                    border-radius: 2rem;
+                    box-shadow: 0 8px 32px rgba(37,99,235,0.08);
+                    border: none;
+                }
+                .bookings-table-wrapper {
+                    min-height: 220px;
+                }
+                .status-badge {
+                    font-size: 0.95rem;
+                    padding: 0.5rem 1.1rem;
+                    border-radius: 1.5rem;
+                    font-weight: 600;
+                    letter-spacing: 0.5px;
+                }
+                .status-badge .me-1 {
+                    margin-right: 0.5rem !important;
+                }
+                .btn-outline-primary {
+                    border-radius: 1.5rem !important;
+                    font-weight: 600;
+                    letter-spacing: 0.5px;
+                }
+                .btn-outline-primary:hover, .btn-outline-primary:focus {
+                    background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+                    color: #fff !important;
+                    border-color: #2563eb !important;
+                }
+                .btn-outline-primary.review-btn {
+                    border-width: 2px;
+                    padding: 0.4rem 1.2rem;
+                    font-size: 1rem;
+                    color: #2563eb;
+                    background: #f8fafc;
+                    transition: all 0.18s;
+                }
+                .btn-outline-primary.review-btn:hover {
+                    background: #2563eb;
+                    color: #fff;
+                }
+                .btn-outline-success.review-btn {
+                    border-width: 2px;
+                    padding: 0.6rem 1.5rem;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    color: #198754;
+                    background: #f8fff9;
+                    border-color: #198754;
+                    border-radius: 1.5rem;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 4px rgba(25, 135, 84, 0.1);
+                    letter-spacing: 0.3px;
+                    margin: 0.25rem;
+                }
+                .btn-outline-success.review-btn:hover {
+                    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+                    color: #fff;
+                    border-color: #198754;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.2);
+                }
+                .btn-outline-success.review-btn:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 4px rgba(25, 135, 84, 0.15);
+                }
+                .btn-outline-success.review-btn:focus {
+                    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+                }
+                @media (max-width: 768px) {
+                    .view-bookings-modal .modal-content {
+                        border-radius: 1rem;
+                    }
+                    .bookings-table-wrapper {
+                        padding: 0.5rem !important;
+                    }
+                    .btn-outline-success.review-btn {
+                        padding: 0.5rem 1.2rem;
+                        font-size: 0.85rem;
+                        min-width: auto;
+                        margin: 0.2rem;
+                    }
+                    .d-flex.align-items-center.gap-3.flex-wrap {
+                        gap: 0.75rem !important;
+                    }
+                }
+                @media (max-width: 576px) {
+                    .btn-outline-success.review-btn {
+                        padding: 0.4rem 1rem;
+                        font-size: 0.8rem;
+                        margin: 0.15rem;
+                    }
+                    .btn-outline-success.review-btn .me-1 {
+                        margin-right: 0.25rem !important;
+                    }
+                }
+            `}</style>
         </>
     );
 };

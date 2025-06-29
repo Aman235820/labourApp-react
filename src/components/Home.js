@@ -448,12 +448,15 @@ function Home() {
           marginBottom: '1rem'
         }}>
           <img
-            src={require('../logo.svg').default}
-            alt="InstaLab Logo"
+            src="/images/instaHelpLogo.jpg"
+            alt="InstaHelp Logo"
             style={{
               height: 80,
+              width: 'auto',
+              borderRadius: '8px',
               transition: 'transform 0.3s ease',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              objectFit: 'contain'
             }}
             onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
             onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
@@ -467,7 +470,7 @@ function Home() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
             }}>
-              InstaLab
+              InstaHelp
             </h1>
             <div className="tagline" style={{
               fontSize: '1.2rem',

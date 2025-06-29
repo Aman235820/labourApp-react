@@ -65,13 +65,17 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile }) {
         {/* Brand */}
         <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
           <img
-            src="/logo.svg"
+            src="/images/instaHelpLogo.jpg"
             width="32"
             height="32"
             className="d-inline-block align-top me-2"
-            alt="InstaLab Logo"
+            alt="InstaHelp Logo"
+            style={{
+              borderRadius: '4px',
+              objectFit: 'cover'
+            }}
           />
-          <span className="brand-text">InstaLab</span>
+          <span className="brand-text">InstaHelp</span>
         </Navbar.Brand>
         
         {/* City Display */}
