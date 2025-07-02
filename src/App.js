@@ -17,6 +17,7 @@ const LabourLogin = lazy(() => import('./components/LabourLogin'));
 const LabourDashboard = lazy(() => import('./components/LabourDashboard'));
 const LabourRegister = lazy(() => import('./components/LabourRegister'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const AadhaarQrDecoder = lazy(() => import('./aadhar/AadhaarQrDecoder'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -89,6 +90,7 @@ function App() {
                 <Route path="/labourRegister" element={<LabourRegister />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/labourDashboard" element={<LabourDashboard />} />
+                <Route path="/aadhar" element={<AadhaarQrDecoder />} />
             </Routes>
           </Suspense>
         </div>
