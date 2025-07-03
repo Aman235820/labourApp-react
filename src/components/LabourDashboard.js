@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert } from 'react-bootstrap';
-import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit } from 'react-icons/fa';
+import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, FaIdCard } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import axios from 'axios';
@@ -106,6 +106,10 @@ const LabourDashboard = () => {
 
   const handleUpdateSuccess = (updatedDetails) => {
     setLabourDetails(updatedDetails);
+  };
+
+  const handleAadhaarVerification = () => {
+    navigate('/aadhar');
   };
 
   const getStatusBadge = (statusCode) => {
@@ -266,6 +270,15 @@ const LabourDashboard = () => {
                 >
                   <FaEdit className="me-2" />
                   Update Profile Details
+                </Button>
+                <Button
+                  variant="success"
+                  size="lg"
+                  className="d-flex align-items-center justify-content-center w-100 mb-3 fw-semibold"
+                  onClick={handleAadhaarVerification}
+                >
+                  <FaIdCard className="me-2" />
+                  Verify Aadhaar
                 </Button>
                 <Button
                   variant="outline-danger"

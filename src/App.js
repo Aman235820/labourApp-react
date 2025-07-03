@@ -51,18 +51,22 @@ function App() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Start automatic location watching
+  useEffect(() => {
+    // Start watching location automatically
+    LocationService.startWatchingLocation();
+    
+    // Cleanup function to stop watching when component unmounts
+    return () => {
+      LocationService.stopWatchingLocation();
+    };
+  }, []);
+
   // Move geolocation request to a user-triggered event
   const requestLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          LocationService.setLocation(position.coords);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
-    }
+    LocationService.getCurrentLocation().catch(error => {
+      console.error('Error getting location:', error);
+    });
   };
 
   return (
