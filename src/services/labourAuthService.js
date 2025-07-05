@@ -1,15 +1,18 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8080/api/labour';
+const appUrl = process.env.REACT_APP_API_BASEURL;
+const baseurl = `${appUrl}/api/labour`;
 
 export const labourAuthService = {
   login: async (mobileNumber) => {
-    const response = await axios.get(`${BASE_URL}/labourLogin?mobileNumber=${mobileNumber}`);
+    const endpoint = `${baseurl}/labourLogin?mobileNumber=${mobileNumber}`;
+    const response = await axios.get(endpoint);
     return response.data;
   },
 
   register: async (formData) => {
-    const response = await axios.post(`${BASE_URL}/register`, formData);
+    const endpoint = `${baseurl}/register`;
+    const response = await axios.post(endpoint, formData);
     return response.data;
   }
 }; 

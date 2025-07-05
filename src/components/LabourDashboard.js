@@ -9,9 +9,9 @@ import '../styles/LabourDashboard.css';
 
 const LabourDashboard = () => {
   const location = useLocation();
-  const { reviews } = location.state || {};
   const [labourDetails, setLabourDetails] = useState(null);
   const [requestedServices, setRequestedServices] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -34,8 +34,17 @@ const LabourDashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    fetchRequestedServices(true);
+    if (labourDetails) {
+      fetchRequestedServices(true);
+      fetchReviews();
+    }
   }, [labourDetails]);
+
+  useEffect(() => {
+    if (labourDetails) {
+      fetchReviews();
+    }
+  }, [sortConfig, labourDetails]);
 
   const fetchRequestedServices = async (initial = false) => {
     try {
@@ -49,6 +58,28 @@ const LabourDashboard = () => {
       console.error('Error fetching services:', error);
     } finally {
       if (initial) setIsLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      setIsReviewsLoading(true);
+      const response = await labourService.getReviews(
+        labourDetails?.labourId,
+        sortConfig.sortBy,
+        sortConfig.sortOrder
+      );
+      
+      if (response && response.returnValue) {
+        setReviews(response.returnValue);
+      } else {
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setReviews([]);
+    } finally {
+      setIsReviewsLoading(false);
     }
   };
 
@@ -642,6 +673,13 @@ const LabourDashboard = () => {
                       )}
                     </div>
                   ))}
+                </div>
+              ) : isReviewsLoading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" role="status" className="text-primary mb-3">
+                    <span className="visually-hidden">Loading reviews...</span>
+                  </Spinner>
+                  <p className="text-muted mb-0">Loading reviews...</p>
                 </div>
               ) : (
                 <div className="text-center py-5">

@@ -1,20 +1,18 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/labourapp';
-
-// Create axios instance with default config
-const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    withCredentials: true // This is important for CORS
-});
+const appUrl = process.env.REACT_APP_API_BASEURL;
+const baseurl = `${appUrl}/labourapp`;
 
 export const registerUser = async (userData, otp) => {
     try {
-        const response = await api.post(`/auth/registerUser?otp=${otp}`, userData);
+        const endpoint = `${baseurl}/auth/registerUser?otp=${otp}`;
+        const response = await axios.post(endpoint, userData, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            withCredentials: true
+        });
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -23,7 +21,14 @@ export const registerUser = async (userData, otp) => {
 
 export const loginUser = async ({ mobileNumber, otp }) => {
     try {
-        const response = await api.post(`/auth/userLogin?otp=${otp}`, { mobileNumber });
+        const endpoint = `${baseurl}/auth/userLogin?otp=${otp}`;
+        const response = await axios.post(endpoint, { mobileNumber }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            withCredentials: true
+        });
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -32,7 +37,14 @@ export const loginUser = async ({ mobileNumber, otp }) => {
 
 export const requestOTP = async (mobile, role) => {
     try {
-        const response = await api.post('/auth/requestOTP', { mobile, role });
+        const endpoint = `${baseurl}/auth/requestOTP`;
+        const response = await axios.post(endpoint, { mobile, role }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            withCredentials: true
+        });
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -41,7 +53,14 @@ export const requestOTP = async (mobile, role) => {
 
 export const deleteUser = async (userId) => {
     try {
-        const response = await api.delete(`/admin/removeUser/${userId}`);
+        const endpoint = `${baseurl}/admin/removeUser/${userId}`;
+        const response = await axios.delete(endpoint, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            withCredentials: true
+        });
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;

@@ -1,8 +1,12 @@
 import axios from 'axios';
 
+const appUrl = process.env.REACT_APP_API_BASEURL;
+const baseurl = `${appUrl}/labourapp`;
+
 export const adminService = {
   getAllLabours: async (pageNumber, pageSize, sortBy, sortOrder) => {
-    const response = await axios.post('http://localhost:4000/labourapp/admin/getAllLabours', {
+    const endpoint = `${baseurl}/admin/getAllLabours`;
+    const response = await axios.post(endpoint, {
       pageNumber,
       pageSize,
       sortBy,
@@ -16,12 +20,14 @@ export const adminService = {
   },
 
   getLabourById: async (labourId) => {
-    const response = await axios.get(`http://localhost:4000/labourapp/labourReq/getLabourById/${labourId}`);
+    const endpoint = `${baseurl}/labourReq/getLabourById/${labourId}`;
+    const response = await axios.get(endpoint);
     return response.data;
   },
 
   getAllUsers: async (pageNumber, pageSize, sortBy, sortOrder) => {
-    const response = await axios.post('http://localhost:4000/labourapp/admin/getAllUsers', {
+    const endpoint = `${baseurl}/admin/getAllUsers`;
+    const response = await axios.post(endpoint, {
       pageNumber: pageNumber,
       pageSize: pageSize,
       sortBy: sortBy,
@@ -31,17 +37,20 @@ export const adminService = {
   },
 
   removeLabour: async (labourId) => {
-    const response = await axios.delete(`http://localhost:4000/labourapp/admin/removeLabour/${labourId}`);
+    const endpoint = `${baseurl}/admin/removeLabour/${labourId}`;
+    const response = await axios.delete(endpoint);
     return response.data;
   },
 
   removeUser: async (userId) => {
-    const response = await axios.delete(`http://localhost:4000/labourapp/admin/removeUser/${userId}`);
+    const endpoint = `${baseurl}/admin/removeUser/${userId}`;
+    const response = await axios.delete(endpoint);
     return response.data;
   },
 
   getAllBookings: async (pageNumber, pageSize, sortBy, sortOrder) => {
-    const response = await axios.post('http://localhost:4000/labourapp/admin/getAllBookings', {
+    const endpoint = `${baseurl}/admin/getAllBookings`;
+    const response = await axios.post(endpoint, {
       pageNumber: pageNumber,
       pageSize: pageSize,
       sortBy: sortBy,
@@ -51,14 +60,16 @@ export const adminService = {
   },
 
   deleteBooking: async (bookingId) => {
-    const response = await axios.delete(`http://localhost:4000/labourapp/admin/deleteBooking/${bookingId}`, {
+    const endpoint = `${baseurl}/admin/deleteBooking/${bookingId}`;
+    const response = await axios.delete(endpoint, {
       data: ''  // Adding empty data as per the API specification
     });
     return response.data;
   },
 
   getAppStats: async () => {
-    const response = await axios.get('http://localhost:4000/labourapp/admin/getAppStats');
+    const endpoint = `${baseurl}/admin/getAppStats`;
+    const response = await axios.get(endpoint);
     return response.data;
   },
 
@@ -66,7 +77,8 @@ export const adminService = {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await axios.post('http://localhost:4000/labourapp/admin/uploadLabours', formData, {
+    const endpoint = `${baseurl}/admin/uploadLabours`;
+    const response = await axios.post(endpoint, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

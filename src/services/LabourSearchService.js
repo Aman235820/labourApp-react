@@ -1,13 +1,15 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:4000/labourapp/labourReq';
+const appUrl = process.env.REACT_APP_API_BASEURL;
+const baseurl = `${appUrl}/labourapp/labourReq`;
 
 export const searchLabourByCategory = async (category, pageNumber = 0, pageSize = 10, sortBy = "rating", sortOrder = "desc") => {
     try {
-        console.log(`${BASE_URL}/findByCategory?category=${category}`);
+        const endpoint = `${baseurl}/findByCategory?category=${category}`;
+        console.log(endpoint);
         console.log('Pagination params:', { pageNumber, pageSize, sortBy, sortOrder });
 
-        const response = await axios.post(`${BASE_URL}/findByCategory?category=${category}`, {
+        const response = await axios.post(endpoint, {
             pageNumber,
             pageSize,
             sortBy,

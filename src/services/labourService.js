@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:4000/labourapp';
+const appUrl = process.env.REACT_APP_API_BASEURL;
+const baseurl = `${appUrl}/labourapp`;
 
 export const labourService = {
   // Get requested services for a labour
   getRequestedServices: async (labourId) => {
     try {
-      const response = await axios.get(`${BASE_URL}/labour/showRequestedServices/${labourId}`);
+      const endpoint = `${baseurl}/labour/showRequestedServices/${labourId}`;
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
       throw error;
@@ -16,9 +18,8 @@ export const labourService = {
   // Get reviews for a labour
   getReviews: async (labourId, sortBy, sortOrder) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/labour/showMyReviews/${labourId}?sortBy=${sortBy}&sortOrder=${sortOrder}`
-      );
+      const endpoint = `${baseurl}/labour/showMyReviews/${labourId}?sortBy=${sortBy}&sortOrder=${sortOrder}`;
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
       throw error;
@@ -28,9 +29,8 @@ export const labourService = {
   // Update booking status
   updateBookingStatus: async (labourId, bookingId, bookingStatusCode) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL}/labour/setBookingStatus?labourId=${labourId}&bookingId=${bookingId}&bookingStatusCode=${bookingStatusCode}`
-      );
+      const endpoint = `${baseurl}/labour/setBookingStatus?labourId=${labourId}&bookingId=${bookingId}&bookingStatusCode=${bookingStatusCode}`;
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
       throw error;
@@ -40,7 +40,8 @@ export const labourService = {
   // Show requested services
   showRequestedServices: async (labourId) => {
     try {
-      const response = await axios.get(`${BASE_URL}/labour/showRequestedServices/${labourId}`);
+      const endpoint = `${baseurl}/labour/showRequestedServices/${labourId}`;
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
       throw error;
@@ -49,7 +50,8 @@ export const labourService = {
 
   getLabourById: async (labourId) => {
     try {
-      const response = await axios.get(`${BASE_URL}/labourReq/getLabourById/${labourId}`);
+      const endpoint = `${baseurl}/labourReq/getLabourById/${labourId}`;
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
       throw error;
@@ -58,7 +60,8 @@ export const labourService = {
 
   registerLabour: async (labourData, otp) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/registerLabour?otp=${otp}`, labourData);
+      const endpoint = `${baseurl}/auth/registerLabour?otp=${otp}`;
+      const response = await axios.post(endpoint, labourData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -67,7 +70,8 @@ export const labourService = {
 
   loginLabour: async (mobileNumber, otp) => {
     try {
-      const response = await axios.get(`${BASE_URL}/auth/labourLogin?mobileNumber=${mobileNumber}&otp=${otp}`);
+      const endpoint = `${baseurl}/auth/labourLogin?mobileNumber=${mobileNumber}&otp=${otp}`;
+      const response = await axios.get(endpoint);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -76,7 +80,8 @@ export const labourService = {
 
   requestOTP: async (mobile, role) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/requestOTP`, { mobile, role });
+      const endpoint = `${baseurl}/auth/requestOTP`;
+      const response = await axios.post(endpoint, { mobile, role });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -85,7 +90,8 @@ export const labourService = {
 
   deleteLabour: async (labourId) => {
     try {
-      const response = await axios.delete(`${BASE_URL}/admin/removeLabour/${labourId}`);
+      const endpoint = `${baseurl}/admin/removeLabour/${labourId}`;
+      const response = await axios.delete(endpoint);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -95,7 +101,8 @@ export const labourService = {
   // Update labour details
   updateLabourDetails: async (labourData) => {
     try {
-      const response = await axios.patch(`${BASE_URL}/labour/updateLabourDetails`, labourData);
+      const endpoint = `${baseurl}/labour/updateLabourDetails`;
+      const response = await axios.patch(endpoint, labourData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
