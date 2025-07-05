@@ -64,7 +64,7 @@
       ]
     },
     {
-      "name": "Cleaner",
+      "name": "House Help",
       "icon": "🧹",
       "subCategories": [
         "Home Deep Cleaning",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "name": "Mason",
+      "name": "Construction & Civil Work",
       "icon": "🏗️",
       "subCategories": [
         "Masonry Work",
@@ -119,15 +119,17 @@
         "Packers & Movers",
         "Tempo / Mini Truck Booking",
         "Loading / Unloading Labor",
-        "Furniture Shifting"
+        "Furniture Shifting",
+        "Taxi/Cab Booking",
+        "Rickshaw Booking"
       ]
     },
     {
       "name": "Personal Care",
       "icon": "💇",
       "subCategories": [
-        "Beautician at Home",
-        "Barber at Home",
+        "Beautician",
+        "Barber",
         "Massage Therapist",
         "Mehndi Artist",
         "Bridal Makeup"
@@ -137,7 +139,7 @@
       "name": "Farm & Rural Services",
       "icon": "🌾",
       "subCategories": [
-        "Borewell Mechanic",
+        "Borewell Services",
         "Hand Pump Repair",
         "Solar Panel Installation",
         "Cow Shed Cleaner",

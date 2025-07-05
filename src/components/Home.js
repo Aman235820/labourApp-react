@@ -513,140 +513,114 @@ function Home() {
         gap: '2rem',
         margin: '2rem 0',
       }}>
-        {[
-          { name: 'Cleaning Services', img: '/images/cleaning1.webp' },
-          { name: 'Electrician', img: '/images/electrician1.jpg' },
-          { name: 'Plumber', img: '/images/plumber1.webp' },
-          { name: 'Painter', img: '/images/painter1.webp' },
-          { name: 'Pest Control', img: '/images/pestcontrol1.jpeg' },
-          { name: 'Logistics', img: '/images/logistics1.webp' },
-          { name: 'Personal Care', img: '/images/personalcare1.jpg' },
-          { name: 'Carpenter', img: '/images/carpenter1.jpg' },
-          { name: 'Home Appliance Repair', img: '/images/homeappliance1.jpg' },
-          { name: 'Construction & Civil Work', img: '/images/construction1.jpg' },
-          { name: 'Vehicle Services', img: '/images/mechanic1.jpg' },
-          { name: 'Farm & Rural Services', img: '/images/farm1.jpg' },
-        ].map(serviceCard => (
-          <div key={serviceCard.name} style={{
-            width: 180,
-            textAlign: 'center',
-            background: '#fff',
-            borderRadius: '1rem',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-            padding: '1rem',
-            transition: 'transform 0.2s',
-            cursor: 'pointer',
-          }}
-          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.04)'}
-          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-          onClick={() => {
-            // Find the matching service object from the services array
-            const match = services.find(s => s.name === serviceCard.name);
-            if (match) handleServiceClick(match);
-          }}
-          >
-            <img
-              src={serviceCard.img}
-              alt={serviceCard.name}
-              style={{
-                width: '100%',
-                height: 110,
-                objectFit: 'cover',
-                borderRadius: '0.7rem',
-                marginBottom: '0.7rem',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
-              }}
-            />
-            <div style={{ fontWeight: 600, fontSize: 18, color: '#222' }}>{serviceCard.name}</div>
-          </div>
-        ))}
+        {services.map(service => {
+          // Map service names to image paths
+          const getServiceImage = (serviceName) => {
+            const imageMap = {
+              'Cleaning Services': '/images/cleaning1.webp',
+              'Electrician': '/images/electrician1.jpg',
+              'Plumber': '/images/plumber1.webp',
+              'Painter': '/images/painter1.webp',
+              'Pest Control': '/images/pestcontrol1.jpeg',
+              'Logistics': '/images/logistics1.webp',
+              'Personal Care': '/images/personalcare1.jpg',
+              'Carpenter': '/images/carpenter1.jpg',
+              'Home Appliance Repair': '/images/homeappliance1.jpg',
+              'Construction & Civil Work': '/images/construction1.jpg',
+              'Vehicle Services': '/images/mechanic1.jpg',
+              'Farm & Rural Services': '/images/farm1.jpg',
+              'House Help': '/images/househelp1.jpg',
+              'Mechanic': '/images/mechanic1.jpg',
+              'Driver': '/images/driver1.jpg',
+            };
+            return imageMap[serviceName] || '/images/default-service.jpg';
+          };
+
+          return (
+            <div key={service.name} style={{
+              width: 180,
+              textAlign: 'center',
+              background: '#fff',
+              borderRadius: '1rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+              padding: '1rem',
+              transition: 'transform 0.2s',
+              cursor: 'pointer',
+            }}
+            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.04)'}
+            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            onClick={() => handleServiceClick(service)}
+            >
+              <img
+                src={getServiceImage(service.name)}
+                alt={service.name}
+                style={{
+                  width: '100%',
+                  height: 110,
+                  objectFit: 'cover',
+                  borderRadius: '0.7rem',
+                  marginBottom: '0.7rem',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
+                }}
+              />
+              <div style={{ fontWeight: 600, fontSize: 18, color: '#222' }}>{service.name}</div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Services & Subservices Section */}
-      <div style={{ margin: '1.5rem 0', background: '#f6f8fa', borderRadius: '1rem', padding: '1.5rem 0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1.2rem' }}>
-          {services.filter(service => ![
-            'Cleaning Services',
-            'Electrician',
-            'Plumber',
-            'Painter',
-            'Pest Control',
-            'Logistics',
-            'Personal Care',
-            'Carpenter',
-            'Home Appliance Repair',
-            'Construction & Civil Work',
-            'Vehicle Services',
-            'Farm & Rural Services',
-          ].includes(service.name)).map(service => (
-            <div
-              key={service.name}
-              style={{
-                textAlign: 'center',
-                cursor: 'pointer',
-                color: selectedService && selectedService.name === service.name ? '#2563eb' : '#444',
-                fontWeight: selectedService && selectedService.name === service.name ? 700 : 500,
-                background: selectedService && selectedService.name === service.name ? 'rgba(37,99,235,0.10)' : 'transparent',
-                borderRadius: '1rem',
-                padding: '0.3rem 0.8rem',
-                transition: 'all 0.18s',
-                boxShadow: selectedService && selectedService.name === service.name ? '0 2px 8px rgba(37,99,235,0.10)' : 'none',
-                minWidth: 80,
-                minHeight: 80,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 15,
-                border: selectedService && selectedService.name === service.name ? '1.5px solid #2563eb' : '1.5px solid #e5e7eb',
-                boxSizing: 'border-box',
-              }}
-              onClick={() => handleServiceClick(service)}
-              onMouseOver={e => e.currentTarget.style.background = 'rgba(37,99,235,0.07)'}
-              onMouseOut={e => e.currentTarget.style.background = selectedService && selectedService.name === service.name ? 'rgba(37,99,235,0.10)' : 'transparent'}
-            >
-              {/* Only show icon for non-image services */}
-              {/* <div style={{ fontSize: 28, marginBottom: 2 }}>{service.icon}</div> */}
-              <div style={{ fontSize: 15, marginTop: 2 }}>{service.name}</div>
+      {/* Subservices Section */}
+      {selectedService && (
+        <div style={{ margin: '1.5rem 0', background: '#f6f8fa', borderRadius: '1rem', padding: '1.5rem 0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <div style={{ marginTop: '1.5rem', padding: '0 1rem' }}>
+            <h3 style={{ 
+              textAlign: 'center', 
+              color: '#2d3748', 
+              fontWeight: 600, 
+              marginBottom: '1rem',
+              fontSize: '1.3rem'
+            }}>
+              <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>{selectedService.icon}</span>
+              {selectedService.name} Services
+            </h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.8rem' }}>
+              {selectedService.subCategories.map(sub => (
+                <button
+                  key={sub}
+                  style={{
+                    border: '1.5px solid #d1d5db',
+                    borderRadius: '1.5rem',
+                    padding: '0.6rem 1.4rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    background: '#fff',
+                    color: '#222',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    cursor: 'pointer',
+                    transition: 'all 0.18s',
+                    outline: 'none',
+                  }}
+                  onClick={() => handleSubserviceClick(sub)}
+                  onMouseOver={e => {
+                    e.currentTarget.style.background = '#f1f5f9';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.10)';
+                    e.currentTarget.style.borderColor = '#2563eb';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
+                    e.currentTarget.style.borderColor = '#d1d5db';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {sub}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-        {selectedService && (
-          <div style={{ marginTop: '1.2rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.7rem' }}>
-            {selectedService.subCategories.map(sub => (
-              <button
-                key={sub}
-                style={{
-                  border: '1.5px solid #d1d5db',
-                  borderRadius: '1.5rem',
-                  padding: '0.45rem 1.2rem',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  background: '#fff',
-                  color: '#222',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                  cursor: 'pointer',
-                  transition: 'all 0.18s',
-                  outline: 'none',
-                }}
-                onClick={() => handleSubserviceClick(sub)}
-                onMouseOver={e => {
-                  e.currentTarget.style.background = '#f1f5f9';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.10)';
-                  e.currentTarget.style.borderColor = '#2563eb';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.background = '#fff';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                }}
-              >
-                {sub}
-              </button>
-            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Modal Results Table for Subservice Clicks */}
       <LabourList
