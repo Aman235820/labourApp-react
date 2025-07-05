@@ -241,6 +241,17 @@ function Home() {
       setSelectedService(null); // Close if already open
     } else {
       setSelectedService(service); // Open if not open
+      // Smooth scroll to subservices section after a short delay to allow rendering
+      setTimeout(() => {
+        const subservicesElement = document.getElementById(`subservices-${service.name.replace(/\s+/g, '-').toLowerCase()}`);
+        if (subservicesElement) {
+          subservicesElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -507,13 +518,16 @@ function Home() {
 
       {/* Service Images Section */}
       <div className="service-images-section" style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: '2rem',
         margin: '2rem 0',
+        maxWidth: '1200px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        padding: '0 1rem'
       }}>
-        {services.map(service => {
+        {services.map((service, index) => {
           // Map service names to image paths
           const getServiceImage = (serviceName) => {
             const imageMap = {
@@ -536,91 +550,199 @@ function Home() {
             return imageMap[serviceName] || '/images/default-service.jpg';
           };
 
+          const isSelected = selectedService && selectedService.name === service.name;
+          const servicesPerRow = Math.floor(1200 / 220); // Approximate services per row
+          const currentRow = Math.floor(index / servicesPerRow);
+          const selectedServiceRow = selectedService ? Math.floor(services.findIndex(s => s.name === selectedService.name) / servicesPerRow) : -1;
+          const shouldShowSubservices = isSelected;
+
           return (
-            <div key={service.name} style={{
-              width: 180,
-              textAlign: 'center',
-              background: '#fff',
-              borderRadius: '1rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-              padding: '1rem',
-              transition: 'transform 0.2s',
-              cursor: 'pointer',
-            }}
-            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.04)'}
-            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-            onClick={() => handleServiceClick(service)}
-            >
-              <img
-                src={getServiceImage(service.name)}
-                alt={service.name}
-                style={{
-                  width: '100%',
-                  height: 110,
-                  objectFit: 'cover',
-                  borderRadius: '0.7rem',
-                  marginBottom: '0.7rem',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
-                }}
-              />
-              <div style={{ fontWeight: 600, fontSize: 18, color: '#222' }}>{service.name}</div>
-            </div>
+            <React.Fragment key={service.name}>
+              <div style={{
+                width: '100%',
+                textAlign: 'center',
+                background: isSelected ? 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' : '#fff',
+                borderRadius: '1rem',
+                boxShadow: isSelected ? '0 8px 25px rgba(37,99,235,0.15)' : '0 2px 8px rgba(0,0,0,0.07)',
+                padding: '1rem',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                border: isSelected ? '2px solid #2563eb' : '2px solid transparent',
+                transform: isSelected ? 'translateY(-2px)' : 'translateY(0)',
+              }}
+              onMouseOver={e => {
+                if (!isSelected) {
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.12)';
+                }
+              }}
+              onMouseOut={e => {
+                if (!isSelected) {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
+                }
+              }}
+              onClick={() => handleServiceClick(service)}
+              >
+                <img
+                  src={getServiceImage(service.name)}
+                  alt={service.name}
+                  style={{
+                    width: '100%',
+                    height: 110,
+                    objectFit: 'cover',
+                    borderRadius: '0.7rem',
+                    marginBottom: '0.7rem',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+                <div style={{ 
+                  fontWeight: 600, 
+                  fontSize: 18, 
+                  color: isSelected ? '#2563eb' : '#222',
+                  transition: 'color 0.3s ease'
+                }}>
+                  {service.name}
+                </div>
+                {isSelected && (
+                  <div style={{
+                    marginTop: '0.5rem',
+                    fontSize: '0.9rem',
+                    color: '#4f46e5',
+                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem'
+                  }}>
+                    <span>Click to close</span>
+                    <span style={{ fontSize: '0.7rem' }}>▲</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Subservices Section - Appears right after the selected service */}
+              {shouldShowSubservices && (
+                <div 
+                  id={`subservices-${selectedService.name.replace(/\s+/g, '-').toLowerCase()}`}
+                  style={{
+                    gridColumn: '1 / -1',
+                    margin: '1rem 0',
+                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                    borderRadius: '1rem',
+                    padding: '2rem 1rem',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    border: '1px solid #e2e8f0',
+                    animation: 'slideDown 0.4s ease-out',
+                    transformOrigin: 'top center',
+                    scrollMarginTop: '2rem'
+                  }}>
+                  <style>
+                    {`
+                      @keyframes slideDown {
+                        from {
+                          opacity: 0;
+                          transform: translateY(-20px) scaleY(0.8);
+                        }
+                        to {
+                          opacity: 1;
+                          transform: translateY(0) scaleY(1);
+                        }
+                      }
+                    `}
+                  </style>
+                  <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ 
+                      color: '#1e293b', 
+                      fontWeight: 700, 
+                      marginBottom: '0.5rem',
+                      fontSize: '1.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <span style={{ fontSize: '1.8rem' }}>{selectedService.icon}</span>
+                      {selectedService.name} Services
+                    </h3>
+                    <p style={{ 
+                      color: '#64748b', 
+                      fontSize: '1rem',
+                      margin: '0 auto',
+                      maxWidth: '500px'
+                    }}>
+                      Choose from our specialized {selectedService.name.toLowerCase()} services
+                    </p>
+                  </div>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    justifyContent: 'center', 
+                    gap: '1rem',
+                    maxWidth: '800px',
+                    margin: '0 auto'
+                  }}>
+                    {selectedService.subCategories.map((sub, subIndex) => (
+                      <button
+                        key={sub}
+                        style={{
+                          border: '2px solid #cbd5e1',
+                          borderRadius: '2rem',
+                          padding: '0.8rem 1.6rem',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          background: 'white',
+                          color: '#374151',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          outline: 'none',
+                          minWidth: '140px',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          animation: `fadeInUp 0.4s ease-out ${subIndex * 0.1}s both`
+                        }}
+                        onClick={() => handleSubserviceClick(sub)}
+                        onMouseOver={e => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%)';
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(37,99,235,0.15)';
+                          e.currentTarget.style.borderColor = '#3b82f6';
+                          e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
+                          e.currentTarget.style.color = '#1e40af';
+                        }}
+                        onMouseOut={e => {
+                          e.currentTarget.style.background = 'white';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
+                          e.currentTarget.style.borderColor = '#cbd5e1';
+                          e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                          e.currentTarget.style.color = '#374151';
+                        }}
+                      >
+                        {sub}
+                      </button>
+                    ))}
+                  </div>
+                  <style>
+                    {`
+                      @keyframes fadeInUp {
+                        from {
+                          opacity: 0;
+                          transform: translateY(20px);
+                        }
+                        to {
+                          opacity: 1;
+                          transform: translateY(0);
+                        }
+                      }
+                    `}
+                  </style>
+                </div>
+              )}
+            </React.Fragment>
           );
         })}
       </div>
-
-      {/* Subservices Section */}
-      {selectedService && (
-        <div style={{ margin: '1.5rem 0', background: '#f6f8fa', borderRadius: '1rem', padding: '1.5rem 0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-          <div style={{ marginTop: '1.5rem', padding: '0 1rem' }}>
-            <h3 style={{ 
-              textAlign: 'center', 
-              color: '#2d3748', 
-              fontWeight: 600, 
-              marginBottom: '1rem',
-              fontSize: '1.3rem'
-            }}>
-              <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>{selectedService.icon}</span>
-              {selectedService.name} Services
-            </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.8rem' }}>
-              {selectedService.subCategories.map(sub => (
-                <button
-                  key={sub}
-                  style={{
-                    border: '1.5px solid #d1d5db',
-                    borderRadius: '1.5rem',
-                    padding: '0.6rem 1.4rem',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                    background: '#fff',
-                    color: '#222',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                    cursor: 'pointer',
-                    transition: 'all 0.18s',
-                    outline: 'none',
-                  }}
-                  onClick={() => handleSubserviceClick(sub)}
-                  onMouseOver={e => {
-                    e.currentTarget.style.background = '#f1f5f9';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(37,99,235,0.10)';
-                    e.currentTarget.style.borderColor = '#2563eb';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseOut={e => {
-                    e.currentTarget.style.background = '#fff';
-                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {sub}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal Results Table for Subservice Clicks */}
       <LabourList
