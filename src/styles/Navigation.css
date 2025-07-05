@@ -163,18 +163,45 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .city-display:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .city-display svg {
   margin-right: 0.5rem;
   color: #667eea;
   flex-shrink: 0;
+}
+
+.city-display .city-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.city-display .city-text:hover {
+  color: white;
+}
+
+/* Add a subtle indicator that it's clickable */
+.city-display::after {
+  content: '▼';
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.city-display:hover::after {
+  opacity: 1;
 }
 
 /* Container adjustments for compact navbar */

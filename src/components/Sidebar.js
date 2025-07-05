@@ -75,8 +75,34 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     return location.pathname === path;
   };
 
+  const handleSidebarNavigation = (action, path = null) => {
+    // If sidebar is closed, open it first
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+    
+    // If sidebar is open, perform the action
+    if (path) {
+      // For navigation links, navigate to the path
+      navigate(path);
+      closeSidebar();
+    } else if (action) {
+      // For custom actions, execute them
+      action();
+    }
+  };
+
   const handleUserAccountClick = (e) => {
     e.preventDefault();
+    
+    // If sidebar is closed, open it first
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+    
+    // If sidebar is open, perform the original action
     closeSidebar();
     
     // Check if user details exist in localStorage
@@ -121,6 +147,17 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     navigate('/');
   };
 
+  const handleLogoutClick = () => {
+    // If sidebar is closed, open it first
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+    
+    // If sidebar is open, perform logout
+    handleLogout();
+  };
+
   return (
     <>
       {/* Sidebar overlay for mobile */}
@@ -156,11 +193,13 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
               </h6>
             )}
             <Nav.Link 
-              as={Link} 
-              to="/" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/');
+              }}
               className={`sidebar-link ${isActive('/') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'Home' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaHome className="me-2" />
               {isOpen && 'Home'}
@@ -175,21 +214,25 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
               </h6>
             )}
             <Nav.Link 
-              as={Link} 
-              to="/register" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/register');
+              }}
               className={`sidebar-link ${isActive('/register') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'Create Customer Account' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaUserPlus className="me-2" />
               {isOpen && 'Create Customer Account'}
             </Nav.Link>
             <Nav.Link 
-              as={Link} 
-              to="/login" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/login');
+              }}
               className={`sidebar-link ${isActive('/login') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'Customer Login' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaSignInAlt className="me-2" />
               {isOpen && 'Customer Login'}
@@ -213,31 +256,37 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
               </h6>
             )}
             <Nav.Link 
-              as={Link} 
-              to="/labourRegister" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/labourRegister');
+              }}
               className={`sidebar-link ${isActive('/labourRegister') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'Register as a Service Provider' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaUserPlus className="me-2" />
               {isOpen && 'Register as a Service Provider'}
             </Nav.Link>
             <Nav.Link 
-              as={Link} 
-              to="/labourLogin" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/labourLogin');
+              }}
               className={`sidebar-link ${isActive('/labourLogin') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'Service Provider Login' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaSignInAlt className="me-2" />
               {isOpen && 'Service Provider Login'}
             </Nav.Link>
             <Nav.Link 
-              as={Link} 
-              to="/labourDashboard" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/labourDashboard');
+              }}
               className={`sidebar-link ${isActive('/labourDashboard') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'My Dashboard' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaClipboardList className="me-2" />
               {isOpen && 'My Dashboard'}
@@ -252,11 +301,13 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
               </h6>
             )}
             <Nav.Link 
-              as={Link} 
-              to="/admin" 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/admin');
+              }}
               className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
-              onClick={closeSidebar}
               title={!isOpen ? 'Admin Panel' : ''}
+              style={{ cursor: 'pointer' }}
             >
               <FaUserShield className="me-2" />
               {isOpen && 'Admin Panel'}
@@ -277,7 +328,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             <Button
               variant="outline-light"
               size="sm"
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="sidebar-logout-btn"
               title={!isOpen ? 'Logout' : ''}
             >

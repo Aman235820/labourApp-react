@@ -56,6 +56,20 @@ function App() {
     // Start watching location automatically
     LocationService.startWatchingLocation();
     
+    // Also try to get current location once on app load
+    const checkInitialLocation = async () => {
+      const existingLocation = localStorage.getItem('userLocation');
+      if (!existingLocation) {
+        try {
+          await LocationService.getCurrentLocation();
+        } catch (error) {
+          console.log('Initial location request failed:', error.message);
+        }
+      }
+    };
+    
+    checkInitialLocation();
+    
     // Cleanup function to stop watching when component unmounts
     return () => {
       LocationService.stopWatchingLocation();
@@ -76,6 +90,7 @@ function App() {
           sidebarOpen={sidebarOpen}
           setIsOpen={setSidebarOpen}
           isMobile={isMobile}
+          requestLocation={requestLocation}
         />
         <Sidebar 
           isOpen={sidebarOpen} 
@@ -104,16 +119,3 @@ function App() {
 }
 
 export default App;
-
-export const requestLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          LocationService.setLocation(position.coords);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
-    }
-  };

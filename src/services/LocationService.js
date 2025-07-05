@@ -27,6 +27,7 @@ const LocationService = {
 
   async setLocation(coords) {
     try {
+      console.log('setLocation called with coords:', coords);
       const round2 = (num) => Math.round(num * 100) / 100;
       const newLat = round2(coords.latitude);
       const newLon = round2(coords.longitude);
@@ -44,6 +45,7 @@ const LocationService = {
             const lonDiff = Math.abs(storedLon - newLon);
             if (latDiff < 0.09 && lonDiff < 0.09) {
               shouldUpdate = false;
+              console.log('Location hasn\'t changed significantly, skipping update');
             }
           }
         } catch {}
@@ -52,8 +54,14 @@ const LocationService = {
       if (shouldUpdate) {
         console.log('Location changed, updating...');
         const address = await this.getLocationFromCoordinates(coords.latitude, coords.longitude);
-        localStorage.setItem('userLocation', JSON.stringify({ coords, address }));
+        console.log('Address received from API:', address);
+        
+        const locationData = { coords, address };
+        console.log('Storing location data:', locationData);
+        
+        localStorage.setItem('userLocation', JSON.stringify(locationData));
         window.dispatchEvent(new Event('locationUpdated'));
+        console.log('Location updated and event dispatched');
       }
     } catch (error) {
       console.error('Error setting location:', error);
@@ -116,19 +124,41 @@ const LocationService = {
   },
 
   async getCurrentLocation() {
+    console.log('getCurrentLocation called');
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
+        console.error('Geolocation is not supported by this browser.');
         reject(new Error('Geolocation is not supported by this browser.'));
         return;
       }
 
+      console.log('Requesting current position...');
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log('Position received:', position.coords);
           this.setLocation(position.coords);
           resolve(position.coords);
         },
         (error) => {
-          reject(error);
+          console.error('Geolocation error:', error);
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              console.error('User denied the request for Geolocation.');
+              reject(new Error('Location permission denied. Please enable location access in your browser settings.'));
+              break;
+            case error.POSITION_UNAVAILABLE:
+              console.error('Location information is unavailable.');
+              reject(new Error('Location information is unavailable.'));
+              break;
+            case error.TIMEOUT:
+              console.error('The request to get user location timed out.');
+              reject(new Error('Location request timed out.'));
+              break;
+            default:
+              console.error('An unknown error occurred.');
+              reject(new Error('An unknown error occurred while getting location.'));
+              break;
+          }
         },
         {
           enableHighAccuracy: true,
@@ -137,6 +167,21 @@ const LocationService = {
         }
       );
     });
+  },
+
+  // Clear stored location data
+  clearLocation() {
+    localStorage.removeItem('userLocation');
+    localStorage.removeItem('recentLocations');
+    window.dispatchEvent(new Event('locationUpdated'));
+    console.log('Location data cleared');
+  },
+
+  // Manually set location with custom data
+  setManualLocation(locationData) {
+    localStorage.setItem('userLocation', JSON.stringify(locationData));
+    window.dispatchEvent(new Event('locationUpdated'));
+    console.log('Manual location set:', locationData);
   }
 };
 
