@@ -122,7 +122,9 @@ function LabourRegister() {
       };
       const response = await labourService.registerLabour(labourData, otp);
       if (response.token && response.returnValue) {
-        localStorage.setItem('labour', JSON.stringify({ ...response.returnValue, token: response.token }));
+        // Filter out reviews data before storing in localStorage
+        const { reviews, ...labourDataWithoutReviews } = response.returnValue;
+        localStorage.setItem('labour', JSON.stringify({ ...labourDataWithoutReviews, token: response.token }));
         navigate('/labourDashboard');
       } else {
         setError('Registration failed. Please try again.');

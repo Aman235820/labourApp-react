@@ -26,6 +26,17 @@ export const labourService = {
     }
   },
 
+  // Get overall ratings for a labour
+  getOverallRatings: async (labourId) => {
+    try {
+      const endpoint = `${baseurl}/labour/showMyRatings/${labourId}`;
+      const response = await axios.get(endpoint);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Update booking status
   updateBookingStatus: async (labourId, bookingId, bookingStatusCode) => {
     try {

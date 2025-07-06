@@ -157,16 +157,16 @@ const UpdateLabourModal = ({ show, onHide, labourDetails, onUpdateSuccess }) => 
       const response = await labourService.updateLabourDetails(updateData);
       
       if (response && !response.hasError) {
-        // Update the local storage with new data
-        const updatedLabourDetails = {
+        // Update the local storage with new data (excluding reviews)
+        const { reviews, ...labourDataWithoutReviews } = {
           ...labourDetails,
           ...updateData
         };
-        localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
+        localStorage.setItem('labour', JSON.stringify(labourDataWithoutReviews));
         
         // Call the callback to refresh parent component
         if (onUpdateSuccess) {
-          onUpdateSuccess(updatedLabourDetails);
+          onUpdateSuccess(labourDataWithoutReviews);
         }
         
         // Close modal and show alert

@@ -48,7 +48,9 @@ function LabourLogin() {
       setError(null);
       const response = await labourService.loginLabour(mobileNumber, otp);
       if (response && response.token && response.returnValue) {
-        localStorage.setItem('labour', JSON.stringify({ ...response.returnValue, token: response.token }));
+        // Filter out reviews data before storing in localStorage
+        const { reviews, ...labourDataWithoutReviews } = response.returnValue;
+        localStorage.setItem('labour', JSON.stringify({ ...labourDataWithoutReviews, token: response.token }));
         navigate('/labourDashboard');
       } else {
         setError('Invalid mobile number or OTP');

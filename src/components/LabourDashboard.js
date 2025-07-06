@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert } from 'react-bootstrap';
-import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, FaIdCard } from 'react-icons/fa';
+import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, FaIdCard, FaSync } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import axios from 'axios';
@@ -12,11 +12,19 @@ const LabourDashboard = () => {
   const [labourDetails, setLabourDetails] = useState(null);
   const [requestedServices, setRequestedServices] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [overallRating, setOverallRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewsLoading, setIsReviewsLoading] = useState(false);
+  const [isRatingsLoading, setIsRatingsLoading] = useState(false);
+  const [isServicesRefreshing, setIsServicesRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     sortBy: 'reviewTime',
+    sortOrder: 'desc'
+  });
+  const [bookingSortConfig, setBookingSortConfig] = useState({
+    sortBy: 'bookingTime',
     sortOrder: 'desc'
   });
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
@@ -29,7 +37,9 @@ const LabourDashboard = () => {
       navigate('/labourLogin');
       return;
     }
-    setLabourDetails(JSON.parse(storedDetails));
+    
+    const parsedDetails = JSON.parse(storedDetails);
+    setLabourDetails(parsedDetails);
     setIsLoading(false);
   }, [navigate]);
 
@@ -37,6 +47,7 @@ const LabourDashboard = () => {
     if (labourDetails) {
       fetchRequestedServices(true);
       fetchReviews();
+      fetchOverallRatings();
     }
   }, [labourDetails]);
 
@@ -48,7 +59,12 @@ const LabourDashboard = () => {
 
   const fetchRequestedServices = async (initial = false) => {
     try {
-      if (initial) setIsLoading(true);
+      if (initial) {
+        setIsLoading(true);
+      } else {
+        setIsServicesRefreshing(true);
+      }
+      
       const response = await labourService.getRequestedServices(labourDetails?.labourId);
       
       if (response && response.returnValue) {
@@ -57,7 +73,11 @@ const LabourDashboard = () => {
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
-      if (initial) setIsLoading(false);
+      if (initial) {
+        setIsLoading(false);
+      } else {
+        setIsServicesRefreshing(false);
+      }
     }
   };
 
@@ -80,6 +100,30 @@ const LabourDashboard = () => {
       setReviews([]);
     } finally {
       setIsReviewsLoading(false);
+    }
+  };
+
+  const fetchOverallRatings = async () => {
+    try {
+      setIsRatingsLoading(true);
+      const response = await labourService.getOverallRatings(labourDetails?.labourId);
+      
+      if (response && response.returnValue && !response.hasError) {
+        const rating = parseFloat(response.returnValue.overallRating) || 0;
+        const count = parseInt(response.returnValue.ratingCount) || 0;
+        
+        setOverallRating(rating);
+        setRatingCount(count);
+      } else {
+        setOverallRating(0);
+        setRatingCount(0);
+      }
+    } catch (error) {
+      console.error('Error fetching overall ratings:', error);
+      setOverallRating(0);
+      setRatingCount(0);
+    } finally {
+      setIsRatingsLoading(false);
     }
   };
 
@@ -106,6 +150,14 @@ const LabourDashboard = () => {
   const handleSortChange = (e) => {
     const { name, value } = e.target;
     setSortConfig(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleBookingSortChange = (e) => {
+    const { name, value } = e.target;
+    setBookingSortConfig(prev => ({
       ...prev,
       [name]: value
     }));
@@ -159,14 +211,42 @@ const LabourDashboard = () => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'N/A';
+    
+    try {
+      let date;
+      
+      // Handle DD-MM-YYYY format (convert to YYYY-MM-DD for proper parsing)
+      if (dateString.match(/^\d{2}-\d{2}-\d{4}/)) {
+        const parts = dateString.split(' ');
+        const datePart = parts[0]; // "06-07-2025"
+        const timePart = parts[1] || '00:00:00'; // "13:25:19" or default
+        
+        const [day, month, year] = datePart.split('-');
+        const isoString = `${year}-${month}-${day}T${timePart}`;
+        date = new Date(isoString);
+      } else {
+        // Handle YYYY-MM-DD format or other standard formats
+        date = new Date(dateString);
+      }
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      
+      // Format: DD MMM YY
+      const day = date.getDate().toString().padStart(2, '0');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = months[date.getMonth()];
+      const year = date.getFullYear().toString().slice(-2);
+      
+      return `${day} ${month} ${year}`;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
   };
 
   const renderStars = (rating) => {
@@ -176,6 +256,24 @@ const LabourDashboard = () => {
         className={index < rating ? 'star-filled' : 'star-empty'}
       />
     ));
+  };
+
+  const getSortedServices = () => {
+    if (!requestedServices || requestedServices.length === 0) return [];
+    
+    const sorted = [...requestedServices].sort((a, b) => {
+      const { sortBy, sortOrder } = bookingSortConfig;
+      
+      if (sortBy === 'bookingTime') {
+        const dateA = new Date(a.bookingTime);
+        const dateB = new Date(b.bookingTime);
+        return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+      }
+      
+      return 0;
+    });
+    
+    return sorted;
   };
 
   if (isLoading) {
@@ -286,7 +384,14 @@ const LabourDashboard = () => {
                     </div>
                     <div>
                       <small className="text-muted d-block">Rating</small>
-                      <span className="fw-semibold">{labourDetails.rating || 0} ({labourDetails.ratingCount || 0} ratings)</span>
+                      {isRatingsLoading ? (
+                        <div className="d-flex align-items-center">
+                          <Spinner animation="border" size="sm" className="me-2" />
+                          <span className="text-muted">Loading...</span>
+                        </div>
+                      ) : (
+                        <span className="fw-semibold">{overallRating} ({ratingCount} ratings)</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -328,27 +433,57 @@ const LabourDashboard = () => {
         <Col lg={7}>
           <Card className="h-100 shadow-lg stats-card border-0">
             <Card.Body className="p-5">
-              <h4 className="card-title mb-4 fw-bold text-primary">Rating Overview</h4>
-              <div className="rating-overview">
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="rating-number">
-                      <h1 className="mb-0">{labourDetails.rating || 0}</h1>
-                      <div className="stars">
-                        {renderStars(labourDetails.rating || 0)}
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h4 className="card-title mb-0 fw-bold text-primary">Rating Overview</h4>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={fetchOverallRatings}
+                  disabled={isRatingsLoading}
+                  className="d-flex align-items-center"
+                >
+                  {isRatingsLoading ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <FaSync className="me-2" />
+                      Refresh
+                    </>
+                  )}
+                </Button>
+              </div>
+              {isRatingsLoading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" role="status" className="text-primary mb-3">
+                    <span className="visually-hidden">Loading ratings...</span>
+                  </Spinner>
+                  <p className="text-muted mb-0">Loading ratings data...</p>
+                </div>
+              ) : (
+                <div className="rating-overview">
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="rating-number">
+                        <h1 className="mb-0">{overallRating}</h1>
+                        <div className="stars">
+                          {renderStars(overallRating)}
+                        </div>
+                        <small>Overall Rating</small>
                       </div>
-                      <small>Overall Rating</small>
                     </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="rating-stats">
-                      <h6>Performance Summary</h6>
-                      <p>Total Ratings: <span className="fw-semibold">{labourDetails.ratingCount || 0}</span></p>
-                      <p>Based on <span className="text-dark">{labourDetails.ratingCount || 0}</span> customer reviews</p>
+                    <div className="col-md-6">
+                      <div className="rating-stats">
+                        <h6>Performance Summary</h6>
+                        <p>Total Ratings: <span className="fw-semibold">{ratingCount}</span></p>
+                        <p>Based on <span className="text-dark">{ratingCount}</span> customer reviews</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="booking-stats">
                 <h4 className="card-title">Booking Statistics</h4>
@@ -449,7 +584,26 @@ const LabourDashboard = () => {
                     <p className="text-muted mb-0">Manage your service requests and bookings</p>
                   </div>
                 </div>
-                <div className="d-flex align-items-center">
+                <div className="d-flex align-items-center gap-3">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => fetchRequestedServices(false)}
+                    disabled={isServicesRefreshing}
+                    className="d-flex align-items-center"
+                  >
+                    {isServicesRefreshing ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Refreshing...
+                      </>
+                    ) : (
+                      <>
+                        <FaSync className="me-2" />
+                        Refresh
+                      </>
+                    )}
+                  </Button>
                   <Badge bg="warning" className="pending-count fs-6 px-3 py-2">
                     {(requestedServices || []).filter(service => service.bookingStatusCode !== 3).length} Pending Requests
                   </Badge>
@@ -652,7 +806,7 @@ const LabourDashboard = () => {
                         </div>
                         <div className="review-date text-end">
                           <small className="text-muted d-block">
-                            {new Date(review.reviewTime).toLocaleDateString()}
+                            {formatDate(review.reviewTime)}
                           </small>
                         </div>
                       </div>
@@ -699,21 +853,33 @@ const LabourDashboard = () => {
                   <FaHistory className="me-2 text-primary" style={{ fontSize: '1.5rem' }} />
                   <h5 className="card-title mb-0">Booking History</h5>
                 </div>
-                <Button 
-                  variant="outline-primary" 
-                  onClick={() => fetchRequestedServices(true)}
-                  disabled={isLoading}
-                  className="refresh-btn"
-                >
-                  {isLoading ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Refreshing...
-                    </>
-                  ) : (
-                    'Refresh'
-                  )}
-                </Button>
+                <div className="d-flex gap-2">
+                  <Form.Select
+                    name="sortOrder"
+                    value={bookingSortConfig.sortOrder}
+                    onChange={handleBookingSortChange}
+                    className="sort-select"
+                    size="sm"
+                  >
+                    <option value="desc">Latest First</option>
+                    <option value="asc">Oldest First</option>
+                  </Form.Select>
+                  <Button 
+                    variant="outline-primary" 
+                    onClick={() => fetchRequestedServices(false)}
+                    disabled={isServicesRefreshing}
+                    className="refresh-btn"
+                  >
+                    {isServicesRefreshing ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Refreshing...
+                      </>
+                    ) : (
+                      'Refresh'
+                    )}
+                  </Button>
+                </div>
               </div>
 
               {error && (
@@ -736,7 +902,7 @@ const LabourDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {(requestedServices || []).map((service) => (
+                      {getSortedServices().map((service) => (
                         <tr key={service.bookingId}>
                           <td className="fw-bold">#{service.bookingId}</td>
                           <td>{service.userName || 'Anonymous'}</td>
