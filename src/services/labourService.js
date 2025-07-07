@@ -16,13 +16,38 @@ export const labourService = {
   },
 
   // Get reviews for a labour
-  getReviews: async (labourId, sortBy, sortOrder) => {
+  getReviews: async (labourId, sortBy = 'reviewTime', sortOrder = 'desc') => {
     try {
       const endpoint = `${baseurl}/labour/showMyReviews/${labourId}?sortBy=${sortBy}&sortOrder=${sortOrder}`;
-      const response = await axios.get(endpoint);
-      return response.data;
+      
+      // Get auth token if available (you might need to adjust this based on your auth implementation)
+      const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      
+      const headers = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      } else if (storedUser) {
+        // Try to get token from user object
+        const userData = JSON.parse(storedUser);
+        if (userData.token) {
+          headers.Authorization = `Bearer ${userData.token}`;
+        }
+      }
+      
+      const response = await axios.get(endpoint, { headers });
+      
+      // Check if the API returned an error
+      if (response.data.hasError) {
+        throw new Error(response.data.message || 'Failed to fetch reviews');
+      }
+      
+      // Return the actual data from returnValue
+      return response.data.returnValue || [];
     } catch (error) {
-      throw error;
+      console.error('Reviews API error:', error.message);
+      // Return empty array instead of throwing to prevent breaking the page
+      return [];
     }
   },
 
@@ -63,7 +88,14 @@ export const labourService = {
     try {
       const endpoint = `${baseurl}/labourReq/getLabourById/${labourId}`;
       const response = await axios.get(endpoint);
-      return response.data;
+      
+      // Check if the API returned an error
+      if (response.data.hasError) {
+        throw new Error(response.data.message || 'Failed to fetch labour details');
+      }
+      
+      // Return the actual data from returnValue
+      return response.data.returnValue;
     } catch (error) {
       throw error;
     }

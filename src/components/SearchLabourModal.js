@@ -4,7 +4,7 @@ import DataTable from "react-data-table-component";
 import { FaStar, FaPhone, FaTools } from 'react-icons/fa';
 import { bookLabour } from '../services/BookingService';
 import { labourService } from '../services/labourService';
-import LabourDetailsModal from './LabourDetailsModal';
+import { useNavigate } from 'react-router-dom';
 
 const SearchLabourModal = ({ 
     show, 
@@ -16,12 +16,9 @@ const SearchLabourModal = ({
     userId,
     userMobileNumber
 }) => {
+    const navigate = useNavigate();
     const [bookingStatus, setBookingStatus] = useState(null);
     const [isBooking, setIsBooking] = useState(false);
-    const [selectedLabourDetails, setSelectedLabourDetails] = useState(null);
-    const [showLabourDetails, setShowLabourDetails] = useState(false);
-    const [loadingLabourDetails, setLoadingLabourDetails] = useState(false);
-    const [labourDetailsError, setLabourDetailsError] = useState('');
 
     // Auto-dismiss success message after 3 seconds
     useEffect(() => {
@@ -76,21 +73,9 @@ const SearchLabourModal = ({
         );
     };
 
-    // Use external LabourDetailsModal
-    const handleRowClicked = async (row) => {
-        setLoadingLabourDetails(true);
-        setLabourDetailsError('');
-        setSelectedLabourDetails(null);
-        try {
-            const data = await labourService.getLabourById(row.labourId);
-            setSelectedLabourDetails(data);
-            setShowLabourDetails(true);
-        } catch (err) {
-            setLabourDetailsError(err.message || 'Failed to fetch labour details.');
-            setShowLabourDetails(true);
-        } finally {
-            setLoadingLabourDetails(false);
-        }
+    // Navigate to LabourDetailsPage
+    const handleRowClicked = (row) => {
+        navigate(`/labour-details/${row.labourId}`);
     };
 
     const columns = [
@@ -230,12 +215,6 @@ const SearchLabourModal = ({
                     </Button>
                 </ModalFooter>
             </Modal>
-
-            <LabourDetailsModal
-                show={showLabourDetails}
-                onHide={() => setShowLabourDetails(false)}
-                selectedLabour={selectedLabourDetails}
-            />
         </>
     );
 };

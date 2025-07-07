@@ -13,6 +13,7 @@ const Login = lazy(() => import('./components/Login'));
 const Home = lazy(() => import('./components/Home'));
 const UserHome = lazy(() => import('./components/UserHome'));
 const LabourProfile = lazy(() => import('./components/LabourProfile'));
+const LabourDetailsPage = lazy(() => import('./components/LabourDetailsPage'));
 const LabourLogin = lazy(() => import('./components/LabourLogin'));
 const LabourDashboard = lazy(() => import('./components/LabourDashboard'));
 const LabourRegister = lazy(() => import('./components/LabourRegister'));
@@ -105,6 +106,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/userHome" element={<UserHome />} />
                 <Route path="/labour/:labourId" element={<LabourProfile />} />
+                <Route path="/labour-details/:labourId" element={<LabourDetailsPage />} />
                 <Route path="/labourLogin" element={<LabourLogin />} />
                 <Route path="/labourRegister" element={<LabourRegister />} />
                 <Route path="/admin" element={<AdminDashboard />} />
