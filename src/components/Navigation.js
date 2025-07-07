@@ -95,49 +95,31 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
     }
   };
 
-  // Calculate navbar left position based on sidebar state
-  const getNavbarLeftPosition = () => {
-    if (isMobile) {
-      return '0'; // Full width on mobile
-    }
-    return sidebarOpen ? '280px' : '70px'; // Adjust based on sidebar width
-  };
-
   return (
     <>
       <Navbar 
         bg="dark" 
         variant="dark" 
         expand="lg" 
-        className="mb-3"
-        style={{
-          left: getNavbarLeftPosition(),
-          transition: 'left 0.3s ease-in-out'
-        }}
+        className={`mb-3 ${isMobile ? 'navbar-mobile' : 'navbar-desktop'} ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
       >
         <Container fluid>
-          {/* Hamburger Menu Button */}
+          {/* Hamburger Menu Button - moved to leftmost position */}
           <Button
             variant="outline-light"
-            className="sidebar-toggle-btn me-3"
+            className="sidebar-toggle-btn me-2"
             onClick={toggleSidebar}
             aria-label="Toggle sidebar"
           >
-            <FaBars size={18} />
+            <FaBars size={14} />
           </Button>
 
-          {/* Brand */}
-          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
+          {/* Brand - Always visible with responsive sizing */}
+          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center flex-grow-1">
             <img
               src="/images/instaHelpLogo.jpg"
-              width="32"
-              height="32"
-              className="d-inline-block align-top me-2"
+              className="navbar-logo me-2"
               alt="InstaHelp Logo"
-              style={{
-                borderRadius: '4px',
-                objectFit: 'cover'
-              }}
             />
             <span className="brand-text">InstaHelp</span>
           </Navbar.Brand>

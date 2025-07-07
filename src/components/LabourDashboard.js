@@ -356,20 +356,20 @@ const LabourDashboard = () => {
       {/* Professional Header */}
       <div className="dashboard-header bg-white shadow-sm border-bottom">
         <Container>
-          <Row className="py-4">
+          <Row className="py-3 py-md-4">
             <Col>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                  <div className="profile-badge me-4">
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div className="d-flex align-items-center mb-3 mb-md-0 w-100 w-md-auto">
+                  <div className="profile-badge me-3 me-md-4">
                     <div className="avatar-professional">
                       <FaUserTie className="text-primary" size={24} />
                     </div>
                   </div>
-                  <div>
-                    <h1 className="h3 mb-1 fw-bold text-dark">{labourDetails.labourName}</h1>
-                    <div className="d-flex align-items-center text-muted mb-2">
-                      <span className="me-3">ID: {labourDetails.labourId}</span>
-                      <Badge bg="primary" className="me-3">{labourDetails.labourSkill}</Badge>
+                  <div className="flex-grow-1">
+                    <h1 className="h4 h-md-3 mb-1 fw-bold text-dark">{labourDetails.labourName}</h1>
+                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center text-muted mb-2 gap-2 gap-sm-3">
+                      <span className="small">ID: {labourDetails.labourId}</span>
+                      <Badge bg="primary" className="me-0 me-sm-3">{labourDetails.labourSkill}</Badge>
                       <div className="d-flex align-items-center">
                         <FaStar className="text-warning me-1" size={14} />
                         <span className="fw-semibold">{overallRating.toFixed(1)}</span>
@@ -378,9 +378,11 @@ const LabourDashboard = () => {
                     </div>
                     {/* Subskills Section */}
                     {labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0 && (
-                      <div className="d-flex align-items-center">
-                        <FaList className="text-muted me-2" size={12} />
-                        <span className="text-muted small me-2">Specializations:</span>
+                      <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center">
+                        <div className="d-flex align-items-center mb-1 mb-sm-0">
+                          <FaList className="text-muted me-2" size={12} />
+                          <span className="text-muted small me-2">Specializations:</span>
+                        </div>
                         <div className="d-flex flex-wrap gap-1">
                           {labourDetails.labourSubSkills.map((subSkill, index) => (
                             <Badge 
@@ -388,7 +390,7 @@ const LabourDashboard = () => {
                               bg="light" 
                               text="dark" 
                               className="px-2 py-1 small"
-                              style={{ fontSize: '0.75rem' }}
+                              style={{ fontSize: '0.7rem' }}
                             >
                               {typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill}
                             </Badge>
@@ -398,22 +400,26 @@ const LabourDashboard = () => {
                     )}
                   </div>
                 </div>
-                <div className="d-flex gap-2">
+                <div className="d-flex gap-2 align-self-stretch align-self-md-auto">
                   <Button 
                     variant="outline-primary" 
                     onClick={handleUpdateDetails}
-                    className="d-flex align-items-center"
+                    className="d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0"
+                    size="sm"
                   >
-                    <FaEdit className="me-2" size={14} />
-                    Edit Profile
+                    <FaEdit className="me-1 me-md-2" size={14} />
+                    <span className="d-none d-sm-inline">Edit Profile</span>
+                    <span className="d-inline d-sm-none">Edit</span>
                   </Button>
                   <Button 
                     variant="outline-danger" 
                     onClick={handleLogout}
-                    className="d-flex align-items-center"
+                    className="d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0"
+                    size="sm"
                   >
-                    <FaSignOutAlt className="me-2" size={14} />
-                    Logout
+                    <FaSignOutAlt className="me-1 me-md-2" size={14} />
+                    <span className="d-none d-sm-inline">Logout</span>
+                    <span className="d-inline d-sm-none">Exit</span>
                   </Button>
                 </div>
               </div>
@@ -422,12 +428,12 @@ const LabourDashboard = () => {
         </Container>
       </div>
 
-      <Container className="py-4">
+      <Container className="py-2 py-md-4">
         {/* Analytics Dashboard */}
-        <Row className="mb-4">
+        <Row className="mb-3 mb-md-4">
           <Col>
             <Card className="border-0 shadow-sm">
-              <Card.Body className="p-4">
+              <Card.Body className="p-3 p-md-4">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaChartLine className="me-2 text-primary" />
@@ -470,81 +476,85 @@ const LabourDashboard = () => {
                           const activity = getRecentActivityData();
                           return (
                             <>
-                              <Col md={2}>
-                                <div className="metric-card h-100 p-3 bg-primary bg-opacity-10 rounded">
+                              <Col xs={6} md={2}>
+                                <div className="metric-card h-100 p-2 p-md-3 bg-primary bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div className="metric-value text-primary fw-bold h4 mb-1">
+                                      <div className="metric-value text-primary fw-bold h5 h-md-4 mb-1">
                                         {analytics.total}
                                       </div>
                                       <div className="metric-label text-muted small">Total Bookings</div>
                                     </div>
-                                    <FaBusinessTime className="text-primary opacity-75" size={20} />
+                                    <FaBusinessTime className="text-primary opacity-75 d-none d-md-block" size={20} />
+                                    <FaBusinessTime className="text-primary opacity-75 d-block d-md-none" size={16} />
                                   </div>
                                 </div>
                               </Col>
-                              <Col md={2}>
-                                <div className="metric-card h-100 p-3 bg-success bg-opacity-10 rounded">
+                              <Col xs={6} md={2}>
+                                <div className="metric-card h-100 p-2 p-md-3 bg-success bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div className="metric-value text-success fw-bold h4 mb-1">
+                                      <div className="metric-value text-success fw-bold h5 h-md-4 mb-1">
                                         {analytics.completionRate.toFixed(1)}%
                                       </div>
                                       <div className="metric-label text-muted small">Completion Rate</div>
                                     </div>
-                                    <FaCheckCircle className="text-success opacity-75" size={20} />
+                                    <FaCheckCircle className="text-success opacity-75 d-none d-md-block" size={20} />
+                                    <FaCheckCircle className="text-success opacity-75 d-block d-md-none" size={16} />
                                   </div>
                                   <ProgressBar 
                                     variant="success" 
                                     now={analytics.completionRate} 
                                     className="mt-2" 
-                                    style={{ height: '4px' }}
+                                    style={{ height: '3px' }}
                                   />
                                 </div>
                               </Col>
-                              <Col md={2}>
-                                <div className="metric-card h-100 p-3 bg-info bg-opacity-10 rounded">
+                              <Col xs={6} md={2}>
+                                <div className="metric-card h-100 p-2 p-md-3 bg-info bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div className="metric-value text-info fw-bold h4 mb-1">
+                                      <div className="metric-value text-info fw-bold h5 h-md-4 mb-1">
                                         {analytics.acceptanceRate.toFixed(1)}%
                                       </div>
                                       <div className="metric-label text-muted small">Acceptance Rate</div>
                                     </div>
-                                    <FaHandshake className="text-info opacity-75" size={20} />
+                                    <FaHandshake className="text-info opacity-75 d-none d-md-block" size={20} />
+                                    <FaHandshake className="text-info opacity-75 d-block d-md-none" size={16} />
                                   </div>
                                   <ProgressBar 
                                     variant="info" 
                                     now={analytics.acceptanceRate} 
                                     className="mt-2" 
-                                    style={{ height: '4px' }}
+                                    style={{ height: '3px' }}
                                   />
                                 </div>
                               </Col>
-                              <Col md={3}>
-                                <div className="metric-card h-100 p-3 bg-danger bg-opacity-10 rounded">
+                              <Col xs={6} md={3}>
+                                <div className="metric-card h-100 p-2 p-md-3 bg-danger bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div className="metric-value text-danger fw-bold h4 mb-1">
+                                      <div className="metric-value text-danger fw-bold h5 h-md-4 mb-1">
                                         {analytics.rejectionRate.toFixed(1)}%
                                       </div>
                                       <div className="metric-label text-muted small">Rejection Rate</div>
                                     </div>
-                                    <FaTimesCircle className="text-danger opacity-75" size={20} />
+                                    <FaTimesCircle className="text-danger opacity-75 d-none d-md-block" size={20} />
+                                    <FaTimesCircle className="text-danger opacity-75 d-block d-md-none" size={16} />
                                   </div>
                                   <ProgressBar 
                                     variant="danger" 
                                     now={analytics.rejectionRate} 
                                     className="mt-2" 
-                                    style={{ height: '4px' }}
+                                    style={{ height: '3px' }}
                                   />
                                 </div>
                               </Col>
-                              <Col md={3}>
-                                <div className="metric-card h-100 p-3 bg-warning bg-opacity-10 rounded">
+                              <Col xs={12} md={3}>
+                                <div className="metric-card h-100 p-2 p-md-3 bg-warning bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
-                                      <div className="metric-value text-warning fw-bold h4 mb-1">
+                                      <div className="metric-value text-warning fw-bold h5 h-md-4 mb-1">
                                         {activity.recentBookings}
                                       </div>
                                       <div className="metric-label text-muted small">Recent Bookings</div>
@@ -552,7 +562,8 @@ const LabourDashboard = () => {
                                         Last 30 Days
                                       </div>
                                     </div>
-                                    <FaChartBar className="text-warning opacity-75" size={20} />
+                                    <FaChartBar className="text-warning opacity-75 d-none d-md-block" size={20} />
+                                    <FaChartBar className="text-warning opacity-75 d-block d-md-none" size={16} />
                                   </div>
                                 </div>
                               </Col>
@@ -569,16 +580,16 @@ const LabourDashboard = () => {
         </Row>
 
         {/* Pending Actions - Professional Table */}
-        <Row className="mb-4">
+        <Row className="mb-3 mb-md-4">
           <Col>
             <Card className="border-0 shadow-sm">
-              <Card.Body className="p-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+              <Card.Body className="p-3 p-md-4">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaClock className="me-2 text-primary" />
                     Service Requests
                   </h4>
-                  <div className="d-flex align-items-center gap-3">
+                  <div className="d-flex align-items-center gap-2 gap-md-3">
                     <Button
                       variant="outline-primary"
                       size="sm"
@@ -588,17 +599,19 @@ const LabourDashboard = () => {
                     >
                       {isServicesRefreshing ? (
                         <>
-                          <Spinner animation="border" size="sm" className="me-2" />
-                          Refreshing...
+                          <Spinner animation="border" size="sm" className="me-1 me-md-2" />
+                          <span className="d-none d-sm-inline">Refreshing...</span>
+                          <span className="d-inline d-sm-none">...</span>
                         </>
                       ) : (
                         <>
-                          <FaSync className="me-2" />
-                          Refresh
+                          <FaSync className="me-1 me-md-2" />
+                          <span className="d-none d-sm-inline">Refresh</span>
+                          <span className="d-inline d-sm-none">Sync</span>
                         </>
                       )}
                     </Button>
-                    <Badge bg="warning" className="px-3 py-2">
+                    <Badge bg="warning" className="px-2 px-md-3 py-1 py-md-2">
                       {(requestedServices || []).filter(service => service.bookingStatusCode === 1).length} Pending
                     </Badge>
                   </div>
@@ -612,54 +625,115 @@ const LabourDashboard = () => {
                 )}
 
                 {(requestedServices || []).length > 0 ? (
-                  <div className="table-responsive">
-                    <Table className="table-modern">
-                      <thead>
-                        <tr>
-                          <th className="border-0 bg-light fw-semibold text-dark">Booking</th>
-                          <th className="border-0 bg-light fw-semibold text-dark">Client</th>
-                          <th className="border-0 bg-light fw-semibold text-dark">Service</th>
-                          <th className="border-0 bg-light fw-semibold text-dark">Date</th>
-                          <th className="border-0 bg-light fw-semibold text-dark">Status</th>
-                          <th className="border-0 bg-light fw-semibold text-dark text-center">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(requestedServices || []).map((service) => (
-                          <tr key={service.bookingId} className="border-bottom">
-                            <td className="py-3">
-                              <div className="fw-bold text-primary">#{service.bookingId}</div>
-                              <small className="text-muted">ID</small>
-                            </td>
-                            <td className="py-3">
-                              <div className="d-flex align-items-center">
-                                <div className="avatar-sm bg-light rounded-circle me-3 d-flex align-items-center justify-content-center">
-                                  <FaUser className="text-muted" size={14} />
+                  <>
+                    {/* Desktop Table */}
+                    <div className="table-responsive d-none d-lg-block">
+                      <Table className="table-modern">
+                        <thead>
+                          <tr>
+                            <th className="border-0 bg-light fw-semibold text-dark">Booking</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Client</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Service</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Date</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Status</th>
+                            <th className="border-0 bg-light fw-semibold text-dark text-center">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(requestedServices || []).map((service) => (
+                            <tr key={service.bookingId} className="border-bottom">
+                              <td className="py-3">
+                                <div className="fw-bold text-primary">#{service.bookingId}</div>
+                                <small className="text-muted">ID</small>
+                              </td>
+                              <td className="py-3">
+                                <div className="d-flex align-items-center">
+                                  <div className="avatar-sm bg-light rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                    <FaUser className="text-muted" size={14} />
+                                  </div>
+                                  <div>
+                                    <div className="fw-semibold">{service.userName || 'Anonymous'}</div>
+                                    <small className="text-muted">{service.userMobileNumber}</small>
+                                  </div>
                                 </div>
-                                <div>
-                                  <div className="fw-semibold">{service.userName || 'Anonymous'}</div>
-                                  <small className="text-muted">{service.userMobileNumber}</small>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-3">
-                              <Badge bg="primary" className="px-3 py-2">
-                                {service.labourSkill}
-                              </Badge>
-                            </td>
-                            <td className="py-3">
-                              <div className="fw-semibold">{formatDate(service.bookingTime)}</div>
-                              <small className="text-muted">Requested</small>
-                            </td>
-                            <td className="py-3">
-                              {getStatusBadge(service.bookingStatusCode)}
-                            </td>
-                            <td className="py-3 text-center">
-                              <div className="d-flex gap-2 justify-content-center">
-                                {service.bookingStatusCode === 1 && (
-                                  <>
+                              </td>
+                              <td className="py-3">
+                                <Badge bg="primary" className="px-3 py-2">
+                                  {service.labourSkill}
+                                </Badge>
+                              </td>
+                              <td className="py-3">
+                                <div className="fw-semibold">{formatDate(service.bookingTime)}</div>
+                                <small className="text-muted">Requested</small>
+                              </td>
+                              <td className="py-3">
+                                {getStatusBadge(service.bookingStatusCode)}
+                              </td>
+                              <td className="py-3 text-center">
+                                <div className="d-flex gap-2 justify-content-center">
+                                  {service.bookingStatusCode === 1 && (
+                                    <>
+                                      <Button 
+                                        variant="success" 
+                                        size="sm"
+                                        onClick={() => handleStatusUpdate(service.bookingId, 2)}
+                                        disabled={statusUpdatingId === service.bookingId}
+                                        className="px-3"
+                                      >
+                                        {statusUpdatingId === service.bookingId ? (
+                                          <Spinner as="span" animation="border" size="sm" />
+                                        ) : (
+                                          <>
+                                            <FaCheckCircle className="me-1" size={12} />
+                                            Accept
+                                          </>
+                                        )}
+                                      </Button>
+                                      <Button 
+                                        variant="outline-danger" 
+                                        size="sm"
+                                        onClick={() => handleStatusUpdate(service.bookingId, -1)}
+                                        disabled={statusUpdatingId === service.bookingId}
+                                        className="px-3"
+                                      >
+                                        {statusUpdatingId === service.bookingId ? (
+                                          <Spinner as="span" animation="border" size="sm" />
+                                        ) : (
+                                          <>
+                                            <FaTimesCircle className="me-1" size={12} />
+                                            Decline
+                                          </>
+                                        )}
+                                      </Button>
+                                    </>
+                                  )}
+                                  {service.bookingStatusCode === 2 && (
                                     <Button 
-                                      variant="success" 
+                                      variant="primary" 
+                                      size="sm"
+                                      onClick={() => handleStatusUpdate(service.bookingId, 3)}
+                                      disabled={statusUpdatingId === service.bookingId}
+                                      className="px-3"
+                                    >
+                                      {statusUpdatingId === service.bookingId ? (
+                                        <Spinner as="span" animation="border" size="sm" />
+                                      ) : (
+                                        <>
+                                          <FaCheckCircle className="me-1" size={12} />
+                                          Complete
+                                        </>
+                                      )}
+                                    </Button>
+                                  )}
+                                  {service.bookingStatusCode === 3 && (
+                                    <Badge bg="success" className="px-3 py-2">
+                                      <FaCheckCircle className="me-1" size={12} />
+                                      Completed
+                                    </Badge>
+                                  )}
+                                  {service.bookingStatusCode === -1 && (
+                                    <Button 
+                                      variant="outline-success" 
                                       size="sm"
                                       onClick={() => handleStatusUpdate(service.bookingId, 2)}
                                       disabled={statusUpdatingId === service.bookingId}
@@ -670,77 +744,135 @@ const LabourDashboard = () => {
                                       ) : (
                                         <>
                                           <FaCheckCircle className="me-1" size={12} />
-                                          Accept
+                                          Reconsider
                                         </>
                                       )}
                                     </Button>
-                                    <Button 
-                                      variant="outline-danger" 
-                                      size="sm"
-                                      onClick={() => handleStatusUpdate(service.bookingId, -1)}
-                                      disabled={statusUpdatingId === service.bookingId}
-                                      className="px-3"
-                                    >
-                                      {statusUpdatingId === service.bookingId ? (
-                                        <Spinner as="span" animation="border" size="sm" />
-                                      ) : (
-                                        <>
-                                          <FaTimesCircle className="me-1" size={12} />
-                                          Decline
-                                        </>
-                                      )}
-                                    </Button>
-                                  </>
-                                )}
-                                {service.bookingStatusCode === 2 && (
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+                    
+                    {/* Mobile Card Layout */}
+                    <div className="d-block d-lg-none">
+                      <div className="mobile-services-list">
+                        {(requestedServices || []).map((service) => (
+                          <div key={service.bookingId} className="mobile-service-card p-3 mb-3 border rounded bg-white">
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                              <div className="d-flex align-items-center">
+                                <div className="avatar-sm bg-light rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                  <FaUser className="text-muted" size={14} />
+                                </div>
+                                <div>
+                                  <div className="fw-bold text-primary small">#{service.bookingId}</div>
+                                  <div className="fw-semibold small">{service.userName || 'Anonymous'}</div>
+                                  <small className="text-muted">{service.userMobileNumber}</small>
+                                </div>
+                              </div>
+                              {getStatusBadge(service.bookingStatusCode)}
+                            </div>
+                            
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                              <Badge bg="primary" className="px-2 py-1">
+                                {service.labourSkill}
+                              </Badge>
+                              <div className="text-end">
+                                <div className="fw-semibold small">{formatDate(service.bookingTime)}</div>
+                                <small className="text-muted">Requested</small>
+                              </div>
+                            </div>
+                            
+                            <div className="d-flex gap-2 justify-content-center">
+                              {service.bookingStatusCode === 1 && (
+                                <>
                                   <Button 
-                                    variant="primary" 
+                                    variant="success" 
                                     size="sm"
-                                    onClick={() => handleStatusUpdate(service.bookingId, 3)}
+                                    onClick={() => handleStatusUpdate(service.bookingId, 2)}
                                     disabled={statusUpdatingId === service.bookingId}
-                                    className="px-3"
+                                    className="flex-grow-1"
                                   >
                                     {statusUpdatingId === service.bookingId ? (
                                       <Spinner as="span" animation="border" size="sm" />
                                     ) : (
                                       <>
                                         <FaCheckCircle className="me-1" size={12} />
-                                        Complete
+                                        Accept
                                       </>
                                     )}
                                   </Button>
-                                )}
-                                {service.bookingStatusCode === 3 && (
+                                  <Button 
+                                    variant="outline-danger" 
+                                    size="sm"
+                                    onClick={() => handleStatusUpdate(service.bookingId, -1)}
+                                    disabled={statusUpdatingId === service.bookingId}
+                                    className="flex-grow-1"
+                                  >
+                                    {statusUpdatingId === service.bookingId ? (
+                                      <Spinner as="span" animation="border" size="sm" />
+                                    ) : (
+                                      <>
+                                        <FaTimesCircle className="me-1" size={12} />
+                                        Decline
+                                      </>
+                                    )}
+                                  </Button>
+                                </>
+                              )}
+                              {service.bookingStatusCode === 2 && (
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  onClick={() => handleStatusUpdate(service.bookingId, 3)}
+                                  disabled={statusUpdatingId === service.bookingId}
+                                  className="w-100"
+                                >
+                                  {statusUpdatingId === service.bookingId ? (
+                                    <Spinner as="span" animation="border" size="sm" />
+                                  ) : (
+                                    <>
+                                      <FaCheckCircle className="me-1" size={12} />
+                                      Mark as Complete
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                              {service.bookingStatusCode === 3 && (
+                                <div className="w-100 text-center">
                                   <Badge bg="success" className="px-3 py-2">
                                     <FaCheckCircle className="me-1" size={12} />
                                     Completed
                                   </Badge>
-                                )}
-                                {service.bookingStatusCode === -1 && (
-                                  <Button 
-                                    variant="outline-success" 
-                                    size="sm"
-                                    onClick={() => handleStatusUpdate(service.bookingId, 2)}
-                                    disabled={statusUpdatingId === service.bookingId}
-                                    className="px-3"
-                                  >
-                                    {statusUpdatingId === service.bookingId ? (
-                                      <Spinner as="span" animation="border" size="sm" />
-                                    ) : (
-                                      <>
-                                        <FaCheckCircle className="me-1" size={12} />
-                                        Reconsider
-                                      </>
-                                    )}
-                                  </Button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
+                                </div>
+                              )}
+                              {service.bookingStatusCode === -1 && (
+                                <Button 
+                                  variant="outline-success" 
+                                  size="sm"
+                                  onClick={() => handleStatusUpdate(service.bookingId, 2)}
+                                  disabled={statusUpdatingId === service.bookingId}
+                                  className="w-100"
+                                >
+                                  {statusUpdatingId === service.bookingId ? (
+                                    <Spinner as="span" animation="border" size="sm" />
+                                  ) : (
+                                    <>
+                                      <FaCheckCircle className="me-1" size={12} />
+                                      Reconsider
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         ))}
-                      </tbody>
-                    </Table>
-                  </div>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-5">
                     <FaClock className="text-muted mb-3" size={48} />
@@ -755,21 +887,21 @@ const LabourDashboard = () => {
 
         {/* Reviews and Booking History */}
         <Row>
-          <Col lg={8} className="mb-4">
+          <Col lg={8} className="mb-3 mb-md-4">
             <Card className="border-0 shadow-sm h-100">
-              <Card.Body className="p-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+              <Card.Body className="p-3 p-md-4">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaStar className="me-2 text-warning" />
                     Customer Reviews
                   </h4>
-                  <div className="d-flex gap-2">
+                  <div className="d-flex gap-2 w-100 w-md-auto">
                     <Form.Select
                       name="sortBy"
                       value={sortConfig.sortBy}
                       onChange={handleSortChange}
                       size="sm"
-                      className="border-0 bg-light"
+                      className="border-0 bg-light flex-grow-1"
                     >
                       <option value="reviewTime">Latest First</option>
                       <option value="rating">By Rating</option>
@@ -779,7 +911,7 @@ const LabourDashboard = () => {
                       value={sortConfig.sortOrder}
                       onChange={handleSortChange}
                       size="sm"
-                      className="border-0 bg-light"
+                      className="border-0 bg-light flex-grow-1"
                     >
                       <option value="desc">High to Low</option>
                       <option value="asc">Low to High</option>
@@ -798,18 +930,18 @@ const LabourDashboard = () => {
                         return [5, 4, 3, 2, 1].map(rating => (
                           <Col key={rating} xs={12}>
                             <div className="d-flex align-items-center gap-2">
-                              <div className="d-flex align-items-center" style={{ minWidth: '60px' }}>
-                                <span className="me-1">{rating}</span>
+                              <div className="d-flex align-items-center" style={{ minWidth: '50px' }}>
+                                <span className="me-1 small">{rating}</span>
                                 <FaStar className="text-warning" size={12} />
                               </div>
                               <div className="flex-grow-1">
                                 <ProgressBar
                                   variant={rating >= 4 ? 'success' : rating >= 3 ? 'warning' : 'danger'}
                                   now={total > 0 ? (distribution[rating] / total) * 100 : 0}
-                                  style={{ height: '8px' }}
+                                  style={{ height: '6px' }}
                                 />
                               </div>
-                              <span className="text-muted small" style={{ minWidth: '30px' }}>
+                              <span className="text-muted small" style={{ minWidth: '25px', textAlign: 'right' }}>
                                 {distribution[rating]}
                               </span>
                             </div>
@@ -825,23 +957,23 @@ const LabourDashboard = () => {
                   {(reviews || []).length > 0 ? (
                     <div className="reviews-list">
                       {(reviews || []).map((review, index) => (
-                        <div key={index} className="review-card mb-3 p-4 bg-white border rounded shadow-sm">
-                          <div className="d-flex justify-content-between align-items-start mb-3">
-                            <div className="d-flex align-items-center">
+                        <div key={index} className="review-card mb-3 p-3 p-md-4 bg-white border rounded shadow-sm">
+                          <div className="d-flex flex-column flex-md-row justify-content-between align-items-start mb-3 gap-2">
+                            <div className="d-flex align-items-center w-100">
                               <div className="avatar-lg bg-primary bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center">
-                                <FaUser className="text-primary" size={20} />
+                                <FaUser className="text-primary" size={16} />
                               </div>
-                              <div>
-                                <h6 className="mb-1 fw-semibold">
+                              <div className="flex-grow-1">
+                                <h6 className="mb-1 fw-semibold small">
                                   {review.userName || 'Anonymous Customer'}
                                 </h6>
-                                <div className="d-flex align-items-center gap-2">
+                                <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-1 gap-sm-2">
                                   <div className="rating-stars">
                                     {[...Array(5)].map((_, i) => (
                                       <FaStar
                                         key={i}
                                         className={i < review.rating ? 'text-warning' : 'text-muted'}
-                                        size={14}
+                                        size={12}
                                       />
                                     ))}
                                   </div>
@@ -853,7 +985,7 @@ const LabourDashboard = () => {
                             </div>
                             <Badge 
                               bg={review.rating >= 4 ? 'success' : review.rating >= 3 ? 'warning' : 'danger'}
-                              className="px-3 py-2"
+                              className="px-2 py-1 align-self-end align-self-md-start"
                             >
                               {review.rating}/5
                             </Badge>
@@ -862,11 +994,11 @@ const LabourDashboard = () => {
                           {review.review && (
                             <div className="review-content">
                               <div className="position-relative">
-                                <FaQuoteLeft className="text-muted position-absolute" 
+                                <FaQuoteLeft className="text-muted position-absolute d-none d-md-block" 
                                   style={{ top: '-5px', left: '-5px', fontSize: '20px', opacity: 0.3 }} />
-                                <p className="mb-0 ps-3" style={{ 
-                                  fontSize: '0.95rem',
-                                  lineHeight: '1.6',
+                                <p className="mb-0 ps-0 ps-md-3" style={{ 
+                                  fontSize: '0.9rem',
+                                  lineHeight: '1.5',
                                   color: '#555'
                                 }}>
                                   {review.review}
@@ -894,21 +1026,21 @@ const LabourDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} className="mb-4">
+          <Col lg={4} className="mb-3 mb-md-4">
             <Card className="border-0 shadow-sm h-100">
-              <Card.Body className="p-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+              <Card.Body className="p-3 p-md-4">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaHistory className="me-2 text-primary" />
                     Recent Activity
                   </h4>
-                  <div className="d-flex gap-2">
+                  <div className="d-flex gap-2 w-100 w-md-auto">
                     <Form.Select
                       name="sortOrder"
                       value={bookingSortConfig.sortOrder}
                       onChange={handleBookingSortChange}
                       size="sm"
-                      className="border-0 bg-light"
+                      className="border-0 bg-light flex-grow-1"
                     >
                       <option value="desc">Latest First</option>
                       <option value="asc">Oldest First</option>
@@ -918,6 +1050,7 @@ const LabourDashboard = () => {
                       size="sm"
                       onClick={() => fetchRequestedServices(false)}
                       disabled={isServicesRefreshing}
+                      className="flex-shrink-0"
                     >
                       {isServicesRefreshing ? (
                         <Spinner animation="border" size="sm" />
@@ -987,7 +1120,7 @@ const LabourDashboard = () => {
           <Col>
             <Card className="border-0 bg-light">
               <Card.Body className="p-3">
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                   <div>
                     <h6 className="mb-1 text-muted">
                       <FaCog className="me-2" size={14} />
@@ -1009,8 +1142,9 @@ const LabourDashboard = () => {
                         className="d-flex align-items-center opacity-75"
                         style={{ fontSize: '0.8rem' }}
                       >
-                        <FaTrashAlt className="me-2" size={12} />
-                        Delete Profile
+                        <FaTrashAlt className="me-1 me-md-2" size={12} />
+                        <span className="d-none d-sm-inline">Delete Profile</span>
+                        <span className="d-inline d-sm-none">Delete</span>
                       </Button>
                     </OverlayTrigger>
                   </div>

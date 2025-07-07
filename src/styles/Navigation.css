@@ -2,27 +2,37 @@
 .navbar {
   position: fixed !important;
   top: 0;
+  left: 0;
   right: 0;
-  z-index: 1002;
+  z-index: 1050;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
-  transition: left 0.3s ease-in-out;
+  transition: left 0.3s ease-in-out, height 0.3s ease-in-out;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   height: 70px;
+  width: 100%;
 }
 
 /* Desktop layout - adjust navbar position when sidebar is present */
 @media (min-width: 992px) {
-  .navbar {
+  .navbar-desktop.sidebar-open {
     left: 280px;
+    width: calc(100% - 280px);
+  }
+  
+  .navbar-desktop.sidebar-closed {
+    left: 70px;
+    width: calc(100% - 70px);
   }
 }
 
 /* Mobile layout - full width navbar */
 @media (max-width: 991.98px) {
+  .navbar-mobile,
   .navbar {
-    left: 0;
+    left: 0 !important;
+    width: 100% !important;
   }
 }
 
@@ -31,9 +41,9 @@
   color: white !important;
   transition: all 0.3s ease;
   border-radius: 6px;
-  padding: 0.5rem !important;
-  min-width: 40px;
-  height: 40px;
+  padding: 0.4rem !important;
+  min-width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,6 +82,7 @@
   background-clip: text;
   font-weight: 800;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .navbar-brand:hover {
@@ -88,6 +99,20 @@
 
 .navbar-brand img {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Responsive navbar logo */
+.navbar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
 }
 
 .nav-link {
@@ -210,11 +235,34 @@
   padding: 0 1rem;
 }
 
+.navbar .container-fluid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .navbar {
     padding: 0.5rem 1rem;
     height: 60px;
+    left: 0 !important;
+    width: 100% !important;
+    right: 0;
+  }
+  
+  .navbar .container-fluid {
+    padding: 0;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
   }
   
   .city-display {
@@ -222,8 +270,22 @@
   }
   
   .navbar-brand {
-    font-size: 1.2rem;
-    margin-right: 1rem;
+    font-size: 1.1rem;
+    margin-right: auto;
+    margin-left: 0.5rem;
+    flex-grow: 0;
+    justify-content: flex-start;
+    order: 2;
+  }
+  
+  .navbar-logo {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .brand-text {
+    font-size: 1.1rem;
+    font-weight: 700;
   }
   
   .nav-link {
@@ -232,13 +294,34 @@
   }
   
   .sidebar-toggle-btn {
-    min-width: 36px;
-    height: 36px;
-    padding: 0.4rem !important;
+    min-width: 32px;
+    height: 32px;
+    padding: 0.3rem !important;
+    margin-right: 0;
+    order: 1;
+    flex-shrink: 0;
+  }
+  
+  .navbar-toggler {
+    order: 3;
+    margin-left: auto;
   }
 }
 
 @media (max-width: 991.98px) {
+  .navbar,
+  .navbar-mobile {
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  
+  .navbar-mobile .container-fluid {
+    padding: 0 1rem;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
   .city-display {
     margin: 0.5rem 0;
     justify-content: center;
@@ -246,6 +329,137 @@
   
   .navbar .container {
     padding: 0 0.5rem;
+  }
+  
+  .navbar .container-fluid {
+    padding: 0 1rem;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 769px) and (max-width: 991.98px) {
+  .navbar {
+    height: 65px;
+  }
+}
+
+/* Ensure navbar stays above all content */
+.navbar {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
+}
+
+/* Prevent horizontal scrolling issues */
+.navbar .container-fluid {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile navbar collapse improvements */
+@media (max-width: 767.98px) {
+  .navbar {
+    overflow-x: hidden;
+  }
+  
+  .navbar .container-fluid {
+    padding: 0 0.75rem;
+    overflow: hidden;
+  }
+  
+  .navbar-collapse {
+    background: rgba(26, 32, 44, 0.95);
+    margin: 0.5rem -0.75rem -0.5rem -0.75rem;
+    padding: 1rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: calc(100% + 1.5rem);
+    left: -0.75rem;
+    position: relative;
+  }
+  
+  .navbar-nav {
+    gap: 0.25rem;
+  }
+  
+  .nav-link {
+    border-radius: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .navbar-toggler {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.3rem 0.4rem;
+    font-size: 0.9rem;
+  }
+  
+  .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 575.98px) {
+  .navbar {
+    padding: 0.4rem 0.75rem;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  .navbar .container-fluid {
+    padding: 0 0.5rem;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .navbar-brand {
+    font-size: 1rem;
+    margin-left: 0.25rem;
+  }
+  
+  .navbar-logo {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .brand-text {
+    font-size: 1rem;
+  }
+  
+  .sidebar-toggle-btn {
+    min-width: 28px;
+    height: 28px;
+    padding: 0.25rem !important;
+    margin-right: 0;
+    flex-shrink: 0;
+  }
+  
+  .sidebar-toggle-btn svg {
+    font-size: 12px;
+  }
+  
+  /* Ensure touch targets are adequate */
+  .sidebar-toggle-btn {
+    position: relative;
+  }
+  
+  .sidebar-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: transparent;
+  }
+  
+  .navbar-collapse {
+    margin: 0.5rem -0.75rem -0.4rem -0.75rem;
+    width: calc(100% + 1.5rem);
   }
 }
 
