@@ -60,6 +60,7 @@ html {
 @media (max-width: 991.98px) {
   .main-content {
     margin-left: 0;
+    padding-top: 65px; /* Mobile navbar height */
   }
   
   .main-content.sidebar-closed {
@@ -234,6 +235,45 @@ html {
   }
 }
 
+/* Handle landscape mobile orientation and very small screens */
+@media (max-width: 575.98px) {
+  .main-content {
+    padding-top: 55px; /* Extra small mobile navbar height */
+  }
+}
+
+/* Handle landscape mobile orientation */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 768px) {
+  .navbar {
+    height: 50px !important;
+    padding: 0.25rem 1rem !important;
+  }
+  
+  .main-content {
+    padding-top: 50px !important;
+  }
+  
+  .navbar-brand {
+    font-size: 1rem !important;
+  }
+  
+  .sidebar-toggle-btn {
+    min-width: 28px !important;
+    height: 28px !important;
+    padding: 0.2rem !important;
+  }
+  
+  .navbar-logo {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  
+  .nav-link {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.85rem !important;
+  }
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {
@@ -390,36 +430,4 @@ html {
 .app-container {
   width: 100%;
   overflow-x: hidden;
-}
-
-/* Handle landscape mobile orientation */
-@media (orientation: landscape) and (max-height: 500px) and (max-width: 768px) {
-  .navbar {
-    height: 50px !important;
-    padding: 0.25rem 1rem !important;
-  }
-  
-  .main-content {
-    padding-top: 50px !important;
-  }
-  
-  .navbar-brand {
-    font-size: 1rem !important;
-  }
-  
-  .sidebar-toggle-btn {
-    min-width: 28px !important;
-    height: 28px !important;
-    padding: 0.2rem !important;
-  }
-  
-  .navbar-logo {
-    width: 22px !important;
-    height: 22px !important;
-  }
-  
-  .nav-link {
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.85rem !important;
-  }
 }

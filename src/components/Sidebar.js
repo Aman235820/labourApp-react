@@ -15,15 +15,19 @@ import {
   FaUserShield,
   FaChevronLeft,
   FaChevronRight,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaMapMarkerAlt
 } from 'react-icons/fa';
 import '../styles/Sidebar.css';
+import LocationModal from './LocationModal';
 
 function Sidebar({ isOpen, setIsOpen, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [cityName, setCityName] = useState(''); // State for city name
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   // Check if user is logged in
   useEffect(() => {
@@ -62,6 +66,53 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     return () => {
       window.removeEventListener('storage', checkUserLoginStatus);
       window.removeEventListener('userLoginStatusChanged', checkUserLoginStatus);
+    };
+  }, []);
+
+  // Check for location updates
+  useEffect(() => {
+    const updateCity = () => {
+      try {
+        const locationData = JSON.parse(localStorage.getItem('userLocation'));
+        if (locationData && locationData.address) {
+          let city = '';
+          
+          if (locationData.address.city) {
+            city = locationData.address.city;
+          } else if (locationData.address.state_district) {
+            city = locationData.address.state_district;
+          } else if (locationData.address.county) {
+            city = locationData.address.county;
+          } else if (locationData.address.town) {
+            city = locationData.address.town;
+          } else if (locationData.address.village) {
+            city = locationData.address.village;
+          } else if (locationData.address.suburb) {
+            city = locationData.address.suburb;
+          } else if (locationData.address.state) {
+            city = locationData.address.state;
+          } else if (locationData.address.postcode) {
+            city = `PIN ${locationData.address.postcode}`;
+          }
+          
+          setCityName(city);
+        } else {
+          setCityName('');
+        }
+      } catch (error) {
+        setCityName('');
+      }
+    };
+
+    updateCity();
+    
+    // Listen for location updates
+    window.addEventListener('locationUpdated', updateCity);
+    window.addEventListener('storage', updateCity);
+    
+    return () => {
+      window.removeEventListener('locationUpdated', updateCity);
+      window.removeEventListener('storage', updateCity);
     };
   }, []);
 
@@ -158,6 +209,22 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     handleLogout();
   };
 
+  const handleLocationClick = () => {
+    // If sidebar is closed, open it first
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+
+    // Show location modal
+    setShowLocationModal(true);
+  };
+
+  const handleLocationSelect = (location) => {
+    setShowLocationModal(false);
+    setCityName(location.city || location.display_name || 'Unknown Location');
+  };
+
   return (
     <>
       {/* Sidebar overlay for mobile */}
@@ -170,6 +237,19 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
 
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        {/* Desktop Sidebar Toggle Button */}
+        <div className="sidebar-toggle-container d-none d-lg-block">
+          <Button
+            variant="outline-light"
+            className="sidebar-toggle-btn-desktop"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle sidebar"
+            title={isOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            <FaBars />
+          </Button>
+        </div>
+
         <div className="sidebar-header">
           <h5 className="mb-0" style={{ display: 'flex', alignItems: 'center', cursor: !isOpen ? 'pointer' : 'default' }}>
             <span
@@ -185,6 +265,54 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
         </div>
 
         <Nav className="flex-column sidebar-nav">
+          {/* Mobile Quick Navigation - Only show on mobile */}
+          {isMobile && (
+            <div className="sidebar-section">
+              {isOpen && (
+                <h6 className="sidebar-section-title">
+                  <FaHome className="me-2" />
+                  Quick Navigation
+                </h6>
+              )}
+              <Nav.Link 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSidebarNavigation(null, '/');
+                }}
+                className={`sidebar-link ${isActive('/') ? 'active' : ''}`}
+                title={!isOpen ? 'Home' : ''}
+                style={{ cursor: 'pointer' }}
+              >
+                <FaHome className="me-2" />
+                {isOpen && 'Home'}
+              </Nav.Link>
+              <Nav.Link 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSidebarNavigation(null, '/admin');
+                }}
+                className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
+                title={!isOpen ? 'Admin Panel' : ''}
+                style={{ cursor: 'pointer' }}
+              >
+                <FaUserShield className="me-2" />
+                {isOpen && 'Admin Panel'}
+              </Nav.Link>
+              <Nav.Link 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLocationClick();
+                }}
+                className="sidebar-link"
+                title={!isOpen ? 'Location' : ''}
+                style={{ cursor: 'pointer' }}
+              >
+                <FaMapMarkerAlt className="me-2" />
+                {isOpen && `Location: ${cityName || 'Set Location'}`}
+              </Nav.Link>
+            </div>
+          )}
+
           <div className="sidebar-section">
             {isOpen && (
               <h6 className="sidebar-section-title">
@@ -346,6 +474,13 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
           )}
         </div>
       </div>
+
+      {/* Location Modal */}
+      <LocationModal
+        show={showLocationModal}
+        onHide={() => setShowLocationModal(false)}
+        onSelect={handleLocationSelect}
+      />
     </>
   );
 }
