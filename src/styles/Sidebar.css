@@ -67,11 +67,11 @@
 }
 
 .sidebar-header {
-  padding: 2rem 1.5rem 1rem;
+  padding: 1rem 1.5rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
   transition: padding 0.3s ease-in-out;
-  margin-top: 50px; /* Space for the toggle button */
+  margin-top: 56px;
 }
 
 .sidebar-closed .sidebar-header {

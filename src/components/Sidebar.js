@@ -74,32 +74,43 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     const updateCity = () => {
       try {
         const locationData = JSON.parse(localStorage.getItem('userLocation'));
-        if (locationData && locationData.address) {
-          let city = '';
-          
-          if (locationData.address.city) {
-            city = locationData.address.city;
-          } else if (locationData.address.state_district) {
-            city = locationData.address.state_district;
-          } else if (locationData.address.county) {
-            city = locationData.address.county;
-          } else if (locationData.address.town) {
-            city = locationData.address.town;
-          } else if (locationData.address.village) {
-            city = locationData.address.village;
-          } else if (locationData.address.suburb) {
-            city = locationData.address.suburb;
-          } else if (locationData.address.state) {
-            city = locationData.address.state;
-          } else if (locationData.address.postcode) {
-            city = `PIN ${locationData.address.postcode}`;
-          }
-          
-          setCityName(city);
-        } else {
+        console.log('Sidebar location data from localStorage:', locationData);
+        
+        if (!locationData || !locationData.address) {
           setCityName('');
+          return;
         }
+        
+        // Check different possible address structures - match Navigation component logic
+        let city = '';
+        if (locationData.address.address) {
+          // Structure: locationData.address.address.city
+          city = locationData.address.address.city || 
+                 locationData.address.address.town || 
+                 locationData.address.address.village || 
+                 locationData.address.address.suburb ||
+                 locationData.address.address.hamlet || '';
+        } else if (locationData.address.display_name) {
+          // Structure from search results
+          const parts = locationData.address.display_name.split(',');
+          city = parts[0] || '';
+        } else {
+          // Structure: locationData.address.city (direct)
+          city = locationData.address.city || 
+                 locationData.address.town || 
+                 locationData.address.village || 
+                 locationData.address.suburb ||
+                 locationData.address.hamlet || '';
+        }
+        
+        // Handle manual address format
+        if (!city && locationData.displayName) {
+          city = locationData.displayName;
+        }
+        
+        setCityName(city);
       } catch (error) {
+        console.error('Error parsing location data in sidebar:', error);
         setCityName('');
       }
     };
@@ -314,12 +325,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
           )}
 
           <div className="sidebar-section">
-            {isOpen && (
-              <h6 className="sidebar-section-title">
-                <FaHome className="me-2" />
-                Main
-              </h6>
-            )}
+           
             <Nav.Link 
               onClick={(e) => {
                 e.preventDefault();

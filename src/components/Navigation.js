@@ -100,10 +100,10 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
         className={`mb-3 ${isMobile ? 'navbar-mobile' : 'navbar-desktop'} ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
       >
         <Container fluid>
-          {/* Hamburger Menu Button - moved to leftmost position */}
+          {/* Hamburger Menu Button - only visible on mobile */}
           <Button
             variant="outline-light"
-            className="sidebar-toggle-btn me-2"
+            className="sidebar-toggle-btn me-2 d-lg-none"
             onClick={toggleSidebar}
             aria-label="Toggle sidebar"
           >
