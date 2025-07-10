@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Modal, Spinner } from 'react-bootstrap';
 import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon, FaTimes } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
@@ -302,6 +302,38 @@ function Home() {
     setCurrentPage(0);
   };
 
+  const handlePopularServiceClick = async (serviceName) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const res = await searchLabourByCategory(serviceName, 0, pageSize);
+      if (res && res.content) {
+        setLabourers(res.content);
+        setTotalPages(res.totalPages || 0);
+        setTotalElements(res.totalElements || 0);
+        setCurrentPage(0);
+        setShowLabourListModal(true);
+      } else {
+        setLabourers([]);
+        setTotalPages(0);
+        setTotalElements(0);
+        setCurrentPage(0);
+        setShowLabourListModal(true);
+        alert('No labourers found for this service.');
+      }
+    } catch (err) {
+      setLabourers([]);
+      setTotalPages(0);
+      setTotalElements(0);
+      setCurrentPage(0);
+      setShowLabourListModal(true);
+      alert('API error for ' + serviceName);
+      console.error('API error for', serviceName, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Container fluid className="home-container">
       {/* Search Section */}
@@ -334,9 +366,22 @@ function Home() {
                       variant="primary" 
                       type="submit"
                       className="search-button"
+                      disabled={isLoading}
                     >
-                      <span className="d-none d-sm-inline">Search</span>
-                      <span className="d-inline d-sm-none">Go</span>
+                      {isLoading ? (
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <>
+                          <span className="d-none d-sm-inline">Search</span>
+                          <span className="d-inline d-sm-none">Go</span>
+                        </>
+                      )}
                     </Button>
                   </InputGroup>
                 </div>
@@ -501,6 +546,142 @@ function Home() {
             </React.Fragment>
           );
         })}
+      </div>
+
+      {/* Explore Popular Services Section */}
+      <div className="popular-services-section">
+        <Container>
+          <div className="section-header text-center mb-5">
+            <h2 className="section-title">Explore Popular Services</h2>
+            <p className="section-subtitle">Find trusted professionals for your most common needs</p>
+          </div>
+          
+          <Row className="justify-content-center">
+            <Col xs={12} sm={6} lg={6} className="mb-5">
+              <div 
+                className="popular-service-card enhanced-card"
+                onClick={() => handlePopularServiceClick('Electrician')}
+              >
+                <div className="service-image-container">
+                  <img
+                    src="/images/electrician2.jpg"
+                    alt="Electrician"
+                    className="popular-service-image"
+                  />
+                  <div className="service-overlay">
+                    <div className="service-icon">
+                      <FaTools />
+                    </div>
+                  </div>
+                  <div className="service-badge">
+                    <span>Popular</span>
+                  </div>
+                </div>
+                <div className="service-content">
+                  <h4 className="service-title">Electrician</h4>
+                  <p className="service-description">Professional electrical services for your home and office</p>
+                  <div className="service-features">
+                    <span className="feature-tag">24/7 Available</span>
+                    <span className="feature-tag">Verified</span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            
+            <Col xs={12} sm={6} lg={6} className="mb-5">
+              <div 
+                className="popular-service-card enhanced-card"
+                onClick={() => handlePopularServiceClick('Plumber')}
+              >
+                <div className="service-image-container">
+                  <img
+                    src="/images/plumber1.webp"
+                    alt="Plumber"
+                    className="popular-service-image"
+                  />
+                  <div className="service-overlay">
+                    <div className="service-icon">
+                      <FaTools />
+                    </div>
+                  </div>
+                  <div className="service-badge">
+                    <span>Top Rated</span>
+                  </div>
+                </div>
+                <div className="service-content">
+                  <h4 className="service-title">Plumber</h4>
+                  <p className="service-description">Expert plumbing solutions for all your needs</p>
+                  <div className="service-features">
+                    <span className="feature-tag">Emergency</span>
+                    <span className="feature-tag">Licensed</span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            
+            <Col xs={12} sm={6} lg={6} className="mb-5">
+              <div 
+                className="popular-service-card enhanced-card"
+                onClick={() => handlePopularServiceClick('House Help')}
+              >
+                <div className="service-image-container">
+                  <img
+                    src="/images/househelp1.jpg"
+                    alt="House Help"
+                    className="popular-service-image"
+                  />
+                  <div className="service-overlay">
+                    <div className="service-icon">
+                      <FaTools />
+                    </div>
+                  </div>
+                  <div className="service-badge">
+                    <span>Trusted</span>
+                  </div>
+                </div>
+                <div className="service-content">
+                  <h4 className="service-title">House Help</h4>
+                  <p className="service-description">Reliable domestic assistance for your daily needs</p>
+                  <div className="service-features">
+                    <span className="feature-tag">Background Checked</span>
+                    <span className="feature-tag">Experienced</span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            
+            <Col xs={12} sm={6} lg={6} className="mb-5">
+              <div 
+                className="popular-service-card enhanced-card"
+                onClick={() => handlePopularServiceClick('Mechanic')}
+              >
+                <div className="service-image-container">
+                  <img
+                    src="/images/mechanic1.jpg"
+                    alt="Mechanic"
+                    className="popular-service-image"
+                  />
+                  <div className="service-overlay">
+                    <div className="service-icon">
+                      <FaTools />
+                    </div>
+                  </div>
+                  <div className="service-badge">
+                    <span>Expert</span>
+                  </div>
+                </div>
+                <div className="service-content">
+                  <h4 className="service-title">Mechanic</h4>
+                  <p className="service-description">Skilled vehicle maintenance and repair services</p>
+                  <div className="service-features">
+                    <span className="feature-tag">Mobile Service</span>
+                    <span className="feature-tag">Warranty</span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
       </div>
 
       {/* Modal Results Table for Subservice Clicks */}
