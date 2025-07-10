@@ -120,11 +120,14 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
             <span className="brand-text">InstaHelp</span>
           </Navbar.Brand>
           
-          {/* City Display */}
-          <div className="city-display d-none d-md-flex" onClick={handleLocationClick}>
-            <FaMapMarkerAlt className="me-2" />
-            <span className="city-text">
-              {cityName || locationError || 'Set Location'}
+          {/* Location Display - Left side */}
+          <div className="location-display d-none d-md-flex align-items-center me-3" onClick={handleLocationClick}>
+            <FaMapMarkerAlt className="me-2 text-info" />
+            <span className="location-text">
+              <span className="text-muted">Showing services in: </span>
+              <span className="fw-bold text-white">
+                {cityName || locationError || 'Set Location'}
+              </span>
             </span>
             {(!cityName && !locationError) && (
               <Button

@@ -151,6 +151,61 @@
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
+/* Location Display - Left side */
+.location-display {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  margin-left: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.location-display:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.location-display svg {
+  margin-right: 0.5rem;
+  color: #17a2b8;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.location-display .location-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.location-display .location-text .text-muted {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.85rem;
+}
+
+.location-display .location-text .fw-bold {
+  color: white !important;
+  font-weight: 600;
+}
+
 /* City Display */
 .city-display {
   color: rgba(255, 255, 255, 0.8);
@@ -232,155 +287,81 @@
 @media (max-width: 991.98px) {
   .navbar,
   .navbar-mobile {
-    left: 0 !important;
-    width: 100% !important;
-    max-width: 100vw !important;
+    height: 65px;
+    padding: 0.5rem 1rem;
   }
-  
+
   .navbar-mobile .container-fluid {
-    padding: 0 1rem;
-    max-width: 100%;
-    overflow: hidden;
+    padding: 0 0.5rem;
   }
-  
-  .city-display {
-    margin: 0.5rem 0;
-    justify-content: center;
+
+  .location-display {
+    max-width: 200px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    margin-left: 0.5rem;
+  }
+
+  .location-display .location-text {
+    gap: 0.2rem;
+  }
+
+  .location-display .location-text .text-muted {
+    font-size: 0.75rem;
   }
 }
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0.5rem 1rem;
     height: 60px;
-    overflow-x: hidden;
+    padding: 0.4rem 0.8rem;
   }
-  
+
   .navbar .container-fluid {
-    padding: 0;
-    max-width: 100%;
-    justify-content: flex-start;
+    padding: 0 0.3rem;
   }
-  
-  .city-display {
-    display: none;
+
+  .location-display {
+    max-width: 160px;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+    margin-left: 0.3rem;
   }
-  
-  .navbar-brand {
-    font-size: 1.1rem;
-    margin-right: auto;
-    margin-left: 0.5rem;
-    flex-grow: 0;
-    justify-content: flex-start;
-    order: 2;
-  }
-  
-  .navbar-logo {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .brand-text {
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-  
-  .nav-link {
-    padding: 0.5rem 0.75rem !important;
+
+  .location-display svg {
     font-size: 0.9rem;
+    margin-right: 0.3rem;
   }
-  
-  .sidebar-toggle-btn {
-    min-width: 32px;
-    height: 32px;
-    padding: 0.3rem !important;
-    margin-right: 0;
-    order: 1;
-    flex-shrink: 0;
-  }
-  
-  .navbar-toggler {
-    order: 3;
-    margin-left: auto;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.3rem 0.4rem;
-    font-size: 0.9rem;
-  }
-  
-  .navbar-toggler:focus {
-    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
-  }
-  
-  .navbar-collapse {
-    background: rgba(26, 32, 44, 0.95);
-    margin: 0.5rem -1rem -0.5rem -1rem;
-    padding: 1rem;
-    border-radius: 0 0 0.5rem 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    width: calc(100% + 2rem);
-    left: -1rem;
-    position: relative;
-  }
-  
-  .navbar-nav {
-    gap: 0.25rem;
-  }
-  
-  .nav-link {
-    border-radius: 0.5rem;
-    margin-bottom: 0.25rem;
+
+  .location-display .location-text .text-muted {
+    font-size: 0.7rem;
   }
 }
 
 @media (max-width: 575.98px) {
   .navbar {
-    padding: 0.4rem 0.75rem;
-    max-width: 100vw;
+    height: 55px;
+    padding: 0.3rem 0.6rem;
   }
-  
+
   .navbar .container-fluid {
-    padding: 0 0.5rem;
+    padding: 0 0.2rem;
   }
-  
-  .navbar-brand {
-    font-size: 1rem;
-    margin-left: 0.25rem;
+
+  .location-display {
+    max-width: 140px;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+    margin-left: 0.2rem;
   }
-  
-  .navbar-logo {
-    width: 24px;
-    height: 24px;
+
+  .location-display svg {
+    font-size: 0.8rem;
+    margin-right: 0.25rem;
   }
-  
-  .brand-text {
-    font-size: 1rem;
-  }
-  
-  .sidebar-toggle-btn {
-    min-width: 28px;
-    height: 28px;
-    padding: 0.25rem !important;
-    position: relative;
-  }
-  
-  .sidebar-toggle-btn svg {
-    font-size: 12px;
-  }
-  
-  .sidebar-toggle-btn::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    background: transparent;
-  }
-  
-  .navbar-collapse {
-    margin: 0.5rem -0.75rem -0.4rem -0.75rem;
-    width: calc(100% + 1.5rem);
-    left: -0.75rem;
+
+  .location-display .location-text .text-muted {
+    font-size: 0.65rem;
   }
 }
 
