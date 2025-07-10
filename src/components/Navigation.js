@@ -17,7 +17,6 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
         console.log('Location data from localStorage:', locationData);
         
         if (!locationData || !locationData.address) {
-          console.log('No location data or address found, requesting location...');
           if (requestLocation) {
             requestLocation().catch(error => {
               console.error('Location request failed:', error);
@@ -28,7 +27,6 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
           return;
         }
         
-        console.log('Address structure:', locationData.address);
         
         // Check different possible address structures
         let city = '';
@@ -57,7 +55,6 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
           city = locationData.displayName;
         }
         
-        console.log('Extracted city:', city);
         setCityName(city);
         setLocationError(''); // Clear any previous error
       } catch (error) {
@@ -80,7 +77,6 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
   };
 
   const handleLocationSelect = (location) => {
-    console.log('Location selected:', location);
     // The location is already saved in the modal, just close it
     setShowLocationModal(false);
   };
