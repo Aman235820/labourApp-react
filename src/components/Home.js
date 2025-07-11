@@ -5,6 +5,7 @@ import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
+import '../styles/SearchLabourModal.css';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
 import LabourList from './LabourList';
@@ -24,7 +25,6 @@ function Home() {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showLabourListModal, setShowLabourListModal] = useState(false);
-  const [loadingPopularService, setLoadingPopularService] = useState(null);
 
   const columns = [
     {
@@ -262,27 +262,44 @@ function Home() {
       setError(null);
       const res = await searchLabourByCategory(sub, 0, pageSize);
       if (res && res.content) {
-        setLabourers(res.content);
-        setTotalPages(res.totalPages || 0);
-        setTotalElements(res.totalElements || 0);
-        setCurrentPage(0);
-        setShowLabourListModal(true);
+        // Navigate to labour list page with the data
+        navigate('/labour-list', { 
+          state: { 
+            labourers: res.content,
+            totalElements: res.totalElements || 0,
+            totalPages: res.totalPages || 0,
+            service: sub,
+            currentPage: 0,
+            pageSize: pageSize
+          }
+        });
       } else {
-        setLabourers([]);
-        setTotalPages(0);
-        setTotalElements(0);
-        setCurrentPage(0);
-        setShowLabourListModal(true);
-        alert('No labourers found for this subservice.');
+        // Navigate with empty data
+        navigate('/labour-list', { 
+          state: { 
+            labourers: [],
+            totalElements: 0,
+            totalPages: 0,
+            service: sub,
+            currentPage: 0,
+            pageSize: pageSize
+          }
+        });
       }
     } catch (err) {
-      setLabourers([]);
-      setTotalPages(0);
-      setTotalElements(0);
-      setCurrentPage(0);
-      setShowLabourListModal(true);
-      alert('API error for ' + sub);
-      console.error('API error for', sub, err);
+      console.error('Navigation error for', sub, err);
+      // Navigate with error state
+      navigate('/labour-list', { 
+        state: { 
+          labourers: [],
+          totalElements: 0,
+          totalPages: 0,
+          service: sub,
+          currentPage: 0,
+          pageSize: pageSize,
+          error: 'Failed to fetch labourers'
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -305,33 +322,50 @@ function Home() {
 
   const handlePopularServiceClick = async (serviceName) => {
     try {
-      setLoadingPopularService(serviceName);
+      setIsLoading(true);
       setError(null);
       const res = await searchLabourByCategory(serviceName, 0, pageSize);
       if (res && res.content) {
-        setLabourers(res.content);
-        setTotalPages(res.totalPages || 0);
-        setTotalElements(res.totalElements || 0);
-        setCurrentPage(0);
-        setShowLabourListModal(true);
+        // Navigate to labour list page with the data
+        navigate('/labour-list', { 
+          state: { 
+            labourers: res.content,
+            totalElements: res.totalElements || 0,
+            totalPages: res.totalPages || 0,
+            service: serviceName,
+            currentPage: 0,
+            pageSize: pageSize
+          }
+        });
       } else {
-        setLabourers([]);
-        setTotalPages(0);
-        setTotalElements(0);
-        setCurrentPage(0);
-        setShowLabourListModal(true);
-        alert('No labourers found for this service.');
+        // Navigate with empty data
+        navigate('/labour-list', { 
+          state: { 
+            labourers: [],
+            totalElements: 0,
+            totalPages: 0,
+            service: serviceName,
+            currentPage: 0,
+            pageSize: pageSize
+          }
+        });
       }
     } catch (err) {
-      setLabourers([]);
-      setTotalPages(0);
-      setTotalElements(0);
-      setCurrentPage(0);
-      setShowLabourListModal(true);
-      alert('API error for ' + serviceName);
-      console.error('API error for', serviceName, err);
+      console.error('Navigation error for', serviceName, err);
+      // Navigate with error state
+      navigate('/labour-list', { 
+        state: { 
+          labourers: [],
+          totalElements: 0,
+          totalPages: 0,
+          service: serviceName,
+          currentPage: 0,
+          pageSize: pageSize,
+          error: 'Failed to fetch labourers'
+        }
+      });
     } finally {
-      setLoadingPopularService(null);
+      setIsLoading(false);
     }
   };
 
@@ -578,15 +612,6 @@ function Home() {
                   <div className="service-badge">
                     <span>Popular</span>
                   </div>
-                  {loadingPopularService === 'Electrician' && (
-                    <div className="service-loading-overlay">
-                      <Spinner
-                        animation="border"
-                        variant="light"
-                        size="lg"
-                      />
-                    </div>
-                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">Electrician</h4>
@@ -619,15 +644,6 @@ function Home() {
                   <div className="service-badge">
                     <span>Top Rated</span>
                   </div>
-                  {loadingPopularService === 'Plumber' && (
-                    <div className="service-loading-overlay">
-                      <Spinner
-                        animation="border"
-                        variant="light"
-                        size="lg"
-                      />
-                    </div>
-                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">Plumber</h4>
@@ -660,15 +676,6 @@ function Home() {
                   <div className="service-badge">
                     <span>Trusted</span>
                   </div>
-                  {loadingPopularService === 'House Help' && (
-                    <div className="service-loading-overlay">
-                      <Spinner
-                        animation="border"
-                        variant="light"
-                        size="lg"
-                      />
-                    </div>
-                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">House Help</h4>
@@ -701,15 +708,6 @@ function Home() {
                   <div className="service-badge">
                     <span>Expert</span>
                   </div>
-                  {loadingPopularService === 'Mechanic' && (
-                    <div className="service-loading-overlay">
-                      <Spinner
-                        animation="border"
-                        variant="light"
-                        size="lg"
-                      />
-                    </div>
-                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">Mechanic</h4>
@@ -724,14 +722,6 @@ function Home() {
           </Row>
         </Container>
       </div>
-
-      {/* Modal Results Table for Subservice Clicks */}
-      <LabourList
-        show={showLabourListModal}
-        onHide={handleLabourListClose}
-        labourers={labourers}
-        onRowClick={handleLabourListRowClick}
-      />
 
       {/* Onboarding CTA Section */}
       <Row className="cta-section">

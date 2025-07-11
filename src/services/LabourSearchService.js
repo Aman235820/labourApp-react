@@ -5,7 +5,9 @@ const baseurl = `${appUrl}/labourapp/labourReq`;
 
 export const searchLabourByCategory = async (category, pageNumber = 0, pageSize = 10, sortBy = "rating", sortOrder = "desc") => {
     try {
-        const endpoint = `${baseurl}/findByCategory?category=${category}`;
+        // Properly encode the category parameter to handle special characters
+        const encodedCategory = encodeURIComponent(category);
+        const endpoint = `${baseurl}/findByCategory?category=${encodedCategory}`;
         console.log(endpoint);
         console.log('Pagination params:', { pageNumber, pageSize, sortBy, sortOrder });
 

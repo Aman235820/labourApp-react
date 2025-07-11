@@ -1,0 +1,227 @@
+/* Labour List Page Styles */
+.labour-list-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 2rem 0;
+}
+
+.labour-list-header {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(102, 126, 234, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+
+.labour-list-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.labour-list-title {
+  color: #2d3748;
+  font-weight: 700;
+  font-size: 1.3rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.labour-list-title::before {
+  content: '🔍';
+  font-size: 1.1rem;
+}
+
+.labour-list-content {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(102, 126, 234, 0.1);
+  overflow: hidden;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  padding: 2rem;
+}
+
+.labour-table-container {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 400px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.labour-table-container .rdt_Table {
+  transition: opacity 0.3s ease;
+}
+
+.labour-table-container .rdt_TableWrapper {
+  transition: all 0.3s ease;
+}
+
+/* Loading and Error States */
+.loading-container {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.error-container {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-container {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+/* Skeleton Loading */
+.skeleton-table {
+  margin-top: 1rem;
+}
+
+.skeleton-header {
+  height: 50px;
+  background: #f0f0f0;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-row {
+  height: 60px;
+  background: #f8f9fa;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .labour-list-page {
+    padding: 1rem 0;
+  }
+  
+  .labour-list-header {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .labour-list-title {
+    font-size: 1.1rem;
+  }
+  
+  .labour-list-content {
+    padding: 1rem 1.5rem;
+  }
+  
+  .labour-table-container {
+    min-height: 300px;
+    overflow-x: auto;
+  }
+  
+  /* Mobile DataTable styles */
+  .labour-table-container .rdt_Table {
+    font-size: 0.9rem;
+  }
+  
+  .labour-table-container .rdt_TableHead {
+    font-size: 0.85rem;
+  }
+  
+  .labour-table-container .rdt_TableHeadRow {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .labour-table-container .rdt_TableRow {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .labour-table-container .rdt_TableCell {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Mobile button styles */
+  .labour-list-header .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Mobile skeleton styles */
+  .skeleton-header {
+    height: 40px !important;
+  }
+  
+  .skeleton-row {
+    height: 50px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .labour-list-page {
+    padding: 0.5rem 0;
+  }
+  
+  .labour-list-header {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .labour-list-title {
+    font-size: 1rem;
+  }
+  
+  .labour-list-content {
+    padding: 0.75rem 1rem;
+  }
+  
+  .labour-table-container {
+    min-height: 250px;
+  }
+  
+  /* Extra small DataTable styles */
+  .labour-table-container .rdt_Table {
+    font-size: 0.8rem;
+  }
+  
+  .labour-table-container .rdt_TableHead {
+    font-size: 0.75rem;
+  }
+  
+  .labour-table-container .rdt_TableHeadRow {
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .labour-table-container .rdt_TableRow {
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .labour-table-container .rdt_TableCell {
+    padding: 0.25rem 0.5rem;
+  }
+} 
