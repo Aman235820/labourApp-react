@@ -24,6 +24,7 @@ function Home() {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showLabourListModal, setShowLabourListModal] = useState(false);
+  const [loadingPopularService, setLoadingPopularService] = useState(null);
 
   const columns = [
     {
@@ -304,7 +305,7 @@ function Home() {
 
   const handlePopularServiceClick = async (serviceName) => {
     try {
-      setIsLoading(true);
+      setLoadingPopularService(serviceName);
       setError(null);
       const res = await searchLabourByCategory(serviceName, 0, pageSize);
       if (res && res.content) {
@@ -330,7 +331,7 @@ function Home() {
       alert('API error for ' + serviceName);
       console.error('API error for', serviceName, err);
     } finally {
-      setIsLoading(false);
+      setLoadingPopularService(null);
     }
   };
 
@@ -561,6 +562,7 @@ function Home() {
               <div 
                 className="popular-service-card enhanced-card"
                 onClick={() => handlePopularServiceClick('Electrician')}
+                style={{ position: 'relative' }}
               >
                 <div className="service-image-container">
                   <img
@@ -576,6 +578,15 @@ function Home() {
                   <div className="service-badge">
                     <span>Popular</span>
                   </div>
+                  {loadingPopularService === 'Electrician' && (
+                    <div className="service-loading-overlay">
+                      <Spinner
+                        animation="border"
+                        variant="light"
+                        size="lg"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">Electrician</h4>
@@ -592,6 +603,7 @@ function Home() {
               <div 
                 className="popular-service-card enhanced-card"
                 onClick={() => handlePopularServiceClick('Plumber')}
+                style={{ position: 'relative' }}
               >
                 <div className="service-image-container">
                   <img
@@ -607,6 +619,15 @@ function Home() {
                   <div className="service-badge">
                     <span>Top Rated</span>
                   </div>
+                  {loadingPopularService === 'Plumber' && (
+                    <div className="service-loading-overlay">
+                      <Spinner
+                        animation="border"
+                        variant="light"
+                        size="lg"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">Plumber</h4>
@@ -622,7 +643,8 @@ function Home() {
             <Col xs={12} sm={6} lg={6} className="mb-5">
               <div 
                 className="popular-service-card enhanced-card"
-                onClick={() => handlePopularServiceClick('House Help')}
+                onClick={() => handlePopularServiceClick('Cleaning')}
+                style={{ position: 'relative' }}
               >
                 <div className="service-image-container">
                   <img
@@ -638,6 +660,15 @@ function Home() {
                   <div className="service-badge">
                     <span>Trusted</span>
                   </div>
+                  {loadingPopularService === 'House Help' && (
+                    <div className="service-loading-overlay">
+                      <Spinner
+                        animation="border"
+                        variant="light"
+                        size="lg"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">House Help</h4>
@@ -653,7 +684,8 @@ function Home() {
             <Col xs={12} sm={6} lg={6} className="mb-5">
               <div 
                 className="popular-service-card enhanced-card"
-                onClick={() => handlePopularServiceClick('Mechanic')}
+                onClick={() => handlePopularServiceClick('Vehicle Services')}
+                style={{ position: 'relative' }}
               >
                 <div className="service-image-container">
                   <img
@@ -669,6 +701,15 @@ function Home() {
                   <div className="service-badge">
                     <span>Expert</span>
                   </div>
+                  {loadingPopularService === 'Mechanic' && (
+                    <div className="service-loading-overlay">
+                      <Spinner
+                        animation="border"
+                        variant="light"
+                        size="lg"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="service-content">
                   <h4 className="service-title">Mechanic</h4>
