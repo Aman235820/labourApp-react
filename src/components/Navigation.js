@@ -153,10 +153,6 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
                 <FaHome className="me-1" />
                 <span className="d-none d-sm-inline">Home</span>
               </Nav.Link>
-              <Nav.Link as={Link} to="/admin" className="nav-link">
-                <FaUserShield className="me-1" />
-                <span className="d-none d-sm-inline">Admin</span>
-              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

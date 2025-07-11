@@ -413,8 +413,8 @@ function Home() {
                         />
                       ) : (
                         <>
-                          <span className="d-none d-sm-inline">Search</span>
-                          <span className="d-inline d-sm-none">Go</span>
+                      <span className="d-none d-sm-inline">Search</span>
+                      <span className="d-inline d-sm-none">Go</span>
                         </>
                       )}
                     </Button>

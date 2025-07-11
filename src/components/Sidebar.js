@@ -342,10 +342,10 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
 
           <div className="sidebar-section">
             {isOpen && (
-              <h6 className="sidebar-section-title">
+              <h3 className="sidebar-section-title">
                 <FaUsers className="me-2" />
                 Join us as a Customer 
-              </h6>
+              </h3>
             )}
             <Nav.Link 
               onClick={(e) => {
@@ -384,10 +384,10 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
 
           <div className="sidebar-section">
             {isOpen && (
-              <h6 className="sidebar-section-title">
+              <h3 className="sidebar-section-title">
                 <FaUserTie className="me-2" />
                 Join us as a Service Provider
-              </h6>
+              </h3>
             )}
             <Nav.Link 
               onClick={(e) => {
@@ -429,10 +429,10 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
 
           <div className="sidebar-section">
             {isOpen && (
-              <h6 className="sidebar-section-title">
+              <h3 className="sidebar-section-title">
                 <FaUserShield className="me-2" />
                 Admin
-              </h6>
+              </h3>
             )}
             <Nav.Link 
               onClick={(e) => {

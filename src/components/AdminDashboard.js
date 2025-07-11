@@ -1,9 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Card, Table, Spinner, Alert, Badge, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Spinner, Alert, Badge, Button, Nav, Tab, ProgressBar } from 'react-bootstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import { adminService } from '../services/adminService';
-import { FaTimesCircle, FaClock, FaCheckCircle, FaStar, FaTools, FaUpload } from 'react-icons/fa';
+import { 
+  FaTimesCircle, 
+  FaClock, 
+  FaCheckCircle, 
+  FaStar, 
+  FaTools, 
+  FaUpload, 
+  FaUsers, 
+  FaUserTie, 
+  FaClipboardList,
+  FaChartLine,
+  FaDownload,
+  FaEye,
+  FaTrash,
+  FaEdit,
+  FaFilter,
+  FaSearch,
+  FaPlus,
+  FaExclamationTriangle,
+  FaCheck,
+  FaTimes,
+  FaUser,
+  FaPhone,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaShieldAlt
+} from 'react-icons/fa';
 import BookingDetailsModal from './BookingDetailsModal';
 import AdminStats from './AdminStats';
 import '../styles/AdminDashboard.css';
@@ -26,6 +54,9 @@ function AdminDashboard() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
   const fileInputRef = useRef(null);
 
   // Pagination and Sorting State for Labours
@@ -52,54 +83,66 @@ function AdminDashboard() {
   const [totalBookingElements, setTotalBookingElements] = useState(0);
   const [totalBookingPages, setTotalBookingPages] = useState(0);
 
-  // Custom Styles for DataTable
+  // Enhanced Custom Styles for DataTable
   const customStyles = {
+    table: {
+      style: {
+        backgroundColor: 'transparent',
+      },
+    },
     headRow: {
       style: {
-        backgroundColor: '#f8f9fa',
-        borderBottom: '1px solid #dee2e6',
-        fontSize: '1rem',
-        fontWeight: 'bold',
+        backgroundColor: '#f8fafc',
+        borderBottom: '2px solid #e2e8f0',
+        borderRadius: '12px 12px 0 0',
+        minHeight: '60px',
       },
     },
     headCells: {
       style: {
-        paddingLeft: '16px',
-        paddingRight: '16px',
-        textAlign: 'center !important',
+        paddingLeft: '24px',
+        paddingRight: '24px',
+        paddingTop: '16px',
+        paddingBottom: '16px',
+        fontSize: '0.875rem',
+        fontWeight: '700',
+        color: '#374151',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+      },
+    },
+    rows: {
+      style: {
+        minHeight: '72px',
+        fontSize: '0.875rem',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #f3f4f6',
+        '&:hover': {
+          backgroundColor: '#f9fafb',
+          transform: 'translateY(-1px)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+          transition: 'all 0.2s ease',
+        },
       },
     },
     cells: {
       style: {
-        paddingLeft: '16px',
-        paddingRight: '16px',
-        textAlign: 'center !important',
+        paddingLeft: '24px',
+        paddingRight: '24px',
+        paddingTop: '16px',
+        paddingBottom: '16px',
+        color: '#374151',
+        fontWeight: '500',
       },
     },
     pagination: {
       style: {
-        borderTop: '1px solid #dee2e6',
+        backgroundColor: '#f8fafc',
+        borderTop: '1px solid #e2e8f0',
+        borderRadius: '0 0 12px 12px',
+        padding: '16px 24px',
       },
     },
-    rows: {
-      highlightOnHoverStyle: {
-        backgroundColor: '#e9e9e9',
-      },
-    },
-  };
-
-  // Custom styles to specifically target the content div within cells
-  customStyles.cells.style['& > div'] = {
-    textAlign: 'center !important',
-    justifyContent: 'center !important',
-    alignItems: 'center !important',
-  };
-
-  // Custom styles to force center alignment for header text
-  customStyles.headCells.style['& > div'] = {
-    textAlign: 'center !important',
-    justifyContent: 'center !important',
-    alignItems: 'center !important',
   };
 
   const [deletingLabourId, setDeletingLabourId] = useState(null);
@@ -118,290 +161,31 @@ function AdminDashboard() {
       case 2:
         return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> Accepted</Badge>;
       case 3:
-        return <Badge bg="success" className="status-badge"><FaClock className="me-1" /> Completed</Badge>;
+        return <Badge bg="success" className="status-badge"><FaCheck className="me-1" /> Completed</Badge>;
       default:
-        return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> Unknown</Badge>;
+        return <Badge bg="secondary" className="status-badge"><FaExclamationTriangle className="me-1" /> Unknown</Badge>;
     }
   };
 
-  // Columns Configuration for Users
-  const userColumns = [
-    {
-      name: 'ID',
-      selector: row => row.userId,
-      sortable: true,
-      sortField: 'userId',
-    },
-    {
-      name: 'Name',
-      selector: row => row.fullName,
-      sortable: true,
-      sortField: 'fullName',
-    },
-    {
-      name: 'Mobile',
-      selector: row => row.mobileNumber,
-      sortable: true,
-      sortField: 'mobileNo',
-    },
-    {
-      name: 'Actions',
-      cell: row => (
-        <div className="d-flex gap-2">
-          <button onClick={() => handleRemoveUser(row.userId)} className="btn btn-danger btn-sm action-btn-sm" disabled={deletingUserId === row.userId}>
-            {deletingUserId === row.userId ? <Spinner as="span" animation="border" size="sm" /> : 'Delete'}
-          </button>
-          <button onClick={() => handleViewUser(row.userId , row.mobileNumber)} className="btn btn-info btn-sm action-btn-sm" disabled={viewingUserId === row.userId}>
-            {viewingUserId === row.userId ? <Spinner as="span" animation="border" size="sm" /> : 'View Details'}
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      width: '160px',
-    },
-  ];
-
-  // Columns Configuration for Bookings
-  const bookingColumns = [
-    {
-      name: 'Booking ID',
-      selector: row => row.bookingId,
-      sortable: true,
-      sortField: 'bookingId',
-      width: '100px',
-      center: true,
-    },
-    {
-      name: 'Status',
-      selector: row => row.bookingStatusCode,
-      sortable: true,
-      sortField: 'bookingStatusCode',
-      width: '120px',
-      center: true,
-      cell: row => getStatusBadge(row.bookingStatusCode),
-    },
-    {
-      name: 'Actions',
-      cell: row => (
-        <div className="d-flex gap-2 justify-content-center">
-          <button onClick={() => handleViewBooking(row)} className="btn btn-info btn-sm action-btn-sm" disabled={viewingBookingId === row.bookingId}>
-            {viewingBookingId === row.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'View Details'}
-          </button>
-          <button onClick={() => handleDeleteBooking(row.bookingId)} className="btn btn-danger btn-sm action-btn-sm" disabled={deletingBookingId === row.bookingId}>
-            {deletingBookingId === row.bookingId ? <Spinner as="span" animation="border" size="sm" /> : 'Delete'}
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      width: '180px',
-      center: true,
-    },
-  ];
-
-  // Fetch Labours on component mount or when pagination/sorting changes
-  useEffect(() => {
-    console.log('Fetching Labours...', { labourPageNumber, labourPageSize, labourSortBy, labourSortOrder });
-    const fetchLabours = async () => {
-      try {
-        setIsLoadingLabours(true);
-        // Fetch all labours with current pagination and sorting
-        const response = await adminService.getAllLabours(labourPageNumber, labourPageSize, labourSortBy, labourSortOrder); 
-        if (response && Array.isArray(response.content)) {
-          // Update labours state with fetched data and pagination info
-          setLabours(response.content);
-          setTotalLabourElements(response.totalElements || 0);
-          setTotalLabourPages(response.totalPages || 0);
-        } else {
-          console.error('API response for labours is not an array:', response);
-          setLabours([]); // Ensure it's always an array
-          setTotalLabourElements(0);
-          setTotalLabourPages(0);
-          setError('Unexpected response format for labours');
-        }
-      } catch (err) {
-        console.error('Error fetching labours:', err.response?.data || err.message);
-        // Set error state if fetch fails, logging response data if available
-        setError(`Failed to fetch labours: ${err.response?.statusText || err.message}`);
-        setLabours([]); // Ensure it's always an array on error
-        setTotalLabourElements(0);
-        setTotalLabourPages(0);
-      } finally {
-        // Set loading state to false after fetch attempt
-        setIsLoadingLabours(false);
-      }
-    };
-    fetchLabours();
-  }, [labourPageNumber, labourPageSize, labourSortBy, labourSortOrder]);
-
-  // Fetch Users on component mount or when pagination/sorting changes
-  useEffect(() => {
-    console.log('Fetching Users...', { userPageNumber, userPageSize, userSortBy, userSortOrder });
-    const fetchUsers = async () => {
-      try {
-        setIsLoadingUsers(true);
-        // Fetch all users with current pagination and sorting
-        const response = await adminService.getAllUsers(userPageNumber, userPageSize, userSortBy, userSortOrder); 
-
-        if (response && Array.isArray(response.content)) {
-          // Update users state with fetched data and pagination info
-          setUsers(response.content);
-          setTotalUserElements(response.totalElements || 0);
-          setTotalUserPages(response.totalPages || 0);
-        } else {
-          console.error('API response for users is not an array:', response);
-          setUsers([]); // Ensure it's always an array
-          setTotalUserElements(0);
-          setTotalUserPages(0);
-          setError('Unexpected response format for users');
-        }
-      } catch (err) {
-        console.error('Error fetching users:', err.response?.data || err.message);
-        // Set error state if fetch fails, logging response data if available
-        setError(`Failed to fetch users: ${err.response?.statusText || err.message}`);
-        setUsers([]); // Ensure it's always an array on error
-        setTotalUserElements(0);
-        setTotalUserPages(0);
-      } finally {
-        // Set loading state to false after fetch attempt
-        setIsLoadingUsers(false);
-      }
-    };
-    fetchUsers();
-  }, [userPageNumber, userPageSize, userSortBy, userSortOrder]);
-
-  // Fetch Bookings on component mount or when pagination/sorting changes
-  useEffect(() => {
-    console.log('Fetching Bookings...', { bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder });
-    const fetchBookings = async () => {
-      try {
-        setIsLoadingBookings(true);
-        // Fetch all bookings with current pagination and sorting
-        const response = await adminService.getAllBookings(bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder);
-
-        if (response && Array.isArray(response.content)) {
-          // Update bookings state with fetched data and pagination info
-          setBookings(response.content);
-          setTotalBookingElements(response.totalElements || 0);
-          setTotalBookingPages(response.totalPages || 0);
-        } else {
-          console.error('API response for bookings is not an array:', response);
-          setBookings([]); // Ensure it's always an array
-          setTotalBookingElements(0);
-          setTotalBookingPages(0);
-          setError('Unexpected response format for bookings');
-        }
-      } catch (err) {
-        console.error('Error fetching bookings:', err.response?.data || err.message);
-        // Set error state if fetch fails, logging response data if available
-        setError(`Failed to fetch bookings: ${err.response?.statusText || err.message}`);
-        setBookings([]); // Ensure it's always an array on error
-        setTotalBookingElements(0);
-        setTotalBookingPages(0);
-      } finally {
-        // Set loading state to false after fetch attempt
-        setIsLoadingBookings(false);
-      }
-    };
-      fetchBookings();
-    }, [bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder]);
-
-  const handleRemoveLabour = async (labourId) => {
-    if (!window.confirm('Are you sure you want to delete this labour?')) return;
-    setDeletingLabourId(labourId);
-    try {
-      await adminService.removeLabour(labourId);
-      const response = await adminService.getAllLabours(labourPageNumber, labourPageSize, labourSortBy, labourSortOrder);
-      if (response && Array.isArray(response.content)) {
-        setLabours(response.content);
-        setTotalLabourElements(response.totalElements || 0);
-        setTotalLabourPages(response.totalPages || 0);
-      } else {
-        setLabours([]);
-        setTotalLabourElements(0);
-        setTotalLabourPages(0);
-        setError('Unexpected response format after deleting labour');
-      }
-    } catch (err) {
-      setError('Failed to remove labour');
-      setLabours([]);
-      setTotalLabourElements(0);
-      setTotalLabourPages(0);
-    } finally {
-      setDeletingLabourId(null);
-    }
-  };
-
-  const handleRemoveUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    setDeletingUserId(userId);
-    try {
-      await adminService.removeUser(userId);
-      const response = await adminService.getAllUsers(userPageNumber, userPageSize, userSortBy, userSortOrder);
-      if (response && Array.isArray(response.content)) {
-        setUsers(response.content);
-        setTotalUserElements(response.totalElements || 0);
-        setTotalUserPages(response.totalPages || 0);
-      } else {
-        setUsers([]);
-        setTotalUserElements(0);
-        setTotalUserPages(0);
-        setError('Unexpected response format after deleting user');
-      }
-    } catch (err) {
-      setError('Failed to remove user');
-      setUsers([]);
-      setTotalUserElements(0);
-      setTotalUserPages(0);
-    } finally {
-      setDeletingUserId(null);
-    }
-  };
-
-  const handleViewLabour = async (labourId) => {
-    setViewingLabourId(labourId);
-    try {
-      const response = await adminService.getLabourById(labourId);
-      if (response && response.returnValue) {
-        setSelectedLabour(response.returnValue);
-        setLabourModalOpen(true);
-      } else {
-        setError('Failed to fetch labour details: Invalid response');
-      }
-    } catch (err) {
-      setError('Failed to fetch labour details');
-    } finally {
-      setViewingLabourId(null);
-    }
-  };
-
-  const handleViewUser = (userId , mobileNumber) => {
-    setViewingUserId(userId);
-    const user = users.find(user => user.userId === userId && user.mobileNumber === mobileNumber);
-    if (user) {
-      setSelectedUser(user);
-      setUserModalOpen(true);
-    }
-    setViewingUserId(null);
-  };
-
+  // Enhanced Columns Configuration for Labours
   const labourColumns = [
     {
-      name: 'ID',
-      selector: row => row.labourId,
-      sortable: true,
-      sortField: 'labourId',
-      width: '5rem'
-    },
-    {
-      name: 'Name',
+      name: 'Labour',
       selector: row => row.labourName,
       sortable: true,
       sortField: 'labourName',
-      width: '20rem'
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <div className="labour-avatar me-3">
+            <FaUser className="text-white" size={16} />
+          </div>
+          <div>
+            <div className="fw-bold text-primary">{row.labourName}</div>
+            <small className="text-muted">{row.labourMobileNo}</small>
+          </div>
+        </div>
+      ),
+      width: '200px',
     },
     {
       name: 'Skill',
@@ -409,89 +193,432 @@ function AdminDashboard() {
       sortable: true,
       sortField: 'labourSkill',
       cell: row => (
-        <div className="d-flex align-items-center">
-          <FaTools className="text-success me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.labourSkill || 'N/A'}</span>
-        </div>
+        <Badge bg="info" className="skill-badge">
+          <FaTools className="me-1" />
+          {row.labourSkill}
+        </Badge>
       ),
+      width: '150px',
     },
     {
       name: 'Rating',
-      selector: row => row.rating,
+      selector: row => parseFloat(row.rating),
       sortable: true,
       sortField: 'rating',
       cell: row => (
         <div className="d-flex align-items-center">
-          <FaStar className="text-warning me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.rating || 'N/A'}</span>
+          <FaStar className="text-warning me-1" />
+          <span className="fw-bold">{row.rating || '0'}</span>
+          <small className="text-muted ms-1">({row.ratingCount || 0})</small>
         </div>
       ),
+      width: '120px',
     },
     {
-      name: 'Mobile',
-      selector: row => row.labourMobileNo,
+      name: 'Status',
+      selector: row => row.status,
       sortable: true,
-      sortField: 'labourMobileNo',
-      width: '110px',
+      sortField: 'status',
+      cell: row => (
+        <Badge bg={row.status === 'active' ? 'success' : 'secondary'} className="status-badge">
+          {row.status === 'active' ? 'Active' : 'Inactive'}
+        </Badge>
+      ),
+      width: '100px',
     },
     {
       name: 'Actions',
-      width: '160px',
       cell: row => (
         <div className="d-flex gap-2">
-          <button onClick={() => handleRemoveLabour(row.labourId)} className="btn btn-danger btn-sm action-btn-sm" disabled={deletingLabourId === row.labourId}>
-            {deletingLabourId === row.labourId ? <Spinner as="span" animation="border" size="sm" /> : 'Delete'}
-          </button>
-          <button onClick={() => handleViewLabour(row.labourId)} className="btn btn-info btn-sm action-btn-sm" disabled={viewingLabourId === row.labourId}>
-            {viewingLabourId === row.labourId ? <Spinner as="span" animation="border" size="sm" /> : 'View Details'}
-          </button>
+          <Button
+            variant="outline-info"
+            size="sm"
+            onClick={() => handleViewLabour(row.labourId)}
+            disabled={viewingLabourId === row.labourId}
+            className="action-btn"
+          >
+            {viewingLabourId === row.labourId ? (
+              <Spinner as="span" animation="border" size="sm" />
+            ) : (
+              <FaEye />
+            )}
+          </Button>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={() => handleRemoveLabour(row.labourId)}
+            disabled={deletingLabourId === row.labourId}
+            className="action-btn"
+          >
+            {deletingLabourId === row.labourId ? (
+              <Spinner as="span" animation="border" size="sm" />
+            ) : (
+              <FaTrash />
+            )}
+          </Button>
         </div>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '160px',
+      width: '120px',
     },
   ];
 
-  // Functions to toggle modals
+  // Enhanced Columns Configuration for Users
+  const userColumns = [
+    {
+      name: 'User',
+      selector: row => row.fullName,
+      sortable: true,
+      sortField: 'fullName',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <div className="user-avatar me-3">
+            <FaUser className="text-white" size={16} />
+          </div>
+          <div>
+            <div className="fw-bold text-primary">{row.fullName}</div>
+            <small className="text-muted">{row.email}</small>
+          </div>
+        </div>
+      ),
+      width: '200px',
+    },
+    {
+      name: 'Contact',
+      selector: row => row.mobileNumber,
+      sortable: true,
+      sortField: 'mobileNo',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <FaPhone className="text-muted me-2" />
+          <span>{row.mobileNumber}</span>
+        </div>
+      ),
+      width: '150px',
+    },
+    {
+      name: 'Status',
+      selector: row => row.status,
+      sortable: true,
+      sortField: 'status',
+      cell: row => (
+        <Badge bg={row.status === 'active' ? 'success' : 'secondary'} className="status-badge">
+          {row.status === 'active' ? 'Active' : 'Inactive'}
+        </Badge>
+      ),
+      width: '100px',
+    },
+    {
+      name: 'Actions',
+      cell: row => (
+        <div className="d-flex gap-2">
+          <Button
+            variant="outline-info"
+            size="sm"
+            onClick={() => handleViewUser(row.userId, row.mobileNumber)}
+            disabled={viewingUserId === row.userId}
+            className="action-btn"
+          >
+            {viewingUserId === row.userId ? (
+              <Spinner as="span" animation="border" size="sm" />
+            ) : (
+              <FaEye />
+            )}
+          </Button>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={() => handleRemoveUser(row.userId)}
+            disabled={deletingUserId === row.userId}
+            className="action-btn"
+          >
+            {deletingUserId === row.userId ? (
+              <Spinner as="span" animation="border" size="sm" />
+            ) : (
+              <FaTrash />
+            )}
+          </Button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      width: '120px',
+    },
+  ];
+
+  // Enhanced Columns Configuration for Bookings
+  const bookingColumns = [
+    {
+      name: 'Booking ID',
+      selector: row => row.bookingId,
+      sortable: true,
+      sortField: 'bookingId',
+      cell: row => (
+        <div className="fw-bold text-primary">#{row.bookingId}</div>
+      ),
+      width: '120px',
+    },
+    {
+      name: 'Customer',
+      selector: row => row.userName,
+      sortable: true,
+      sortField: 'userName',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <div className="user-avatar me-2">
+            <FaUser className="text-white" size={12} />
+          </div>
+          <span className="fw-medium">{row.userName}</span>
+        </div>
+      ),
+      width: '150px',
+    },
+    {
+      name: 'Labour',
+      selector: row => row.labourName,
+      sortable: true,
+      sortField: 'labourName',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <div className="labour-avatar me-2">
+            <FaUserTie className="text-white" size={12} />
+          </div>
+          <span className="fw-medium">{row.labourName}</span>
+        </div>
+      ),
+      width: '150px',
+    },
+    {
+      name: 'Service',
+      selector: row => row.serviceName,
+      sortable: true,
+      sortField: 'serviceName',
+      cell: row => (
+        <Badge bg="info" className="service-badge">
+          <FaTools className="me-1" />
+          {row.serviceName}
+        </Badge>
+      ),
+      width: '120px',
+    },
+    {
+      name: 'Status',
+      selector: row => row.bookingStatusCode,
+      sortable: true,
+      sortField: 'bookingStatusCode',
+      cell: row => getStatusBadge(row.bookingStatusCode),
+      width: '120px',
+    },
+    {
+      name: 'Date',
+      selector: row => row.bookingTime,
+      sortable: true,
+      sortField: 'bookingTime',
+      cell: row => (
+        <div className="d-flex align-items-center">
+          <FaCalendarAlt className="text-muted me-2" />
+          <small>{new Date(row.bookingTime).toLocaleDateString()}</small>
+        </div>
+      ),
+      width: '120px',
+    },
+    {
+      name: 'Actions',
+      cell: row => (
+        <div className="d-flex gap-2">
+          <Button
+            variant="outline-info"
+            size="sm"
+            onClick={() => handleViewBooking(row)}
+            disabled={viewingBookingId === row.bookingId}
+            className="action-btn"
+          >
+            {viewingBookingId === row.bookingId ? (
+              <Spinner as="span" animation="border" size="sm" />
+            ) : (
+              <FaEye />
+            )}
+          </Button>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={() => handleDeleteBooking(row.bookingId)}
+            disabled={deletingBookingId === row.bookingId}
+            className="action-btn"
+          >
+            {deletingBookingId === row.bookingId ? (
+              <Spinner as="span" animation="border" size="sm" />
+            ) : (
+              <FaTrash />
+            )}
+          </Button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+      width: '120px',
+    },
+  ];
+
+  // Fetch data functions
+  const fetchLabours = async () => {
+    try {
+      setIsLoadingLabours(true);
+      const response = await adminService.getAllLabours(labourPageNumber, labourPageSize, labourSortBy, labourSortOrder);
+      if (response && !response.hasError) {
+        setLabours(response.content || []);
+        setTotalLabourElements(response.totalElements || 0);
+        setTotalLabourPages(response.totalPages || 0);
+      } else {
+        setError('Failed to fetch labours');
+      }
+    } catch (err) {
+      setError('Error fetching labours');
+      console.error('Error fetching labours:', err);
+    } finally {
+      setIsLoadingLabours(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const response = await adminService.getAllUsers(userPageNumber, userPageSize, userSortBy, userSortOrder);
+      if (response && !response.hasError) {
+        setUsers(response.content || []);
+        setTotalUserElements(response.totalElements || 0);
+        setTotalUserPages(response.totalPages || 0);
+      } else {
+        setError('Failed to fetch users');
+      }
+    } catch (err) {
+      setError('Error fetching users');
+      console.error('Error fetching users:', err);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const fetchBookings = async () => {
+    try {
+      setIsLoadingBookings(true);
+      const response = await adminService.getAllBookings(bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder);
+      if (response && !response.hasError) {
+        setBookings(response.content || []);
+        setTotalBookingElements(response.totalElements || 0);
+        setTotalBookingPages(response.totalPages || 0);
+      } else {
+        setError('Failed to fetch bookings');
+      }
+    } catch (err) {
+      setError('Error fetching bookings');
+      console.error('Error fetching bookings:', err);
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  };
+
+  // Event handlers
+  const handleRemoveLabour = async (labourId) => {
+    if (!window.confirm('Are you sure you want to remove this labour?')) return;
+    
+    try {
+      setDeletingLabourId(labourId);
+      const response = await adminService.removeLabour(labourId);
+      if (response && !response.hasError) {
+        fetchLabours();
+      } else {
+        setError('Failed to remove labour');
+      }
+    } catch (err) {
+      setError('Error removing labour');
+      console.error('Error removing labour:', err);
+    } finally {
+      setDeletingLabourId(null);
+    }
+  };
+
+  const handleRemoveUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to remove this user?')) return;
+    
+    try {
+      setDeletingUserId(userId);
+      const response = await adminService.removeUser(userId);
+      if (response && !response.hasError) {
+        fetchUsers();
+      } else {
+        setError('Failed to remove user');
+      }
+    } catch (err) {
+      setError('Error removing user');
+      console.error('Error removing user:', err);
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
+  const handleViewLabour = async (labourId) => {
+    try {
+      setViewingLabourId(labourId);
+      const response = await adminService.getLabourById(labourId);
+      if (response && !response.hasError) {
+        setSelectedLabour(response.returnValue);
+        setLabourModalOpen(true);
+      } else {
+        setError('Failed to fetch labour details');
+      }
+    } catch (err) {
+      setError('Error fetching labour details');
+      console.error('Error fetching labour details:', err);
+    } finally {
+      setViewingLabourId(null);
+    }
+  };
+
+  const handleViewUser = (userId, mobileNumber) => {
+    setSelectedUser({ userId, mobileNumber });
+    setUserModalOpen(true);
+  };
+
+  const handleViewBooking = (booking) => {
+    setSelectedBooking(booking);
+    setBookingModalOpen(true);
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to delete this booking?')) return;
+    
+    try {
+      setDeletingBookingId(bookingId);
+      const response = await adminService.removeBooking(bookingId);
+      if (response && !response.hasError) {
+        fetchBookings();
+      } else {
+        setError('Failed to delete booking');
+      }
+    } catch (err) {
+      setError('Error deleting booking');
+      console.error('Error deleting booking:', err);
+    } finally {
+      setDeletingBookingId(null);
+    }
+  };
+
   const toggleLabourModal = () => {
     setLabourModalOpen(!labourModalOpen);
-    if (!labourModalOpen) { // If opening, ensure selectedLabour is cleared when closed
+    if (!labourModalOpen) {
       setSelectedLabour(null);
     }
   };
 
   const toggleUserModal = () => {
     setUserModalOpen(!userModalOpen);
-     if (!userModalOpen) { // If opening, ensure selectedUser is cleared when closed
+    if (!userModalOpen) {
       setSelectedUser(null);
-    }
-  };
-
-  const handleViewBooking = (booking) => {
-    setViewingBookingId(booking.bookingId);
-    setSelectedBooking(booking);
-    setBookingModalOpen(true);
-    setTimeout(() => setViewingBookingId(null), 500); // Simulate loading for UI feedback
-  };
-
-  const handleDeleteBooking = async (bookingId) => {
-    if (window.confirm('Are you sure you want to delete this booking?')) {
-      setDeletingBookingId(bookingId);
-      try {
-        await adminService.deleteBooking(bookingId);
-        const response = await adminService.getAllBookings(bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder);
-        if (response && Array.isArray(response.content)) {
-          setBookings(response.content);
-          setTotalBookingElements(response.totalElements || 0);
-          setTotalBookingPages(response.totalPages || 0);
-        }
-      } catch (err) {
-        setError(`Failed to delete booking: ${err.message}`);
-      } finally {
-        setDeletingBookingId(null);
-      }
     }
   };
 
@@ -506,7 +633,6 @@ function AdminDashboard() {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Check if file is an Excel file
     if (!file.name.match(/\.(xlsx|xls)$/)) {
       setUploadError('Please upload an Excel file (.xlsx or .xls)');
       return;
@@ -521,7 +647,6 @@ function AdminDashboard() {
       
       if (response && !response.hasError) {
         setUploadSuccess(true);
-        // Refresh the labour list using the new API
         const updatedResponse = await adminService.getAllLabours(labourPageNumber, labourPageSize, labourSortBy, labourSortOrder);
         if (updatedResponse) {
           setLabours(updatedResponse.content || []);
@@ -535,7 +660,6 @@ function AdminDashboard() {
       setUploadError(error.response?.data?.message || 'Error uploading file');
     } finally {
       setIsUploading(false);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -544,195 +668,485 @@ function AdminDashboard() {
 
   useEffect(() => {
     if (uploadSuccess) {
-      const timer = setTimeout(() => setUploadSuccess(false), 2000);
+      const timer = setTimeout(() => setUploadSuccess(false), 3000);
       return () => clearTimeout(timer);
     }
   }, [uploadSuccess]);
 
   useEffect(() => {
     if (uploadError) {
-      const timer = setTimeout(() => setUploadError(null), 2000);
+      const timer = setTimeout(() => setUploadError(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [uploadError]);
 
+  useEffect(() => {
+    fetchLabours();
+  }, [labourPageNumber, labourPageSize, labourSortBy, labourSortOrder]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [userPageNumber, userPageSize, userSortBy, userSortOrder]);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [bookingPageNumber, bookingPageSize, bookingSortBy, bookingSortOrder]);
+
   return (
     <Container fluid className="admin-dashboard">
-      <AdminStats />
-      
-      {/* Labour Management Section */}
-      <Card className="mb-4">
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h3 className="mb-0">Labour Management</h3>
-          <div className="d-flex gap-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".xlsx,.xls"
-              style={{ display: 'none' }}
-            />
-            <Button
-              variant="success"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-            >
-              {isUploading ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" className="me-2" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <FaUpload className="me-2" />
-                  Bulk Upload
-                </>
-              )}
+      {/* Header Section */}
+      <div className="admin-header mb-4">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 className="admin-title mb-2">
+              <FaShieldAlt className="me-3 text-primary" />
+              Admin Dashboard
+            </h1>
+            <p className="text-muted mb-0">Manage your labour services platform</p>
+          </div>
+          <div className="admin-actions">
+            <Button variant="outline-primary" className="me-2">
+              <FaDownload className="me-2" />
+              Export Data
+            </Button>
+            <Button variant="primary">
+              <FaPlus className="me-2" />
+              Add New
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Analytics Overview */}
+      <AdminStats />
+
+      {/* Main Content Tabs */}
+      <Card className="admin-content-card">
+        <Card.Header className="admin-card-header">
+          <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+            <Nav.Item>
+              <Nav.Link eventKey="overview" className="admin-tab">
+                <FaChartLine className="me-2" />
+                Overview
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="labours" className="admin-tab">
+                <FaUserTie className="me-2" />
+                Labour Management
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="users" className="admin-tab">
+                <FaUsers className="me-2" />
+                User Management
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="bookings" className="admin-tab">
+                <FaClipboardList className="me-2" />
+                Booking Management
+              </Nav.Link>
+            </Nav.Item>
+          </Nav>
         </Card.Header>
-        <Card.Body>
-          {uploadError && (
-            <Alert variant="danger" onClose={() => setUploadError(null)} dismissible>
-              {uploadError}
-            </Alert>
+        <Card.Body className="admin-card-body">
+          <Tab.Content>
+            <Tab.Pane eventKey="overview" active={activeTab === 'overview'}>
+              <div className="overview-section">
+                <Row className="g-4">
+                  <Col md={6}>
+                    <Card className="h-100 overview-card">
+                      <Card.Body>
+                        <h5 className="card-title">
+                          <FaUserTie className="me-2 text-primary" />
+                          Recent Labours
+                        </h5>
+                        <div className="recent-list">
+                          {labours.slice(0, 5).map((labour, index) => (
+                            <div key={labour.labourId} className="recent-item">
+                              <div className="d-flex align-items-center">
+                                <div className="labour-avatar me-3">
+                                  <FaUser className="text-white" size={14} />
+                                </div>
+                                <div className="flex-grow-1">
+                                  <div className="fw-bold">{labour.labourName}</div>
+                                  <small className="text-muted">{labour.labourSkill}</small>
+                                </div>
+                                <Badge bg="success" className="status-badge">
+                                  Active
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                  <Col md={6}>
+                    <Card className="h-100 overview-card">
+                      <Card.Body>
+                        <h5 className="card-title">
+                          <FaClipboardList className="me-2 text-primary" />
+                          Recent Bookings
+                        </h5>
+                        <div className="recent-list">
+                          {bookings.slice(0, 5).map((booking, index) => (
+                            <div key={booking.bookingId} className="recent-item">
+                              <div className="d-flex align-items-center">
+                                <div className="booking-avatar me-3">
+                                  <FaCalendarAlt className="text-white" size={14} />
+                                </div>
+                                <div className="flex-grow-1">
+                                  <div className="fw-bold">#{booking.bookingId}</div>
+                                  <small className="text-muted">{booking.userName}</small>
+                                </div>
+                                {getStatusBadge(booking.bookingStatusCode)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                </Row>
+              </div>
+            </Tab.Pane>
+
+            <Tab.Pane eventKey="labours" active={activeTab === 'labours'}>
+              <div className="labour-management-section">
+                <div className="section-header mb-4">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 className="section-title">
+                        <FaUserTie className="me-2" />
+                        Labour Management
+                      </h4>
+                      <p className="text-muted mb-0">Manage service providers and their details</p>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept=".xlsx,.xls"
+                        style={{ display: 'none' }}
+                      />
+                      <Button
+                        variant="success"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="upload-btn"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Spinner as="span" animation="border" size="sm" className="me-2" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <FaUpload className="me-2" />
+                            Bulk Upload
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {uploadError && (
+                  <Alert variant="danger" onClose={() => setUploadError(null)} dismissible className="mb-3">
+                    <FaExclamationTriangle className="me-2" />
+                    {uploadError}
+                  </Alert>
+                )}
+                {uploadSuccess && (
+                  <Alert variant="success" onClose={() => setUploadSuccess(false)} dismissible className="mb-3">
+                    <FaCheck className="me-2" />
+                    Labours uploaded successfully!
+                  </Alert>
+                )}
+
+                <div className="data-table-container">
+                  <DataTable
+                    columns={labourColumns}
+                    data={Array.isArray(labours) ? labours : []}
+                    pagination
+                    paginationServer
+                    paginationTotalRows={totalLabourElements}
+                    paginationDefaultPage={labourPageNumber + 1}
+                    onChangePage={page => setLabourPageNumber(page - 1)}
+                    onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                      setLabourPageSize(currentRowsPerPage);
+                      setLabourPageNumber(currentPage - 1);
+                    }}
+                    sortServer
+                    onSort={(column, sortDirection) => {
+                      setLabourSortBy(column.sortField || 'rating');
+                      setLabourSortOrder(sortDirection || 'asc');
+                    }}
+                    progressPending={isLoadingLabours}
+                    noDataComponent={
+                      <div className="text-center py-4">
+                        <FaUserTie className="text-muted mb-3" size={48} />
+                        <p className="text-muted mb-0">No labours found</p>
+                      </div>
+                    }
+                    customStyles={customStyles}
+                    responsive
+                    highlightOnHover
+                    pointerOnHover
+                  />
+                </div>
+              </div>
+            </Tab.Pane>
+
+            <Tab.Pane eventKey="users" active={activeTab === 'users'}>
+              <div className="user-management-section">
+                <div className="section-header mb-4">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 className="section-title">
+                        <FaUsers className="me-2" />
+                        User Management
+                      </h4>
+                      <p className="text-muted mb-0">Manage customer accounts and information</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="data-table-container">
+                  <DataTable
+                    columns={userColumns}
+                    data={Array.isArray(users) ? users : []}
+                    pagination
+                    paginationServer
+                    paginationTotalRows={totalUserElements}
+                    paginationDefaultPage={userPageNumber + 1}
+                    onChangePage={page => setUserPageNumber(page - 1)}
+                    onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                      setUserPageSize(currentRowsPerPage);
+                      setUserPageNumber(currentPage - 1);
+                    }}
+                    sortServer
+                    onSort={(column, sortDirection) => {
+                      setUserSortBy(column.sortField || 'fullName');
+                      setUserSortOrder(sortDirection || 'asc');
+                    }}
+                    progressPending={isLoadingUsers}
+                    noDataComponent={
+                      <div className="text-center py-4">
+                        <FaUsers className="text-muted mb-3" size={48} />
+                        <p className="text-muted mb-0">No users found</p>
+                      </div>
+                    }
+                    customStyles={customStyles}
+                    responsive
+                    highlightOnHover
+                    pointerOnHover
+                  />
+                </div>
+              </div>
+            </Tab.Pane>
+
+            <Tab.Pane eventKey="bookings" active={activeTab === 'bookings'}>
+              <div className="booking-management-section">
+                <div className="section-header mb-4">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 className="section-title">
+                        <FaClipboardList className="me-2" />
+                        Booking Management
+                      </h4>
+                      <p className="text-muted mb-0">Monitor and manage service bookings</p>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <div className="search-box">
+                        <FaSearch className="search-icon" />
+                        <input
+                          type="text"
+                          placeholder="Search bookings..."
+                          className="search-input"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                      <select
+                        className="form-select filter-select"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                      >
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="data-table-container">
+                  <DataTable
+                    columns={bookingColumns}
+                    data={Array.isArray(bookings) ? bookings : []}
+                    pagination
+                    paginationServer
+                    paginationTotalRows={totalBookingElements}
+                    paginationDefaultPage={bookingPageNumber + 1}
+                    onChangePage={page => setBookingPageNumber(page - 1)}
+                    onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                      setBookingPageSize(currentRowsPerPage);
+                      setBookingPageNumber(currentPage - 1);
+                    }}
+                    sortServer
+                    onSort={(column, sortDirection) => {
+                      setBookingSortBy(column.sortField || 'bookingTime');
+                      setBookingSortOrder(sortDirection || 'asc');
+                    }}
+                    progressPending={isLoadingBookings}
+                    noDataComponent={
+                      <div className="text-center py-4">
+                        <FaClipboardList className="text-muted mb-3" size={48} />
+                        <p className="text-muted mb-0">No bookings found</p>
+                      </div>
+                    }
+                    customStyles={customStyles}
+                    responsive
+                    highlightOnHover
+                    pointerOnHover
+                  />
+                </div>
+              </div>
+            </Tab.Pane>
+          </Tab.Content>
+        </Card.Body>
+      </Card>
+
+      {/* Enhanced Modals */}
+      <Modal isOpen={labourModalOpen} toggle={toggleLabourModal} size="lg" className="admin-modal">
+        <ModalHeader toggle={toggleLabourModal} className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <FaUserTie className="me-2 text-primary" />
+            Labour Details
+          </div>
+        </ModalHeader>
+        <ModalBody className="admin-modal-body">
+          {selectedLabour && (
+            <div className="labour-details">
+              <div className="detail-header mb-4">
+                <div className="d-flex align-items-center">
+                  <div className="labour-avatar-large me-3">
+                    <FaUser className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h4 className="mb-1">{selectedLabour.labourName}</h4>
+                    <Badge bg="info" className="skill-badge-large">
+                      <FaTools className="me-1" />
+                      {selectedLabour.labourSkill}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <Row className="g-3">
+                <Col md={6}>
+                  <div className="detail-item">
+                    <label className="detail-label">
+                      <FaPhone className="me-2" />
+                      Mobile Number
+                    </label>
+                    <div className="detail-value">{selectedLabour.labourMobileNo}</div>
+                  </div>
+                </Col>
+                <Col md={6}>
+                  <div className="detail-item">
+                    <label className="detail-label">
+                      <FaStar className="me-2" />
+                      Rating
+                    </label>
+                    <div className="detail-value">
+                      {selectedLabour.rating && Number(selectedLabour.rating) > 0 
+                        ? `${selectedLabour.rating} (${selectedLabour.ratingCount || 0} reviews)`
+                        : 'No ratings yet'
+                      }
+                    </div>
+                  </div>
+                </Col>
+                {Array.isArray(selectedLabour?.labourSubSkills) && selectedLabour.labourSubSkills.length > 0 && (
+                  <Col md={12}>
+                    <div className="detail-item">
+                      <label className="detail-label">
+                        <FaTools className="me-2" />
+                        Sub Skills
+                      </label>
+                      <div className="detail-value">
+                        <div className="d-flex flex-wrap gap-2">
+                          {selectedLabour.labourSubSkills.map((sub, idx) => (
+                            <Badge key={sub.subSkillId || idx} bg="secondary" className="sub-skill-badge">
+                              {sub.subSkillName}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Col>
+                )}
+              </Row>
+            </div>
           )}
-          {uploadSuccess && (
-            <Alert variant="success" onClose={() => setUploadSuccess(false)} dismissible>
-              Labours uploaded successfully!
-            </Alert>
-          )}
-          <div className="table-responsive">
-            <DataTable
-              columns={labourColumns}
-              data={Array.isArray(labours) ? labours : []}
-              pagination
-              paginationServer
-              paginationTotalRows={totalLabourElements}
-              paginationDefaultPage={labourPageNumber + 1}
-              onChangePage={page => setLabourPageNumber(page - 1)}
-              onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                setLabourPageSize(currentRowsPerPage);
-                setLabourPageNumber(currentPage - 1);
-              }}
-              sortServer
-              onSort={(column, sortDirection) => {
-                setLabourSortBy(column.sortField || 'rating');
-                setLabourSortOrder(sortDirection || 'asc');
-              }}
-              progressPending={isLoadingLabours}
-              noDataComponent={'No labours found.'}
-              customStyles={customStyles}
-              responsive
-            />
-          </div>
-        </Card.Body>
-      </Card>
-
-      {/* Users Section */}
-      <Card className="mb-4">
-        <Card.Header>
-          <h3 className="mb-0">User Management</h3>
-        </Card.Header>
-        <Card.Body>
-          <div className="table-responsive">
-            <DataTable
-              columns={userColumns}
-              data={Array.isArray(users) ? users : []}
-              pagination
-              paginationServer
-              paginationTotalRows={totalUserElements}
-              paginationDefaultPage={userPageNumber + 1}
-              onChangePage={page => setUserPageNumber(page - 1)}
-              onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                setUserPageSize(currentRowsPerPage);
-                setUserPageNumber(currentPage - 1);
-              }}
-              sortServer
-              onSort={(column, sortDirection) => {
-                setUserSortBy(column.sortField || 'fullName');
-                setUserSortOrder(sortDirection || 'asc');
-              }}
-              progressPending={isLoadingUsers}
-              noDataComponent={'No users found.'}
-              customStyles={customStyles}
-              responsive
-            />
-          </div>
-        </Card.Body>
-      </Card>
-
-      {/* Bookings Section */}
-      <Card className="mb-4">
-        <Card.Header>
-          <h3 className="mb-0">Booking Management</h3>
-        </Card.Header>
-        <Card.Body>
-          <div className="table-responsive">
-            <DataTable
-              columns={bookingColumns}
-              data={Array.isArray(bookings) ? bookings : []}
-              pagination
-              paginationServer
-              paginationTotalRows={totalBookingElements}
-              paginationDefaultPage={bookingPageNumber + 1}
-              onChangePage={page => setBookingPageNumber(page - 1)}
-              onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
-                setBookingPageSize(currentRowsPerPage);
-                setBookingPageNumber(currentPage - 1);
-              }}
-              sortServer
-              onSort={(column, sortDirection) => {
-                setBookingSortBy(column.sortField || 'bookingTime');
-                setBookingSortOrder(sortDirection || 'asc');
-              }}
-              progressPending={isLoadingBookings}
-              noDataComponent={'No bookings found.'}
-              customStyles={customStyles}
-              responsive
-            />
-          </div>
-        </Card.Body>
-      </Card>
-
-      {/* Modals */}
-      <Modal isOpen={labourModalOpen} toggle={toggleLabourModal} size="lg">
-        <ModalHeader toggle={toggleLabourModal}>Labour Details (ID: {selectedLabour?.labourId})</ModalHeader>
-        <ModalBody>
-          <Card className="shadow-sm border-0 p-3">
-            <Card.Body>
-              <h4 className="mb-3 text-primary">Labour Details</h4>
-              <div className="mb-2"><strong>Name: </strong> {selectedLabour?.labourName}</div>
-              <div className="mb-2"><strong>Skill: </strong> <span className="badge bg-info text-dark">{selectedLabour?.labourSkill}</span></div>
-              <div className="mb-2"><strong>Mobile: </strong>{selectedLabour?.labourMobileNo}</div>
-              {Array.isArray(selectedLabour?.labourSubSkills) && selectedLabour.labourSubSkills.length > 0 && (
-                <div className="mb-2"><strong>Sub Skills: </strong> <span className="d-flex flex-wrap gap-2 mt-2">{selectedLabour.labourSubSkills.map((sub, idx) => (
-                  <span key={sub.subSkillId || idx} className="badge bg-info text-dark mb-1" style={{ fontSize: '0.97em', padding: '0.5em 1em', borderRadius: '1em' }}>{sub.subSkillName}</span>
-                ))}</span></div>
-              )}
-              <div className="mb-2"><strong>Rating: </strong> {selectedLabour?.rating && Number(selectedLabour.rating) > 0 ? selectedLabour.rating : <span className="text-muted">No Ratings Yet</span>}</div>
-              <div className="mb-2"><strong>Ratings Count: </strong> {selectedLabour?.ratingCount && Number(selectedLabour.ratingCount) > 0 ? selectedLabour.ratingCount : 0}</div>
-            </Card.Body>
-          </Card>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="admin-modal-footer">
           <Button color="secondary" onClick={toggleLabourModal}>Close</Button>
         </ModalFooter>
       </Modal>
 
-      <Modal isOpen={userModalOpen} toggle={toggleUserModal} size="lg">
-        <ModalHeader toggle={toggleUserModal}>User Details (ID: {selectedUser?.userId})</ModalHeader>
-        <ModalBody>
-          <Card className="shadow-sm border-0 p-3">
-            <Card.Body>
-              <h4 className="mb-3 text-primary">User Details</h4>
-              <div className="mb-2"><strong>Name: </strong> {selectedUser?.fullName}</div>
-              <div className="mb-2"><strong>Mobile: </strong> <span className="badge bg-info">{selectedUser?.mobileNumber}</span></div>
-              <div className="mb-2"><strong>Email: </strong> <span className="badge bg-info text-dark">{selectedUser?.email}</span></div>
-            </Card.Body>
-          </Card>
+      <Modal isOpen={userModalOpen} toggle={toggleUserModal} size="lg" className="admin-modal">
+        <ModalHeader toggle={toggleUserModal} className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <FaUser className="me-2 text-primary" />
+            User Details
+          </div>
+        </ModalHeader>
+        <ModalBody className="admin-modal-body">
+          {selectedUser && (
+            <div className="user-details">
+              <div className="detail-header mb-4">
+                <div className="d-flex align-items-center">
+                  <div className="user-avatar-large me-3">
+                    <FaUser className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h4 className="mb-1">User #{selectedUser.userId}</h4>
+                    <Badge bg="success" className="status-badge-large">Active</Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <Row className="g-3">
+                <Col md={6}>
+                  <div className="detail-item">
+                    <label className="detail-label">
+                      <FaPhone className="me-2" />
+                      Mobile Number
+                    </label>
+                    <div className="detail-value">{selectedUser.mobileNumber}</div>
+                  </div>
+                </Col>
+                <Col md={6}>
+                  <div className="detail-item">
+                    <label className="detail-label">
+                      <FaEnvelope className="me-2" />
+                      Email
+                    </label>
+                    <div className="detail-value">{selectedUser.email || 'Not provided'}</div>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          )}
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="admin-modal-footer">
           <Button color="secondary" onClick={toggleUserModal}>Close</Button>
         </ModalFooter>
       </Modal>

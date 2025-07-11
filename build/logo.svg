@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="#1a237e"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="256" cy="256" r="200" fill="#0d47a1"/>
+  
+  <!-- Tools Icon -->
+  <g transform="translate(156, 156) scale(0.4)">
+    <!-- Wrench -->
+    <path d="M250 150C250 206.6 203.6 253 147 253C90.4 253 44 206.6 44 150C44 93.4 90.4 47 147 47C203.6 47 250 93.4 250 150Z" fill="#ffffff"/>
+    <path d="M147 253C203.6 253 250 206.6 250 150C250 93.4 203.6 47 147 47C90.4 47 44 93.4 44 150C44 206.6 90.4 253 147 253ZM147 67C193.2 67 230 103.8 230 150C230 196.2 193.2 233 147 233C100.8 233 64 196.2 64 150C64 103.8 100.8 67 147 67Z" fill="#1a237e"/>
+    
+    <!-- Handle -->
+    <path d="M147 150L200 97C206.6 90.4 206.6 80.2 200 73.6C193.4 67 183.2 67 176.6 73.6L147 103.2L117.4 73.6C110.8 67 100.6 67 94 73.6C87.4 80.2 87.4 90.4 94 97L147 150Z" fill="#ffffff"/>
+  </g>
+  
+  <!-- Text "InstaLab" -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">InstaLab</text>
+</svg> 
