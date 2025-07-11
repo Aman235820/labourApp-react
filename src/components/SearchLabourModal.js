@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner } from 'react-bootstrap';
-import DataTable from "react-data-table-component";
-import { FaStar, FaPhone, FaTools } from 'react-icons/fa';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Row, Col, Badge } from 'react-bootstrap';
+import { FaStar, FaPhone, FaTools, FaUser, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import { bookLabour } from '../services/BookingService';
 import { labourService } from '../services/labourService';
 import { useNavigate } from 'react-router-dom';
@@ -74,96 +73,97 @@ const SearchLabourModal = ({
     };
 
     // Navigate to LabourDetailsPage
-    const handleRowClicked = (row) => {
-        navigate(`/labour-details/${row.labourId}`);
+    const handleCardClicked = (labour) => {
+        navigate(`/labour-details/${labour.labourId}`);
     };
 
-    const columns = [
-        {
-            name: 'Name',
-            selector: row => row.labourName,
-            sortable: true,
-        },
-        {
-            name: 'Skill',
-            selector: row => row.labourSkill,
-            sortable: true,
-            cell: row => (
-                <div className="d-flex align-items-center">
-                    <FaTools className="text-primary me-2" />
-                    {row.labourSkill}
+    const renderLabourCard = (labour) => (
+        <Card 
+            key={labour.labourId} 
+            className="labour-card mb-3"
+            onClick={() => handleCardClicked(labour)}
+        >
+            <Card.Body className="p-3">
+                <div className="d-flex justify-content-between align-items-start mb-2">
+                    <div className="d-flex align-items-center">
+                        <div className="labour-avatar me-3">
+                            <FaUser className="text-primary" size={24} />
+                        </div>
+                        <div>
+                            <h6 className="mb-1 fw-bold text-primary">{labour.labourName}</h6>
+                            <div className="d-flex align-items-center text-muted">
+                                <FaTools className="me-1" size={12} />
+                                <small>{labour.labourSkill}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-end">
+                        {labour.rating && parseFloat(labour.rating) > 0 ? (
+                            <div className="d-flex align-items-center justify-content-end mb-1">
+                                <FaStar className="text-warning me-1" size={14} />
+                                <span className="fw-bold">{labour.rating}</span>
+                                <small className="text-muted ms-1">({labour.ratingCount || 0})</small>
+                            </div>
+                        ) : (
+                            <Badge bg="secondary" className="mb-1">No Ratings</Badge>
+                        )}
+                    </div>
                 </div>
-            ),
-        },
-        {
-            name: 'Rating',
-            selector: row => parseFloat(row.rating),
-            sortable: true,
-            cell: row => (
-                <div className="d-flex align-items-center">
-                    <FaStar className="text-warning me-2" />
-                    {row.rating && parseFloat(row.rating) > 0
-                        ? `${row.rating} (${row.ratingCount} reviews)`
-                        : 'No Ratings Yet'}
+                
+                <div className="row g-2 mb-3">
+                    <div className="col-6">
+                        <div className="d-flex align-items-center text-muted">
+                            <FaPhone className="me-2" size={12} />
+                            <small>{labour.labourMobileNo}</small>
+                        </div>
+                    </div>
+                    <div className="col-6">
+                        <div className="d-flex align-items-center text-muted">
+                            <FaMapMarkerAlt className="me-2" size={12} />
+                            <small>{labour.labourAddress || 'Location not specified'}</small>
+                        </div>
+                    </div>
                 </div>
-            ),
-        },
-        {
-            name: 'Phone',
-            selector: row => row.labourMobileNo,
-            cell: row => (
-                <div className="d-flex align-items-center">
+                
+                <div className="d-flex justify-content-between align-items-center">
                     <Button 
                         variant="outline-primary" 
                         size="sm"
-                        onClick={() => window.location.href = `tel:${row.labourMobileNo}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = `tel:${labour.labourMobileNo}`;
+                        }}
                         className="d-flex align-items-center"
                     >
-                        <FaPhone className="me-2" />
+                        <FaPhone className="me-1" />
                         Call Now
                     </Button>
-                </div>
-            ),
-        },
-        {
-            name: 'Actions',
-            cell: row => (
-                <div>
                     <Button 
-                        variant="outline-primary" 
+                        variant="success" 
                         size="sm"
-                        onClick={() => handleBookLabour(row)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleBookLabour(labour);
+                        }}
                         disabled={isBooking}
+                        className="d-flex align-items-center"
                     >
-                        {isBooking ? 'Booking...' : 'Book Now'}
+                        {isBooking ? (
+                            <>
+                                <Spinner animation="border" size="sm" className="me-1" />
+                                Booking...
+                            </>
+                        ) : (
+                            <>
+                                <FaCalendarAlt className="me-1" />
+                                Book Now
+                            </>
+                        )}
                     </Button>
                 </div>
-            ),
-        },
-    ];
-
-    const customStyles = {
-        headRow: {
-            style: {
-                backgroundColor: '#f8f9fa',
-                borderBottom: '2px solid #dee2e6',
-            },
-        },
-        rows: {
-            style: {
-                minHeight: '72px',
-                borderRadius: '8px',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                transition: 'background 0.2s, box-shadow 0.2s, font-weight 0.2s',
-            },
-            highlightOnHoverStyle: {
-                backgroundColor: '#cce3ff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(0,123,255,0.18)',
-                fontWeight: 'bold',
-            },
-        },
-    };
+            </Card.Body>
+        </Card>
+    );
 
     return (
         <>
@@ -186,28 +186,70 @@ const SearchLabourModal = ({
                             {bookingStatus.message}
                         </Alert>
                     )}
-                    <DataTable
-                        columns={columns}
-                        data={searchResults.content || []}
-                        pagination
-                        paginationServer
-                        paginationTotalRows={searchResults.totalElements || 0}
-                        paginationPerPage={searchResults.pageSize || 10}
-                        paginationDefaultPage={searchResults.pageNumber + 1}
-                        onChangePage={handlePageChange}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onSort={handleSort}
-                        sortServer
-                        customStyles={customStyles}
-                        highlightOnHover
-                        pointerOnHover
-                        noDataComponent={
-                            <div className="text-center py-4">
-                                <p className="text-muted mb-0">No results found</p>
+                    
+                    <div className="search-results-content">
+                        {searchResults.content && searchResults.content.length > 0 ? (
+                            <>
+                                <div className="mb-3">
+                                    <small className="text-muted">
+                                        Showing {searchResults.content.length} of {searchResults.totalElements} results
+                                    </small>
+                                </div>
+                                <div className="labour-cards-container">
+                                    {searchResults.content.map(renderLabourCard)}
+                                </div>
+                                
+                                {/* Pagination */}
+                                {searchResults.totalPages > 1 && (
+                                    <div className="d-flex justify-content-center mt-4">
+                                        <div className="pagination-container">
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                disabled={searchResults.pageNumber === 0}
+                                                onClick={() => handlePageChange(searchResults.pageNumber)}
+                                            >
+                                                Previous
+                                            </Button>
+                                            <span className="mx-3 align-self-center">
+                                                Page {searchResults.pageNumber + 1} of {searchResults.totalPages}
+                                            </span>
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                disabled={searchResults.pageNumber >= searchResults.totalPages - 1}
+                                                onClick={() => handlePageChange(searchResults.pageNumber + 2)}
+                                            >
+                                                Next
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-5">
+                                <div className="empty-results-alert">
+                                    <div className="empty-results-icon mb-3">
+                                        <FaTools className="text-muted" size={48} />
+                                    </div>
+                                    <h5 className="text-muted mb-2">
+                                        Requested services for <span className="text-primary fw-bold">"{searchCategory}"</span> not available
+                                    </h5>
+                                    <p className="text-muted mb-3">
+                                        We apologize, but we couldn't find any skilled professionals for this service in your area at the moment.
+                                    </p>
+                                    <div className="empty-results-suggestions">
+                                        <p className="text-muted small mb-2">You can try:</p>
+                                        <ul className="text-muted small text-start">
+                                            <li>Checking back later for new professionals</li>
+                                            <li>Searching for a different service category</li>
+                                            <li>Expanding your search area</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                        }
-                        onRowClicked={handleRowClicked}
-                    />
+                        )}
+                    </div>
                 </ModalBody>
                 <ModalFooter>
                     <Button variant="secondary" onClick={onHide}>
