@@ -62,8 +62,8 @@ function AdminDashboard() {
   // Pagination and Sorting State for Labours
   const [labourPageNumber, setLabourPageNumber] = useState(0);
   const [labourPageSize, setLabourPageSize] = useState(10);
-  const [labourSortBy, setLabourSortBy] = useState('rating');
-  const [labourSortOrder, setLabourSortOrder] = useState('asc');
+  const [labourSortBy, setLabourSortBy] = useState('labourId');
+  const [labourSortOrder, setLabourSortOrder] = useState('desc');
   const [totalLabourElements, setTotalLabourElements] = useState(0);
   const [totalLabourPages, setTotalLabourPages] = useState(0);
 
@@ -79,7 +79,7 @@ function AdminDashboard() {
   const [bookingPageNumber, setBookingPageNumber] = useState(0);
   const [bookingPageSize, setBookingPageSize] = useState(20);
   const [bookingSortBy, setBookingSortBy] = useState('bookingTime');
-  const [bookingSortOrder, setBookingSortOrder] = useState('asc');
+  const [bookingSortOrder, setBookingSortOrder] = useState('desc');
   const [totalBookingElements, setTotalBookingElements] = useState(0);
   const [totalBookingPages, setTotalBookingPages] = useState(0);
 
@@ -88,6 +88,7 @@ function AdminDashboard() {
     table: {
       style: {
         backgroundColor: 'transparent',
+        minWidth: '100%',
       },
     },
     headRow: {
@@ -100,20 +101,24 @@ function AdminDashboard() {
     },
     headCells: {
       style: {
-        paddingLeft: '24px',
-        paddingRight: '24px',
-        paddingTop: '16px',
-        paddingBottom: '16px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
+        paddingTop: '20px',
+        paddingBottom: '20px',
         fontSize: '0.875rem',
         fontWeight: '700',
         color: '#374151',
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
+        borderRight: '1px solid #e2e8f0',
+        '&:last-child': {
+          borderRight: 'none',
+        },
       },
     },
     rows: {
       style: {
-        minHeight: '72px',
+        minHeight: '80px',
         fontSize: '0.875rem',
         backgroundColor: 'white',
         borderBottom: '1px solid #f3f4f6',
@@ -127,12 +132,16 @@ function AdminDashboard() {
     },
     cells: {
       style: {
-        paddingLeft: '24px',
-        paddingRight: '24px',
-        paddingTop: '16px',
-        paddingBottom: '16px',
+        paddingLeft: '32px',
+        paddingRight: '32px',
+        paddingTop: '20px',
+        paddingBottom: '20px',
         color: '#374151',
         fontWeight: '500',
+        borderRight: '1px solid #f3f4f6',
+        '&:last-child': {
+          borderRight: 'none',
+        },
       },
     },
     pagination: {
@@ -140,7 +149,63 @@ function AdminDashboard() {
         backgroundColor: '#f8fafc',
         borderTop: '1px solid #e2e8f0',
         borderRadius: '0 0 12px 12px',
-        padding: '16px 24px',
+        padding: '20px 32px',
+      },
+    },
+  };
+
+  // Responsive configuration for DataTables
+  const responsiveConfig = {
+    breakpoints: {
+      mobile: 768,
+      tablet: 1024,
+      desktop: 1200,
+    },
+    table: {
+      style: {
+        minWidth: '100%',
+      },
+    },
+    headRow: {
+      style: {
+        backgroundColor: '#f8fafc',
+        borderBottom: '2px solid #e2e8f0',
+        borderRadius: '12px 12px 0 0',
+        minHeight: '60px',
+      },
+    },
+    headCells: {
+      style: {
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        paddingTop: '16px',
+        paddingBottom: '16px',
+        fontSize: '0.75rem',
+        fontWeight: '700',
+        color: '#374151',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+      },
+    },
+    rows: {
+      style: {
+        minHeight: '60px',
+        fontSize: '0.8rem',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #f3f4f6',
+        '&:hover': {
+          backgroundColor: '#f9fafb',
+        },
+      },
+    },
+    cells: {
+      style: {
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        paddingTop: '12px',
+        paddingBottom: '12px',
+        color: '#374151',
+        fontWeight: '500',
       },
     },
   };
@@ -185,7 +250,8 @@ function AdminDashboard() {
           </div>
         </div>
       ),
-      width: '200px',
+      width: '280px',
+      minWidth: '280px',
     },
     {
       name: 'Skill',
@@ -198,7 +264,8 @@ function AdminDashboard() {
           {row.labourSkill}
         </Badge>
       ),
-      width: '150px',
+      width: '180px',
+      minWidth: '180px',
     },
     {
       name: 'Rating',
@@ -212,7 +279,8 @@ function AdminDashboard() {
           <small className="text-muted ms-1">({row.ratingCount || 0})</small>
         </div>
       ),
-      width: '120px',
+      width: '160px',
+      minWidth: '160px',
     },
     {
       name: 'Status',
@@ -224,7 +292,8 @@ function AdminDashboard() {
           {row.status === 'active' ? 'Active' : 'Inactive'}
         </Badge>
       ),
-      width: '100px',
+      width: '140px',
+      minWidth: '140px',
     },
     {
       name: 'Actions',
@@ -261,7 +330,8 @@ function AdminDashboard() {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '120px',
+      width: '160px',
+      minWidth: '160px',
     },
   ];
 
@@ -283,7 +353,8 @@ function AdminDashboard() {
           </div>
         </div>
       ),
-      width: '200px',
+      width: '280px',
+      minWidth: '280px',
     },
     {
       name: 'Contact',
@@ -296,7 +367,8 @@ function AdminDashboard() {
           <span>{row.mobileNumber}</span>
         </div>
       ),
-      width: '150px',
+      width: '200px',
+      minWidth: '200px',
     },
     {
       name: 'Status',
@@ -308,7 +380,8 @@ function AdminDashboard() {
           {row.status === 'active' ? 'Active' : 'Inactive'}
         </Badge>
       ),
-      width: '100px',
+      width: '140px',
+      minWidth: '140px',
     },
     {
       name: 'Actions',
@@ -345,7 +418,8 @@ function AdminDashboard() {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '120px',
+      width: '160px',
+      minWidth: '160px',
     },
   ];
 
@@ -359,7 +433,8 @@ function AdminDashboard() {
       cell: row => (
         <div className="fw-bold text-primary">#{row.bookingId}</div>
       ),
-      width: '120px',
+      width: '140px',
+      minWidth: '140px',
     },
     {
       name: 'Customer',
@@ -374,7 +449,8 @@ function AdminDashboard() {
           <span className="fw-medium">{row.userName}</span>
         </div>
       ),
-      width: '150px',
+      width: '180px',
+      minWidth: '180px',
     },
     {
       name: 'Labour',
@@ -389,7 +465,8 @@ function AdminDashboard() {
           <span className="fw-medium">{row.labourName}</span>
         </div>
       ),
-      width: '150px',
+      width: '180px',
+      minWidth: '180px',
     },
     {
       name: 'Service',
@@ -402,7 +479,8 @@ function AdminDashboard() {
           {row.serviceName}
         </Badge>
       ),
-      width: '120px',
+      width: '160px',
+      minWidth: '160px',
     },
     {
       name: 'Status',
@@ -410,7 +488,8 @@ function AdminDashboard() {
       sortable: true,
       sortField: 'bookingStatusCode',
       cell: row => getStatusBadge(row.bookingStatusCode),
-      width: '120px',
+      width: '160px',
+      minWidth: '160px',
     },
     {
       name: 'Date',
@@ -423,7 +502,8 @@ function AdminDashboard() {
           <small>{new Date(row.bookingTime).toLocaleDateString()}</small>
         </div>
       ),
-      width: '120px',
+      width: '140px',
+      minWidth: '140px',
     },
     {
       name: 'Actions',
@@ -460,7 +540,8 @@ function AdminDashboard() {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: '120px',
+      width: '160px',
+      minWidth: '160px',
     },
   ];
 
@@ -522,7 +603,6 @@ function AdminDashboard() {
     }
   };
 
-  // Event handlers
   const handleRemoveLabour = async (labourId) => {
     if (!window.confirm('Are you sure you want to remove this labour?')) return;
     
@@ -763,22 +843,56 @@ function AdminDashboard() {
                           Recent Labours
                         </h5>
                         <div className="recent-list">
-                          {labours.slice(0, 5).map((labour, index) => (
-                            <div key={labour.labourId} className="recent-item">
-                              <div className="d-flex align-items-center">
-                                <div className="labour-avatar me-3">
-                                  <FaUser className="text-white" size={14} />
-                                </div>
-                                <div className="flex-grow-1">
-                                  <div className="fw-bold">{labour.labourName}</div>
-                                  <small className="text-muted">{labour.labourSkill}</small>
-                                </div>
-                                <Badge bg="success" className="status-badge">
-                                  Active
-                                </Badge>
-                              </div>
+                          {isLoadingLabours ? (
+                            <div className="text-center py-4">
+                              <Spinner animation="border" role="status" variant="primary" size="sm">
+                                <span className="visually-hidden">Loading...</span>
+                              </Spinner>
+                              <p className="text-muted mt-2 mb-0">Loading recent labours...</p>
                             </div>
-                          ))}
+                          ) : labours.length > 0 ? (
+                            // Use the same data as the main table, showing top 5 most recent labours
+                            labours.slice(0, 5).map((labour, index) => (
+                              <div 
+                                key={labour.labourId} 
+                                className="recent-item clickable-item"
+                                onClick={() => handleViewLabour(labour.labourId)}
+                                style={{ cursor: 'pointer' }}
+                              >
+                                <div className="d-flex align-items-center">
+                                  <div className="labour-avatar me-3">
+                                    <FaUser className="text-white" size={14} />
+                                  </div>
+                                  <div className="flex-grow-1">
+                                    <div className="fw-bold">{labour.labourName}</div>
+                                    <small className="text-muted">{labour.labourSkill}</small>
+                                  </div>
+                                  <div className="d-flex align-items-center">
+                                    <Badge bg="success" className="status-badge me-2">
+                                      Active
+                                    </Badge>
+                                    <Button
+                                      variant="outline-primary"
+                                      size="sm"
+                                      className="view-btn-recent"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewLabour(labour.labourId);
+                                      }}
+                                    >
+                                      <FaEye className="me-1" />
+                                      View
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-4">
+                              <FaUserTie className="text-muted mb-3" size={32} />
+                              <p className="text-muted mb-0">No recent labours</p>
+                            </div>
+                          )}
                         </div>
                       </Card.Body>
                     </Card>
@@ -791,20 +905,54 @@ function AdminDashboard() {
                           Recent Bookings
                         </h5>
                         <div className="recent-list">
-                          {bookings.slice(0, 5).map((booking, index) => (
-                            <div key={booking.bookingId} className="recent-item">
-                              <div className="d-flex align-items-center">
-                                <div className="booking-avatar me-3">
-                                  <FaCalendarAlt className="text-white" size={14} />
-                                </div>
-                                <div className="flex-grow-1">
-                                  <div className="fw-bold">#{booking.bookingId}</div>
-                                  <small className="text-muted">{booking.userName}</small>
-                                </div>
-                                {getStatusBadge(booking.bookingStatusCode)}
-                              </div>
+                          {isLoadingBookings ? (
+                            <div className="text-center py-4">
+                              <Spinner animation="border" role="status" variant="primary" size="sm">
+                                <span className="visually-hidden">Loading...</span>
+                              </Spinner>
+                              <p className="text-muted mt-2 mb-0">Loading recent bookings...</p>
                             </div>
-                          ))}
+                          ) : bookings.length > 0 ? (
+                            // Use the same data as the main table, showing top 5 most recent bookings
+                            bookings.slice(0, 5).map((booking, index) => (
+                              <div 
+                                key={booking.bookingId} 
+                                className="recent-item clickable-item"
+                                onClick={() => handleViewBooking(booking)}
+                                style={{ cursor: 'pointer' }}
+                              >
+                                <div className="d-flex align-items-center">
+                                  <div className="booking-avatar me-3">
+                                    <FaCalendarAlt className="text-white" size={14} />
+                                  </div>
+                                  <div className="flex-grow-1">
+                                    <div className="fw-bold">#{booking.bookingId}</div>
+                                    <small className="text-muted">{booking.userName}</small>
+                                  </div>
+                                  <div className="d-flex align-items-center">
+                                    {getStatusBadge(booking.bookingStatusCode)}
+                                    <Button
+                                      variant="outline-primary"
+                                      size="sm"
+                                      className="view-btn-recent ms-2"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewBooking(booking);
+                                      }}
+                                    >
+                                      <FaEye className="me-1" />
+                                      View
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-4">
+                              <FaClipboardList className="text-muted mb-3" size={32} />
+                              <p className="text-muted mb-0">No recent bookings</p>
+                            </div>
+                          )}
                         </div>
                       </Card.Body>
                     </Card>
@@ -867,7 +1015,7 @@ function AdminDashboard() {
                   </Alert>
                 )}
 
-                <div className="data-table-container">
+                <div className="data-table-container labour-table">
                   <DataTable
                     columns={labourColumns}
                     data={Array.isArray(labours) ? labours : []}
@@ -882,8 +1030,8 @@ function AdminDashboard() {
                     }}
                     sortServer
                     onSort={(column, sortDirection) => {
-                      setLabourSortBy(column.sortField || 'rating');
-                      setLabourSortOrder(sortDirection || 'asc');
+                      setLabourSortBy(column.sortField || 'labourId');
+                      setLabourSortOrder(sortDirection || 'desc');
                     }}
                     progressPending={isLoadingLabours}
                     noDataComponent={
@@ -893,7 +1041,7 @@ function AdminDashboard() {
                       </div>
                     }
                     customStyles={customStyles}
-                    responsive
+                    responsive={responsiveConfig}
                     highlightOnHover
                     pointerOnHover
                   />
@@ -915,7 +1063,7 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="data-table-container">
+                <div className="data-table-container user-table">
                   <DataTable
                     columns={userColumns}
                     data={Array.isArray(users) ? users : []}
@@ -941,7 +1089,7 @@ function AdminDashboard() {
                       </div>
                     }
                     customStyles={customStyles}
-                    responsive
+                    responsive={responsiveConfig}
                     highlightOnHover
                     pointerOnHover
                   />
@@ -986,7 +1134,7 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="data-table-container">
+                <div className="data-table-container booking-table">
                   <DataTable
                     columns={bookingColumns}
                     data={Array.isArray(bookings) ? bookings : []}
@@ -1002,7 +1150,7 @@ function AdminDashboard() {
                     sortServer
                     onSort={(column, sortDirection) => {
                       setBookingSortBy(column.sortField || 'bookingTime');
-                      setBookingSortOrder(sortDirection || 'asc');
+                      setBookingSortOrder(sortDirection || 'desc');
                     }}
                     progressPending={isLoadingBookings}
                     noDataComponent={
@@ -1012,7 +1160,7 @@ function AdminDashboard() {
                       </div>
                     }
                     customStyles={customStyles}
-                    responsive
+                    responsive={responsiveConfig}
                     highlightOnHover
                     pointerOnHover
                   />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Tab, Tabs, Alert, Form, Modal } from 'react-bootstrap';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Button, Badge, Tab, Tabs, Alert, Form, Modal, Spinner } from 'react-bootstrap';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FaUserCircle, FaPhone, FaStar, FaMapMarkerAlt, FaCalendarAlt, 
   FaClock, FaCheckCircle, FaTimesCircle, FaHeart, FaShare, 
@@ -9,11 +9,13 @@ import {
   FaShield, FaAward, FaCertificate, FaGraduationCap
 } from 'react-icons/fa';
 import { labourService } from '../services/labourService';
+import { bookLabour } from '../services/BookingService';
 import '../styles/LabourDetailsPage.css';
 
 const LabourDetailsPage = () => {
   const { labourId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [labour, setLabour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -22,12 +24,20 @@ const LabourDetailsPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState(null);
   const [bookingData, setBookingData] = useState({
     date: '',
     time: '',
     description: '',
     urgency: 'normal'
   });
+
+  // Get searchCategory from location state or URL params, with fallback to labour skill
+  const searchCategory = location.state?.searchCategory || (labour?.labourSkill || '');
+  
+  // Computed service category for display and booking
+  const serviceCategory = searchCategory || labour?.labourSkill || 'Service';
 
   // Fetch labour details from API
   useEffect(() => {
@@ -158,12 +168,49 @@ const LabourDetailsPage = () => {
     fetchLabourDetails();
   }, [labourId]);
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    // Handle booking logic here
-    console.log('Booking submitted:', bookingData);
-    setShowBookingModal(false);
-    // Show success message or redirect
+    
+    try {
+      setIsBooking(true);
+      setBookingStatus(null);
+      
+      const userData = JSON.parse(localStorage.getItem('user'));
+      
+      // Prepare booking data
+      const bookingData = {
+        userId: userData.userId,
+        labourId: labour.id,
+        labourSkill: serviceCategory
+      };
+      
+      // Make the booking API call
+      const response = await bookLabour(bookingData);
+      
+      if (response && !response.hasError) {
+        setBookingStatus({
+          type: 'success',
+          message: 'Labour Successfully booked!'
+        });
+        
+        // Show alert with specific message and redirect on close
+        alert(`${labour.labourName} successfully booked for ${serviceCategory}, you can check your bookings section for more details`);
+        navigate('/');
+      } else {
+        setBookingStatus({
+          type: 'danger',
+          message: 'Booking failed. Please try again.'
+        });
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      setBookingStatus({
+        type: 'danger',
+        message: 'Booking failed. Please try again.'
+      });
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   const renderStars = (rating) => {
@@ -297,7 +344,16 @@ const LabourDetailsPage = () => {
               <Button 
                 variant="success" 
                 size="lg"
-                onClick={() => setShowBookingModal(true)}
+                onClick={() => {
+                  // Check if user is logged in
+                  const storedUser = localStorage.getItem('user');
+                  if (!storedUser) {
+                    alert('Please login to book a service. Redirecting to registration page.');
+                    navigate('/register');
+                    return;
+                  }
+                  setShowBookingModal(true);
+                }}
                 disabled={!labour.isAvailable}
               >
                 <FaCalendarAlt className="me-2" />
@@ -641,6 +697,38 @@ const LabourDetailsPage = () => {
           <Modal.Title>Book {labour.labourName}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {bookingStatus && (
+            <Alert variant={bookingStatus.type} onClose={() => setBookingStatus(null)} dismissible>
+              {bookingStatus.message}
+            </Alert>
+          )}
+          
+          <div className="booking-confirmation mb-4">
+            <div className="text-center">
+              <FaCalendarAlt className="text-primary mb-3" size={48} />
+              <h5>Confirm Your Booking</h5>
+              <p className="text-muted">
+                Are you sure you want to book <strong>{labour.labourName}</strong> for <strong>{serviceCategory}</strong>?
+              </p>
+              <div className="booking-details bg-light p-3 rounded">
+                <div className="row text-start">
+                  <div className="col-6">
+                    <strong>Labour:</strong> {labour.labourName}
+                  </div>
+                  <div className="col-6">
+                    <strong>Service:</strong> {serviceCategory}
+                  </div>
+                  <div className="col-6">
+                    <strong>Contact:</strong> {labour.labourMobileNo}
+                  </div>
+                  <div className="col-6">
+                    <strong>Rating:</strong> {labour.rating ? `${labour.rating}/5` : 'No rating'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <Form onSubmit={handleBookingSubmit}>
             <Row>
               <Col md={6}>
@@ -650,7 +738,6 @@ const LabourDetailsPage = () => {
                     type="date"
                     value={bookingData.date}
                     onChange={(e) => setBookingData({...bookingData, date: e.target.value})}
-                    required
                   />
                 </Form.Group>
               </Col>
@@ -661,7 +748,6 @@ const LabourDetailsPage = () => {
                     type="time"
                     value={bookingData.time}
                     onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
-                    required
                   />
                 </Form.Group>
               </Col>
@@ -675,7 +761,6 @@ const LabourDetailsPage = () => {
                 value={bookingData.description}
                 onChange={(e) => setBookingData({...bookingData, description: e.target.value})}
                 placeholder="Describe the work you need done..."
-                required
               />
             </Form.Group>
             
@@ -693,8 +778,18 @@ const LabourDetailsPage = () => {
             </Form.Group>
             
             <div className="d-grid gap-2">
-              <Button variant="primary" type="submit" size="lg">
-                Send Booking Request
+              <Button variant="success" type="submit" size="lg" disabled={isBooking}>
+                {isBooking ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Sending Booking Request...
+                  </>
+                ) : (
+                  <>
+                    <FaCalendarAlt className="me-2" />
+                    Confirm Booking
+                  </>
+                )}
               </Button>
               <Button variant="outline-secondary" onClick={() => setShowBookingModal(false)}>
                 Cancel

@@ -103,15 +103,20 @@
   color: #374151 !important;
   font-weight: 700 !important;
   font-size: 0.875rem !important;
-  padding: 20px 24px !important;
+  padding: 20px 32px !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border-right: 1px solid #e2e8f0;
+}
+
+.data-table-container .rdt_TableHead .rdt_TableCol:last-child {
+  border-right: none;
 }
 
 .data-table-container .rdt_TableBody .rdt_TableRow {
   border-bottom: 1px solid #f3f4f6;
   transition: all 0.2s ease;
-  min-height: 72px;
+  min-height: 80px;
 }
 
 .data-table-container .rdt_TableBody .rdt_TableRow:hover {
@@ -121,10 +126,89 @@
 }
 
 .data-table-container .rdt_TableBody .rdt_TableCell {
-  padding: 16px 24px !important;
+  padding: 20px 32px !important;
   color: #374151;
   font-weight: 500;
   font-size: 0.875rem;
+  border-right: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.data-table-container .rdt_TableBody .rdt_TableCell:last-child {
+  border-right: none;
+}
+
+/* Column-specific spacing - Labour Table (5 columns) */
+.labour-table .rdt_TableCell:nth-child(1) {
+  min-width: 280px;
+}
+
+.labour-table .rdt_TableCell:nth-child(2) {
+  min-width: 180px;
+}
+
+.labour-table .rdt_TableCell:nth-child(3) {
+  min-width: 160px;
+}
+
+.labour-table .rdt_TableCell:nth-child(4) {
+  min-width: 140px;
+}
+
+.labour-table .rdt_TableCell:nth-child(5) {
+  min-width: 160px;
+}
+
+/* User Table (4 columns) */
+.user-table .rdt_TableCell:nth-child(1) {
+  min-width: 280px;
+}
+
+.user-table .rdt_TableCell:nth-child(2) {
+  min-width: 200px;
+}
+
+.user-table .rdt_TableCell:nth-child(3) {
+  min-width: 140px;
+}
+
+.user-table .rdt_TableCell:nth-child(4) {
+  min-width: 160px;
+}
+
+/* Booking Table (7 columns) */
+.booking-table .rdt_TableCell:nth-child(1) {
+  min-width: 140px;
+}
+
+.booking-table .rdt_TableCell:nth-child(2) {
+  min-width: 180px;
+}
+
+.booking-table .rdt_TableCell:nth-child(3) {
+  min-width: 180px;
+}
+
+.booking-table .rdt_TableCell:nth-child(4) {
+  min-width: 160px;
+}
+
+.booking-table .rdt_TableCell:nth-child(5) {
+  min-width: 160px;
+}
+
+.booking-table .rdt_TableCell:nth-child(6) {
+  min-width: 140px;
+}
+
+.booking-table .rdt_TableCell:nth-child(7) {
+  min-width: 160px;
+}
+
+/* Ensure proper spacing for action buttons */
+.data-table-container .rdt_TableCell:last-child {
+  text-align: center;
+  min-width: 160px;
 }
 
 /* Avatar Styles */
@@ -356,33 +440,80 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
+/* Recent Items in Overview */
 .recent-list {
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
 .recent-item {
-  padding: 12px 0;
+  padding: 1rem;
   border-bottom: 1px solid #f3f4f6;
   transition: all 0.2s ease;
 }
 
 .recent-item:hover {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
+  background-color: #f9fafb;
+  transform: translateX(4px);
 }
 
 .recent-item:last-child {
   border-bottom: none;
 }
 
-/* Modal Styles */
+/* Clickable Items */
+.clickable-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.clickable-item:hover {
+  background-color: #f0f9ff !important;
+  border-left: 3px solid #3b82f6;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.clickable-item:active {
+  transform: translateX(2px);
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* View Button in Recent Section */
+.view-btn-recent {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-width: 1px;
+  min-width: 60px;
+}
+
+.view-btn-recent:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.view-btn-recent:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.4);
+}
+
+.view-btn-recent .fa-eye {
+  font-size: 0.7rem;
+}
+
+/* Admin Modal Styles */
 .admin-modal .modal-content {
   border-radius: 16px;
   border: none;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .admin-modal-header {
@@ -444,7 +575,6 @@
   
   .admin-header {
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
   }
   
   .admin-title {
@@ -469,33 +599,139 @@
   }
   
   .search-input {
-    width: 200px;
+    font-size: 0.875rem;
   }
   
   .data-table-container .rdt_TableHead .rdt_TableCol {
-    padding: 16px 12px !important;
+    padding: 12px 16px !important;
     font-size: 0.75rem !important;
   }
   
   .data-table-container .rdt_TableBody .rdt_TableCell {
-    padding: 12px !important;
+    padding: 12px 16px !important;
     font-size: 0.8rem;
   }
   
   .action-btn {
-    min-width: 36px;
-    height: 36px;
-    font-size: 0.7rem !important;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
   }
   
   .labour-avatar, .user-avatar, .booking-avatar {
     width: 32px;
     height: 32px;
+    font-size: 0.875rem;
   }
   
   .labour-avatar-large, .user-avatar-large {
     width: 48px;
     height: 48px;
+    font-size: 1.25rem;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(1) {
+    min-width: 200px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(3) {
+    min-width: 100px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(4) {
+    min-width: 80px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(5) {
+    min-width: 120px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(1) {
+    min-width: 200px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(2) {
+    min-width: 140px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(3) {
+    min-width: 80px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(4) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(1) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(3) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(4) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(5) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(6) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(7) {
+    min-width: 120px;
+  }
+  
+  .action-btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+  }
+  
+  .status-badge, .skill-badge, .service-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .labour-avatar, .user-avatar, .booking-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+  
+  .data-table-container .rdt_Pagination {
+    padding: 12px 16px;
+  }
+  
+  .data-table-container .rdt_Pagination button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .data-table-container .rdt_Pagination select {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  /* View button responsive styles */
+  .view-btn-recent {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 50px;
+  }
+  
+  .view-btn-recent .fa-eye {
+    font-size: 0.65rem;
   }
 }
 
@@ -513,27 +749,26 @@
   }
   
   .search-input {
-    width: 150px;
+    font-size: 0.8rem;
   }
   
   .filter-select {
-    min-width: 120px;
+    font-size: 0.8rem;
   }
   
   .data-table-container .rdt_TableHead .rdt_TableCol {
-    padding: 12px 8px !important;
+    padding: 12px 16px !important;
     font-size: 0.7rem !important;
   }
   
   .data-table-container .rdt_TableBody .rdt_TableCell {
-    padding: 8px !important;
+    padding: 12px 16px !important;
     font-size: 0.75rem;
   }
   
   .action-btn {
-    min-width: 32px;
-    height: 32px;
-    font-size: 0.65rem !important;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
   }
   
   .labour-avatar, .user-avatar, .booking-avatar {
@@ -544,5 +779,301 @@
   .labour-avatar-large, .user-avatar-large {
     width: 40px;
     height: 40px;
+  }
+  
+  /* Further adjust column widths for very small screens */
+  .labour-table .rdt_TableCell:nth-child(1) {
+    min-width: 160px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(3) {
+    min-width: 100px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(4) {
+    min-width: 80px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(5) {
+    min-width: 100px;
+  }
+  
+  /* User Table small screen adjustments */
+  .user-table .rdt_TableCell:nth-child(1) {
+    min-width: 160px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(3) {
+    min-width: 80px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(4) {
+    min-width: 100px;
+  }
+  
+  /* Booking Table small screen adjustments */
+  .booking-table .rdt_TableCell:nth-child(1) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(3) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(4) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(5) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(6) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(7) {
+    min-width: 100px;
+  }
+} 
+
+/* Enhanced Mobile Responsive DataTable Styles */
+@media (max-width: 768px) {
+  .data-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .data-table-container .rdt_Table {
+    min-width: 600px; /* Ensure minimum width for mobile */
+  }
+  
+  .data-table-container .rdt_TableHead .rdt_TableCol {
+    padding: 12px 8px !important;
+    font-size: 0.7rem !important;
+    white-space: nowrap;
+  }
+  
+  .data-table-container .rdt_TableBody .rdt_TableCell {
+    padding: 12px 8px !important;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  
+  /* Mobile-specific column adjustments */
+  .labour-table .rdt_TableCell:nth-child(1) {
+    min-width: 160px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(2) {
+    min-width: 100px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(3) {
+    min-width: 80px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(4) {
+    min-width: 80px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(5) {
+    min-width: 100px;
+  }
+  
+  /* User table mobile adjustments */
+  .user-table .rdt_TableCell:nth-child(1) {
+    min-width: 160px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(3) {
+    min-width: 80px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(4) {
+    min-width: 100px;
+  }
+  
+  /* Booking table mobile adjustments */
+  .booking-table .rdt_TableCell:nth-child(1) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(2) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(3) {
+    min-width: 120px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(4) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(5) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(6) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(7) {
+    min-width: 100px;
+  }
+  
+  /* Mobile action buttons */
+  .action-btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7rem !important;
+    min-width: 32px;
+    height: 32px;
+  }
+  
+  /* Mobile badges */
+  .status-badge, .skill-badge, .service-badge {
+    padding: 4px 8px !important;
+    font-size: 0.65rem !important;
+  }
+  
+  /* Mobile avatars */
+  .labour-avatar, .user-avatar, .booking-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  /* Mobile pagination */
+  .data-table-container .rdt_Pagination {
+    padding: 12px 16px !important;
+  }
+  
+  .data-table-container .rdt_Pagination button {
+    padding: 6px 10px !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .data-table-container .rdt_Pagination select {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .data-table-container .rdt_Table {
+    min-width: 500px;
+  }
+  
+  .data-table-container .rdt_TableHead .rdt_TableCol {
+    padding: 8px 6px !important;
+    font-size: 0.65rem !important;
+  }
+  
+  .data-table-container .rdt_TableBody .rdt_TableCell {
+    padding: 8px 6px !important;
+    font-size: 0.7rem;
+  }
+  
+  /* Further reduce column widths for very small screens */
+  .labour-table .rdt_TableCell:nth-child(1) {
+    min-width: 140px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(2) {
+    min-width: 80px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(3) {
+    min-width: 60px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(4) {
+    min-width: 60px;
+  }
+  
+  .labour-table .rdt_TableCell:nth-child(5) {
+    min-width: 80px;
+  }
+  
+  /* User table very small screen adjustments */
+  .user-table .rdt_TableCell:nth-child(1) {
+    min-width: 140px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(2) {
+    min-width: 100px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(3) {
+    min-width: 60px;
+  }
+  
+  .user-table .rdt_TableCell:nth-child(4) {
+    min-width: 80px;
+  }
+  
+  /* Booking table very small screen adjustments */
+  .booking-table .rdt_TableCell:nth-child(1) {
+    min-width: 60px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(2) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(3) {
+    min-width: 100px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(4) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(5) {
+    min-width: 80px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(6) {
+    min-width: 60px;
+  }
+  
+  .booking-table .rdt_TableCell:nth-child(7) {
+    min-width: 80px;
+  }
+  
+  /* Very small action buttons */
+  .action-btn {
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.65rem !important;
+    min-width: 28px;
+    height: 28px;
+  }
+  
+  /* Very small badges */
+  .status-badge, .skill-badge, .service-badge {
+    padding: 3px 6px !important;
+    font-size: 0.6rem !important;
+  }
+  
+  /* Very small avatars */
+  .labour-avatar, .user-avatar, .booking-avatar {
+    width: 24px;
+    height: 24px;
   }
 } 

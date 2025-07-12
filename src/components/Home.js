@@ -776,6 +776,7 @@ function Home() {
         show={showLabourModal}
         onHide={handleLabourModalClose}
         selectedLabour={selectedLabour}
+        service={searchTerm}
       />
     </Container>
   );

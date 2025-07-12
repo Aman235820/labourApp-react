@@ -4,6 +4,7 @@ import { Spinner } from 'react-bootstrap';
 import Navigation from './components/Navigation';
 import Sidebar from './components/Sidebar';
 import LocationService from './services/LocationService';
+import { StatsProvider } from './context/StatsContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -86,39 +87,41 @@ function App() {
   };
 
   return (
-    <Router future={{ v7_startTransition: true }}>
-      <div className="app-container">
-        <Navigation 
-          sidebarOpen={sidebarOpen}
-          setIsOpen={setSidebarOpen}
-          isMobile={isMobile}
-          requestLocation={requestLocation}
-        />
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          setIsOpen={setSidebarOpen}
-          isMobile={isMobile}
-        />
-        <div className={`main-content ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-            <Route path="/" element={<Home />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/userHome" element={<UserHome />} />
-                <Route path="/labour/:labourId" element={<LabourProfile />} />
-                <Route path="/labour-details/:labourId" element={<LabourDetailsPage />} />
-                <Route path="/labour-list" element={<LabourListPage />} />
-                <Route path="/labourLogin" element={<LabourLogin />} />
-                <Route path="/labourRegister" element={<LabourRegister />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/labourDashboard" element={<LabourDashboard />} />
-                <Route path="/aadhar" element={<AadhaarQrDecoder />} />
-            </Routes>
-          </Suspense>
+    <StatsProvider>
+      <Router future={{ v7_startTransition: true }}>
+        <div className="app-container">
+          <Navigation 
+            sidebarOpen={sidebarOpen}
+            setIsOpen={setSidebarOpen}
+            isMobile={isMobile}
+            requestLocation={requestLocation}
+          />
+          <Sidebar 
+            isOpen={sidebarOpen} 
+            setIsOpen={setSidebarOpen}
+            isMobile={isMobile}
+          />
+          <div className={`main-content ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+              <Route path="/" element={<Home />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/userHome" element={<UserHome />} />
+                  <Route path="/labour/:labourId" element={<LabourProfile />} />
+                  <Route path="/labour-details/:labourId" element={<LabourDetailsPage />} />
+                  <Route path="/labour-list" element={<LabourListPage />} />
+                  <Route path="/labourLogin" element={<LabourLogin />} />
+                  <Route path="/labourRegister" element={<LabourRegister />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/labourDashboard" element={<LabourDashboard />} />
+                  <Route path="/aadhar" element={<AadhaarQrDecoder />} />
+              </Routes>
+            </Suspense>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </StatsProvider>
   );
 }
 

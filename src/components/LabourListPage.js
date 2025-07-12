@@ -301,6 +301,7 @@ function LabourListPage() {
         show={showLabourModal}
         onHide={handleLabourModalClose}
         selectedLabour={selectedLabour}
+        service={service}
       />
     </div>
   );

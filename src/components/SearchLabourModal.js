@@ -28,23 +28,45 @@ const SearchLabourModal = ({
     }, [bookingStatus]);
 
     const handleBookLabour = async (labour) => {
+        // Check if user is logged in
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            alert('Please login to book a service. Redirecting to registration page.');
+            navigate('/register');
+            return;
+        }
+
+        // Show confirmation alert
+        const isConfirmed = window.confirm(
+            `Are you sure you want to book ${labour.labourName} for ${searchCategory}?`
+        );
+
+        if (!isConfirmed) {
+            return;
+        }
+
         try {
             setIsBooking(true);
             setBookingStatus(null);
-            const storedUser = localStorage.getItem('user');
-            if (!storedUser) {
-                throw new Error('User data not found. Please login again.');
-            }
+            
             const userData = JSON.parse(storedUser);
             const bookingData = {
                 userId: userData.userId,
                 labourId: labour.labourId,
+                labourSkill: searchCategory
             };
+            
             const response = await bookLabour(bookingData);
-            setBookingStatus({
-                type: 'success',
-                message: 'Labour booked successfully!'
-            });
+            
+            if (response && !response.hasError) {
+                alert('Labour Successfully booked!');
+                navigate('/');
+            } else {
+                setBookingStatus({
+                    type: 'danger',
+                    message: 'Failed to book labour. Please try again.'
+                });
+            }
         } catch (err) {
             setBookingStatus({
                 type: 'danger',
@@ -74,7 +96,9 @@ const SearchLabourModal = ({
 
     // Navigate to LabourDetailsPage
     const handleCardClicked = (labour) => {
-        navigate(`/labour-details/${labour.labourId}`);
+        navigate(`/labour-details/${labour.labourId}`, {
+            state: { searchCategory: searchCategory }
+        });
     };
 
     const renderLabourCard = (labour) => (
