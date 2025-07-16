@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert, ProgressBar, Tooltip, OverlayTrigger } from 'react-bootstrap';
-import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, FaIdCard, FaSync, FaChartLine, FaChartBar, FaAward, FaEye, FaQuoteLeft, FaThumbsUp, FaUserTie, FaBusinessTime, FaHandshake, FaTrashAlt, FaCog, FaList } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert, ProgressBar, Tooltip, OverlayTrigger, Modal } from 'react-bootstrap';
+import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, FaIdCard, FaSync, FaChartLine, FaChartBar, FaAward, FaEye, FaQuoteLeft, FaThumbsUp, FaUserTie, FaBusinessTime, FaHandshake, FaTrashAlt, FaCog, FaList, FaInstagram, FaFacebook, FaYoutube, FaCertificate, FaShieldAlt, FaHeadset, FaDollarSign } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import axios from 'axios';
@@ -29,7 +29,42 @@ const LabourDashboard = () => {
   });
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const navigate = useNavigate();
+
+  // Profile Settings State
+  const [profileSettings, setProfileSettings] = useState({
+    // Pricing & Payment
+    hourlyRates: {},
+    
+    // Customer Experience
+    satisfactionGuarantee: false,
+    warrantyOnWork: false,
+    warrantyDuration: '',
+    followUpService: false,
+    emergencyContact: '',
+    workingHours: {
+      monday: { start: '09:00', end: '17:00', available: true },
+      tuesday: { start: '09:00', end: '17:00', available: true },
+      wednesday: { start: '09:00', end: '17:00', available: true },
+      thursday: { start: '09:00', end: '17:00', available: true },
+      friday: { start: '09:00', end: '17:00', available: true },
+      saturday: { start: '09:00', end: '14:00', available: true },
+      sunday: { start: '00:00', end: '00:00', available: false }
+    },
+    
+    // Social Proof
+    socialMedia: {
+      instagram: '',
+      facebook: '',
+      youtube: ''
+    },
+    socialMediaEnabled: false,
+    certifications: [],
+    certificationsEnabled: false,
+    testimonialVideos: [],
+    testimonialVideosEnabled: false
+  });
 
   useEffect(() => {
     const storedDetails = localStorage.getItem('labour');
@@ -193,6 +228,179 @@ const LabourDashboard = () => {
 
   const handleAadhaarVerification = () => {
     navigate('/aadhar');
+  };
+
+  // Profile Settings Handlers
+  const handleProfileSettingsChange = (section, field, value) => {
+    setProfileSettings(prev => {
+      if (field === null) {
+        // Handle direct boolean values (for checkboxes)
+        return {
+          ...prev,
+          [section]: value
+        };
+      } else {
+        // Handle nested object updates
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value
+          }
+        };
+      }
+    });
+  };
+
+  const handleWorkingHoursChange = (day, field, value) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      workingHours: {
+        ...prev.workingHours,
+        [day]: {
+          ...prev.workingHours[day],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const handleHourlyRateChange = (subSkill, field, value) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      hourlyRates: {
+        ...prev.hourlyRates,
+        [subSkill]: {
+          ...prev.hourlyRates[subSkill],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const handleCertificationAdd = () => {
+    setProfileSettings(prev => ({
+      ...prev,
+      certifications: [
+        ...prev.certifications,
+        { name: '', link: '', issueDate: '', id: Date.now() }
+      ]
+    }));
+  };
+
+  const handleCertificationChange = (index, field, value) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      certifications: prev.certifications.map((cert, i) => 
+        i === index ? { ...cert, [field]: value } : cert
+      )
+    }));
+  };
+
+  const handleCertificationRemove = (index) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleVideoAdd = () => {
+    setProfileSettings(prev => ({
+      ...prev,
+      testimonialVideos: [
+        ...prev.testimonialVideos,
+        { title: '', url: '', id: Date.now() }
+      ]
+    }));
+  };
+
+  const handleVideoChange = (index, field, value) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      testimonialVideos: prev.testimonialVideos.map((video, i) => 
+        i === index ? { ...video, [field]: value } : video
+      )
+    }));
+  };
+
+  const handleVideoRemove = (index) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      testimonialVideos: prev.testimonialVideos.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSocialMediaChange = (platform, value) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      socialMedia: {
+        ...prev.socialMedia,
+        [platform]: value
+      }
+    }));
+  };
+
+  const handleSaveProfileSettings = async () => {
+    try {
+      setIsSavingProfile(true);
+      
+      // Prepare the data object for the API
+      const apiData = {
+        labourId: labourDetails.labourId,
+        timestamp: new Date().toISOString(),
+        profileSettings: {
+          // Pricing & Payment
+          hourlyRates: profileSettings.hourlyRates,
+          
+          // Customer Experience
+          satisfactionGuarantee: profileSettings.satisfactionGuarantee,
+          warrantyOnWork: profileSettings.warrantyOnWork,
+          warrantyDuration: profileSettings.warrantyDuration,
+          followUpService: profileSettings.followUpService,
+          emergencyContact: profileSettings.emergencyContact,
+          workingHours: profileSettings.workingHours
+        }
+      };
+
+      // Only include enabled social proof sections
+      if (profileSettings.socialMediaEnabled) {
+        apiData.profileSettings.socialMedia = profileSettings.socialMedia;
+      }
+      
+      if (profileSettings.certificationsEnabled) {
+        apiData.profileSettings.certifications = profileSettings.certifications;
+      }
+      
+      if (profileSettings.testimonialVideosEnabled) {
+        apiData.profileSettings.testimonialVideos = profileSettings.testimonialVideos;
+      }
+
+      console.log('Saving profile settings at:', new Date().toLocaleString());
+      console.log('API Data:', apiData);
+
+      // Make the API call
+      const response = await axios.post(
+        'http://localhost:4000/labourapp/labour/updateAdditionalLabourData',
+        apiData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data && response.data.success) {
+        alert('Profile settings saved successfully!');
+        console.log('API Response:', response.data);
+      } else {
+        throw new Error('Failed to save profile settings');
+      }
+    } catch (error) {
+      console.error('Error saving profile settings:', error);
+      alert('Failed to save profile settings. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const getStatusBadge = (statusCode) => {
@@ -1151,6 +1359,423 @@ const LabourDashboard = () => {
                 </div>
               </Card.Body>
             </Card>
+          </Col>
+        </Row>
+
+        {/* Profile Settings Section - Independent Section */}
+        <Row className="mt-5">
+          <Col>
+            <div className="profile-settings-section">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                  <h3 className="fw-bold text-dark mb-2">
+                    <FaCog className="me-3 text-primary" />
+                    Profile Settings
+                  </h3>
+                  <p className="text-muted mb-0">Configure your business profile and service details</p>
+                </div>
+                <Button 
+                  variant="primary" 
+                  size="lg"
+                  onClick={handleSaveProfileSettings}
+                  disabled={isSavingProfile}
+                  className="save-settings-btn"
+                >
+                  {isSavingProfile ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaCheckCircle className="me-2" />
+                      Save Settings
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Pricing & Payment Information */}
+              <Row className="mb-4">
+                <Col>
+                  <Card className="border-0 shadow-sm settings-card">
+                    <Card.Header className="bg-primary bg-opacity-10 border-0">
+                      <h5 className="mb-0 fw-bold">
+                        <FaDollarSign className="me-2 text-primary" />
+                        Pricing & Payment Information
+                      </h5>
+                    </Card.Header>
+                    <Card.Body className="p-4">
+                      <h6 className="mb-3">Hourly Rates for Subservices</h6>
+                      {labourDetails?.labourSubSkills && labourDetails.labourSubSkills.length > 0 ? (
+                        <Row className="g-3">
+                          {labourDetails.labourSubSkills.map((subSkill, index) => {
+                            const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+                            return (
+                              <Col key={index} xs={12} md={6} lg={4}>
+                                <div className="pricing-card p-3 border rounded">
+                                  <h6 className="mb-3 text-primary">{skillName}</h6>
+                                  <Row className="g-2">
+                                    <Col xs={6}>
+                                      <Form.Label className="small fw-semibold">Min Rate (₹/hr)</Form.Label>
+                                      <Form.Control
+                                        type="number"
+                                        placeholder="200"
+                                        value={profileSettings.hourlyRates[skillName]?.min || ''}
+                                        onChange={(e) => handleHourlyRateChange(skillName, 'min', e.target.value)}
+                                        size="sm"
+                                      />
+                                    </Col>
+                                    <Col xs={6}>
+                                      <Form.Label className="small fw-semibold">Max Rate (₹/hr)</Form.Label>
+                                      <Form.Control
+                                        type="number"
+                                        placeholder="500"
+                                        value={profileSettings.hourlyRates[skillName]?.max || ''}
+                                        onChange={(e) => handleHourlyRateChange(skillName, 'max', e.target.value)}
+                                        size="sm"
+                                      />
+                                    </Col>
+                                  </Row>
+                                </div>
+                              </Col>
+                            );
+                          })}
+                        </Row>
+                      ) : (
+                        <div className="text-center py-4">
+                          <FaTools className="text-muted mb-3" size={48} />
+                          <h6 className="text-muted">No subskills available</h6>
+                          <p className="text-muted small">Add subskills in your profile first to set pricing</p>
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* Customer Experience Features */}
+              <Row className="mb-4">
+                <Col>
+                  <Card className="border-0 shadow-sm settings-card">
+                    <Card.Header className="bg-success bg-opacity-10 border-0">
+                      <h5 className="mb-0 fw-bold">
+                        <FaShieldAlt className="me-2 text-success" />
+                        Customer Experience Features
+                      </h5>
+                    </Card.Header>
+                    <Card.Body className="p-4">
+                      <Row className="g-3">
+                        <Col xs={12} md={6}>
+                          <div className="experience-feature p-3 border rounded">
+                            <Form.Check
+                              type="checkbox"
+                              label="Satisfaction Guarantee"
+                              checked={profileSettings.satisfactionGuarantee}
+                              onChange={(e) => handleProfileSettingsChange('satisfactionGuarantee', null, e.target.checked)}
+                              className="mb-2"
+                            />
+                            <small className="text-muted">Money-back guarantee for customer satisfaction</small>
+                          </div>
+                        </Col>
+                        
+                        <Col xs={12} md={6}>
+                          <div className="experience-feature p-3 border rounded">
+                            <Form.Check
+                              type="checkbox"
+                              label="Warranty on Work"
+                              checked={profileSettings.warrantyOnWork}
+                              onChange={(e) => handleProfileSettingsChange('warrantyOnWork', null, e.target.checked)}
+                              className="mb-2"
+                            />
+                            <small className="text-muted">Provide warranty for your services</small>
+                            {profileSettings.warrantyOnWork && (
+                              <Form.Control
+                                as="textarea"
+                                rows={2}
+                                placeholder="Describe your warranty terms (e.g., 6 months warranty on electrical work)"
+                                value={profileSettings.warrantyDuration}
+                                onChange={(e) => handleProfileSettingsChange('warrantyDuration', null, e.target.value)}
+                                className="mt-2"
+                              />
+                            )}
+                          </div>
+                        </Col>
+                        
+                        <Col xs={12} md={6}>
+                          <div className="experience-feature p-3 border rounded">
+                            <Form.Check
+                              type="checkbox"
+                              label="Follow-up Service"
+                              checked={profileSettings.followUpService}
+                              onChange={(e) => handleProfileSettingsChange('followUpService', null, e.target.checked)}
+                              className="mb-2"
+                            />
+                            <small className="text-muted">Post-completion support for customers</small>
+                          </div>
+                        </Col>
+                        
+                        <Col xs={12} md={6}>
+                          <div className="experience-feature p-3 border rounded">
+                            <Form.Label className="fw-semibold">Emergency Contact</Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="Emergency contact number or name"
+                              value={profileSettings.emergencyContact}
+                              onChange={(e) => handleProfileSettingsChange('emergencyContact', null, e.target.value)}
+                            />
+                            <small className="text-muted">Alternative contact for urgent issues</small>
+                          </div>
+                        </Col>
+                      </Row>
+
+                      {/* Working Hours */}
+                      <hr className="my-4" />
+                      <h6 className="mb-3">Working Hours</h6>
+                      <Row className="g-3">
+                        {Object.entries(profileSettings.workingHours).map(([day, hours]) => (
+                          <Col key={day} xs={12} sm={6} md={4}>
+                            <div className="working-hours-card p-3 border rounded">
+                              <div className="d-flex align-items-center justify-content-between mb-3">
+                                <h6 className="mb-0 text-capitalize fw-semibold">{day}</h6>
+                                <Form.Check
+                                  type="checkbox"
+                                  checked={hours.available}
+                                  onChange={(e) => handleWorkingHoursChange(day, 'available', e.target.checked)}
+                                />
+                              </div>
+                              {hours.available && (
+                                <Row className="g-2">
+                                  <Col xs={6}>
+                                    <Form.Label className="small fw-semibold">Start</Form.Label>
+                                    <Form.Control
+                                      type="time"
+                                      value={hours.start}
+                                      onChange={(e) => handleWorkingHoursChange(day, 'start', e.target.value)}
+                                      size="sm"
+                                    />
+                                  </Col>
+                                  <Col xs={6}>
+                                    <Form.Label className="small fw-semibold">End</Form.Label>
+                                    <Form.Control
+                                      type="time"
+                                      value={hours.end}
+                                      onChange={(e) => handleWorkingHoursChange(day, 'end', e.target.value)}
+                                      size="sm"
+                                    />
+                                  </Col>
+                                </Row>
+                              )}
+                            </div>
+                          </Col>
+                        ))}
+                      </Row>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* Social Proof & Community */}
+              <Row className="mb-4">
+                <Col>
+                  <Card className="border-0 shadow-sm settings-card">
+                    <Card.Header className="bg-info bg-opacity-10 border-0">
+                      <h5 className="mb-0 fw-bold">
+                        <FaAward className="me-2 text-info" />
+                        Social Proof & Community
+                      </h5>
+                    </Card.Header>
+                    <Card.Body className="p-4">
+                      {/* Social Media Links */}
+                      <div className="d-flex align-items-center justify-content-between mb-3">
+                        <h6 className="mb-0">Social Media Presence</h6>
+                        <Form.Check
+                          type="checkbox"
+                          label="Enable Social Media"
+                          checked={profileSettings.socialMediaEnabled}
+                          onChange={(e) => handleProfileSettingsChange('socialMediaEnabled', null, e.target.checked)}
+                        />
+                      </div>
+                      {profileSettings.socialMediaEnabled && (
+                        <Row className="g-3 mb-4">
+                          <Col xs={12} md={4}>
+                            <div className="social-media-card p-3 border rounded text-center">
+                              <FaInstagram className="text-danger mb-2" size={24} />
+                              <Form.Label className="fw-semibold">Instagram Profile</Form.Label>
+                              <Form.Control
+                                type="url"
+                                placeholder="https://instagram.com/yourprofile"
+                                value={profileSettings.socialMedia.instagram}
+                                onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                              />
+                            </div>
+                          </Col>
+                          <Col xs={12} md={4}>
+                            <div className="social-media-card p-3 border rounded text-center">
+                              <FaFacebook className="text-primary mb-2" size={24} />
+                              <Form.Label className="fw-semibold">Facebook Profile</Form.Label>
+                              <Form.Control
+                                type="url"
+                                placeholder="https://facebook.com/yourprofile"
+                                value={profileSettings.socialMedia.facebook}
+                                onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                              />
+                            </div>
+                          </Col>
+                          <Col xs={12} md={4}>
+                            <div className="social-media-card p-3 border rounded text-center">
+                              <FaYoutube className="text-danger mb-2" size={24} />
+                              <Form.Label className="fw-semibold">YouTube Channel</Form.Label>
+                              <Form.Control
+                                type="url"
+                                placeholder="https://youtube.com/yourchannel"
+                                value={profileSettings.socialMedia.youtube}
+                                onChange={(e) => handleSocialMediaChange('youtube', e.target.value)}
+                              />
+                            </div>
+                          </Col>
+                        </Row>
+                      )}
+
+                      {/* Certifications */}
+                      <div className="d-flex align-items-center justify-content-between mb-3">
+                        <h6 className="mb-0">
+                          <FaCertificate className="me-2 text-warning" />
+                          Certifications
+                        </h6>
+                        <Form.Check
+                          type="checkbox"
+                          label="Enable Certifications"
+                          checked={profileSettings.certificationsEnabled}
+                          onChange={(e) => handleProfileSettingsChange('certificationsEnabled', null, e.target.checked)}
+                        />
+                      </div>
+                      {profileSettings.certificationsEnabled && (
+                        <div className="mb-3">
+                        {profileSettings.certifications.map((cert, index) => (
+                          <div key={cert.id} className="certification-item p-3 border rounded mb-3">
+                            <Row className="g-2">
+                              <Col xs={12} md={4}>
+                                <Form.Label className="small fw-semibold">Certification Name</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  placeholder="e.g., Electrician License"
+                                  value={cert.name}
+                                  onChange={(e) => handleCertificationChange(index, 'name', e.target.value)}
+                                  size="sm"
+                                />
+                              </Col>
+                              <Col xs={12} md={4}>
+                                <Form.Label className="small fw-semibold">Certificate Link</Form.Label>
+                                <Form.Control
+                                  type="url"
+                                  placeholder="https://..."
+                                  value={cert.link}
+                                  onChange={(e) => handleCertificationChange(index, 'link', e.target.value)}
+                                  size="sm"
+                                />
+                              </Col>
+                              <Col xs={12} md={3}>
+                                <Form.Label className="small fw-semibold">Issue Date</Form.Label>
+                                <Form.Control
+                                  type="date"
+                                  value={cert.issueDate}
+                                  onChange={(e) => handleCertificationChange(index, 'issueDate', e.target.value)}
+                                  size="sm"
+                                />
+                              </Col>
+                              <Col xs={12} md={1} className="d-flex align-items-end">
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleCertificationRemove(index)}
+                                  className="remove-btn"
+                                >
+                                  ×
+                                </Button>
+                              </Col>
+                            </Row>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={handleCertificationAdd}
+                          className="add-btn"
+                        >
+                          <FaCertificate className="me-2" />
+                          Add Certification
+                        </Button>
+                      </div>
+                      )}
+
+                      {/* Testimonial Videos */}
+                      <div className="d-flex align-items-center justify-content-between mb-3">
+                        <h6 className="mb-0">
+                          <FaYoutube className="me-2 text-danger" />
+                          Testimonial Videos
+                        </h6>
+                        <Form.Check
+                          type="checkbox"
+                          label="Enable Testimonial Videos"
+                          checked={profileSettings.testimonialVideosEnabled}
+                          onChange={(e) => handleProfileSettingsChange('testimonialVideosEnabled', null, e.target.checked)}
+                        />
+                      </div>
+                      {profileSettings.testimonialVideosEnabled && (
+                        <div className="mb-3">
+                        {profileSettings.testimonialVideos.map((video, index) => (
+                          <div key={video.id} className="video-item p-3 border rounded mb-3">
+                            <Row className="g-2">
+                              <Col xs={12} md={5}>
+                                <Form.Label className="small fw-semibold">Video Title</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  placeholder="e.g., Customer Testimonial"
+                                  value={video.title}
+                                  onChange={(e) => handleVideoChange(index, 'title', e.target.value)}
+                                  size="sm"
+                                />
+                              </Col>
+                              <Col xs={12} md={6}>
+                                <Form.Label className="small fw-semibold">YouTube Video URL</Form.Label>
+                                <Form.Control
+                                  type="url"
+                                  placeholder="https://youtube.com/watch?v=..."
+                                  value={video.url}
+                                  onChange={(e) => handleVideoChange(index, 'url', e.target.value)}
+                                  size="sm"
+                                />
+                              </Col>
+                              <Col xs={12} md={1} className="d-flex align-items-end">
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleVideoRemove(index)}
+                                  className="remove-btn"
+                                >
+                                  ×
+                                </Button>
+                              </Col>
+                            </Row>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={handleVideoAdd}
+                          className="add-btn"
+                        >
+                          <FaYoutube className="me-2" />
+                          Add Video
+                        </Button>
+                      </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
           </Col>
         </Row>
       </Container>
