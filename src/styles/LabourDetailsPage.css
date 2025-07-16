@@ -5,6 +5,132 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
+/* Quick Actions Section */
+.quick-actions {
+  margin-bottom: 2rem;
+}
+
+.quick-actions .card {
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn-primary {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.action-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(45deg, #5a6fd8, #6a4190);
+}
+
+.action-btn-secondary {
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid #667eea;
+  color: #667eea;
+}
+
+.action-btn-secondary:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.action-btn-call {
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid #28a745;
+  color: #28a745;
+}
+
+.action-btn-call:hover {
+  background: #28a745;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.action-btn-whatsapp {
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid #17a2b8;
+  color: #17a2b8;
+}
+
+.action-btn-whatsapp:hover {
+  background: #17a2b8;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+/* Compact Reviews Section */
+.reviews-compact-card {
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.rating-summary-compact {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+}
+
+.rating-number-compact {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffc107;
+  line-height: 1;
+}
+
+.rating-stars-compact .fa-star {
+  font-size: 14px;
+}
+
+.review-item-compact {
+  background: white;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef !important;
+}
+
+.review-item-compact:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #667eea !important;
+}
+
+.reviewer-name-compact {
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.review-rating-compact .fa-star {
+  font-size: 12px;
+}
+
+.review-text-compact {
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.no-reviews-compact {
+  color: #6c757d;
+}
+
 /* Header Section */
 .labour-header {
   background: white;
@@ -334,6 +460,18 @@
 }
 
 /* Reviews */
+.reviews-card {
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-summary-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
 .reviews-header {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 15px;
@@ -359,12 +497,27 @@
   gap: 0.5rem;
 }
 
+.rating-number-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
 .rating-number {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: #ffc107;
+  line-height: 1;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   animation: scaleIn 0.6s ease;
+}
+
+.rating-max {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin-left: 0.25rem;
 }
 
 .rating-breakdown {
@@ -763,6 +916,19 @@
 @media (max-width: 768px) {
   .labour-details-page {
     padding: 1rem 0;
+  }
+  
+  .quick-actions .d-flex {
+    flex-direction: column;
+    gap: 1rem !important;
+  }
+  
+  .action-btn-primary,
+  .action-btn-secondary,
+  .action-btn-call,
+  .action-btn-whatsapp {
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
   
   .labour-header {

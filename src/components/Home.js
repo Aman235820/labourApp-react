@@ -177,6 +177,9 @@ function Home() {
         setTotalElements(response.totalElements || 0);
         setCurrentPage(pageNumber);
         setPageSize(size);
+        if(response.content.length === 0){
+          alert(`Search results for "${searchTerm}" not found Sorry for the inconvenience. We couldn't find any skilled professionals for this service at the moment.`);
+        }
       }
     } catch (error) {
       setError('Failed to fetch labourers. Please try again.');

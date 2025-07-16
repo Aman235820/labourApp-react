@@ -19,7 +19,6 @@ const LabourDetailsPage = () => {
   const [labour, setLabour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
   const [isFavorited, setIsFavorited] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -340,325 +339,148 @@ const LabourDetailsPage = () => {
               <Button variant="outline-secondary" className="me-2">
                 <FaShare />
               </Button>
-              
-              <Button 
-                variant="success" 
-                size="lg"
-                onClick={() => {
-                  // Check if user is logged in
-                  const storedUser = localStorage.getItem('user');
-                  if (!storedUser) {
-                    alert('Please login to book a service. Redirecting to registration page.');
-                    navigate('/register');
-                    return;
-                  }
-                  setShowBookingModal(true);
-                }}
-                disabled={!labour.isAvailable}
-              >
-                <FaCalendarAlt className="me-2" />
-                Book Now
-              </Button>
             </div>
           </Col>
         </Row>
       </div>
 
-      {/* Navigation Tabs */}
-      <Tabs
-        activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k)}
-        className="labour-tabs mb-4"
-      >
-        <Tab eventKey="overview" title="Overview">
-          <Row>
-            <Col lg={8}>
-              {/* Description */}
-              <Card className="mb-4">
-                <Card.Body>
-                  <h5>About {labour.labourName}</h5>
-                  <p className={`labour-description ${showFullDescription ? 'expanded' : ''}`}>
-                    {labour.description}
-                  </p>
-                  {labour.description.length > 200 && (
-                    <Button
-                      variant="link"
-                      className="p-0"
-                      onClick={() => setShowFullDescription(!showFullDescription)}
-                    >
-                      {showFullDescription ? 'Show Less' : 'Read More'}
-                    </Button>
-                  )}
-                </Card.Body>
-              </Card>
+      {/* Quick Action Buttons */}
+      <div className="quick-actions mb-4">
+        <Row>
+          <Col xs={12}>
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="p-3">
+                <div className="d-flex flex-wrap justify-content-center gap-3">
+                  <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => {
+                      const storedUser = localStorage.getItem('user');
+                      if (!storedUser) {
+                        alert('Please login to book a service. Redirecting to registration page.');
+                        navigate('/register');
+                        return;
+                      }
+                      setShowBookingModal(true);
+                    }}
+                    disabled={!labour.isAvailable}
+                    className="action-btn-primary"
+                  >
+                    <FaCalendarAlt className="me-2" />
+                    Book Now
+                  </Button>
+                  
+                  <Button 
+                    variant="outline-primary" 
+                    size="lg"
+                    onClick={() => {
+                      // Scroll to reviews section
+                      const reviewsSection = document.querySelector('.reviews-compact-card');
+                      if (reviewsSection) {
+                        reviewsSection.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="action-btn-secondary"
+                  >
+                    <FaStar className="me-2" />
+                    View Reviews ({labour.reviewCount || 0})
+                  </Button>
+                  
+                  <Button 
+                    variant="outline-success" 
+                    size="lg"
+                    onClick={() => window.location.href = `tel:${labour.labourMobileNo}`}
+                    className="action-btn-call"
+                  >
+                    <FaPhone className="me-2" />
+                    Call Now
+                  </Button>
+                  
+                  <Button 
+                    variant="outline-info" 
+                    size="lg"
+                    onClick={() => window.open(`https://wa.me/${labour.labourMobileNo ? labour.labourMobileNo.replace(/\D/g, '') : ''}`, '_blank')}
+                    className="action-btn-whatsapp"
+                  >
+                    <FaWhatsapp className="me-2" />
+                    WhatsApp
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </div>
 
-              {/* Skills */}
-              <Card className="mb-4">
-                <Card.Body>
-                  <h5>Skills & Specializations</h5>
-                  <div className="skills-grid">
-                    {labour.skills && labour.skills.length > 0 ? (
-                      labour.skills.map((skill, index) => (
-                        <Badge key={index} bg="light" text="dark" className="skill-badge">
-                          {skill}
-                        </Badge>
-                      ))
-                    ) : (
-                      <p className="text-muted">No specific skills listed. Contact for more information about services offered.</p>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
-
-              {/* Work Gallery */}
-              <Card className="mb-4">
-                <Card.Body>
-                  <h5>Work Gallery</h5>
-                  <div className="work-gallery">
-                    {labour.workImages && labour.workImages.length > 0 ? (
-                      labour.workImages.map((image, index) => (
-                        <div
-                          key={index}
-                          className={`gallery-item ${selectedImageIndex === index ? 'active' : ''}`}
-                          onClick={() => setSelectedImageIndex(index)}
-                        >
-                          <img src={image} alt={`Work ${index + 1}`} onError={(e) => {
-                            e.target.style.display = 'none';
-                          }} />
-                          <div className="gallery-overlay">
-                            <FaCamera />
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-muted">No work samples available yet.</p>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            
-            <Col lg={4}>
-              {/* Contact Card */}
-              <Card className="mb-4 contact-card">
-                <Card.Body>
-                  <h5>Contact Information</h5>
-                  
-                  <div className="contact-item">
-                    <FaPhone className="contact-icon" />
-                    <div>
-                      <p className="mb-1">Phone</p>
-                      <a href={`tel:${labour.labourMobileNo}`} className="contact-link">
-                        {labour.labourMobileNo}
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="contact-item">
-                    <FaWhatsapp className="contact-icon text-success" />
-                    <div>
-                      <p className="mb-1">WhatsApp</p>
-                      <a href={`https://wa.me/${labour.labourMobileNo ? labour.labourMobileNo.replace(/\D/g, '') : ''}`} className="contact-link">
-                        Chat on WhatsApp
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="contact-item">
-                    <FaEnvelope className="contact-icon" />
-                    <div>
-                      <p className="mb-1">Email</p>
-                      <a href={`mailto:${labour.email}`} className="contact-link">
-                        {labour.email}
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <hr />
-                  
-                  <div className="mb-3">
-                    <p className="mb-1"><strong>Service Radius:</strong></p>
-                    <p>{labour.serviceRadius}</p>
-                  </div>
-                  
-                  <div className="mb-3">
-                    <p className="mb-1"><strong>Languages:</strong></p>
-                    <p>{labour.languages && labour.languages.length > 0 ? labour.languages.join(', ') : 'Not specified'}</p>
-                  </div>
-                </Card.Body>
-              </Card>
-
-              {/* Stats Card */}
-              <Card className="mb-4">
-                <Card.Body>
-                  <h5>Performance Stats</h5>
-                  
-                  <div className="stat-item">
-                    <div className="stat-number">{labour.stats.totalJobs}</div>
-                    <div className="stat-label">Total Jobs</div>
-                  </div>
-                  
-                  <div className="stat-item">
-                    <div className="stat-number">{labour.stats.repeatCustomers}%</div>
-                    <div className="stat-label">Repeat Customers</div>
-                  </div>
-                  
-                  <div className="stat-item">
-                    <div className="stat-number">{labour.stats.onTimeCompletion}%</div>
-                    <div className="stat-label">On-Time Completion</div>
-                  </div>
-                  
-                  <div className="stat-item">
-                    <div className="stat-number">{labour.stats.responseTime}</div>
-                    <div className="stat-label">Response Time</div>
-                  </div>
-                </Card.Body>
-              </Card>
-
-              {/* Certifications */}
-              <Card className="mb-4">
-                <Card.Body>
-                  <h5>Certifications</h5>
-                  {labour.certifications && labour.certifications.length > 0 ? (
-                    labour.certifications.map((cert, index) => (
-                      <div key={index} className="certification-item">
-                        <FaCertificate className="me-2 text-primary" />
-                        <span>{cert}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted">No certifications listed.</p>
-                  )}
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Tab>
-
-        <Tab eventKey="reviews" title={`Reviews (${labour.reviewCount || 0})`}>
-          <Card>
+      {/* Main Content - Single Page Layout */}
+      <Row>
+        <Col lg={8}>
+          {/* Description */}
+          <Card className="mb-4">
             <Card.Body>
-              
-              <div className="reviews-header mb-4">
-                <Row>
-                  <Col md={6}>
-                    <div className="rating-summary">
-                      <div className="big-rating">
-                        <span className="rating-number">{labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : 'No rating'}</span>
-                        <div className="rating-stars">
-                          {renderStars(labour.rating)}
-                        </div>
-                        <p>{labour.reviewCount} reviews</p>
-                      </div>
-                    </div>
-                  </Col>
-                  <Col md={6}>
-                    <div className="rating-breakdown">
-                      {[5, 4, 3, 2, 1].map(star => {
-                        const count = (labour.ratingBreakdown && labour.ratingBreakdown[star]) || 0;
-                        const percentage = (labour.reviewCount && labour.reviewCount > 0) ? (count / labour.reviewCount) * 100 : 0;
-                        return (
-                          <div key={star} className="rating-bar">
-                            <span className="rating-star-number">{star}</span>
-                            <FaStar className="text-warning me-2" />
-                            <div className="progress flex-fill">
-                              <div 
-                                className="progress-bar bg-warning" 
-                                style={{ width: `${percentage}%` }}
-                              ></div>
-                            </div>
-                            <span className="count ms-2">{count}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Col>
-                </Row>
-              </div>
+              <h5>About {labour.labourName}</h5>
+              <p className={`labour-description ${showFullDescription ? 'expanded' : ''}`}>
+                {labour.description}
+              </p>
+              {labour.description.length > 200 && (
+                <Button
+                  variant="link"
+                  className="p-0"
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                >
+                  {showFullDescription ? 'Show Less' : 'Read More'}
+                </Button>
+              )}
+            </Card.Body>
+          </Card>
 
-              <div className="reviews-list">
-                {labour.reviews && labour.reviews.length > 0 ? (
-                  labour.reviews.map((review) => (
-                    <div key={review.id} className="review-item">
-                      <div className="review-header">
-                        <div className="reviewer-info">
-                          <FaUser className="reviewer-avatar" />
-                          <div>
-                            <div className="reviewer-name">
-                              {review.customerName}
-                              {review.verified && (
-                                <FaCheckCircle className="text-success ms-1" size={14} />
-                              )}
-                            </div>
-                            <div className="review-meta">
-                              <span className="work-type">{review.workType}</span>
-                              <span className="review-date">
-                                {new Date(review.reviewTime).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="review-rating">
-                          {renderStars(review.rating)}
-                        </div>
-                      </div>
-                      
-                      <p className="review-text">{review.review}</p>
-                      
-                      <div className="review-actions">
-                        <Button 
-                          variant="outline-primary" 
-                          size="sm" 
-                          className="review-action-btn me-2"
-                        >
-                          <FaThumbsUp className="me-1" />
-                          Helpful ({review.helpful})
-                        </Button>
-                        <Button 
-                          variant="outline-secondary" 
-                          size="sm" 
-                          className="review-action-btn me-2"
-                        >
-                          <FaThumbsDown className="me-1" />
-                          Not Helpful
-                        </Button>
-                        <Button 
-                          variant="outline-danger" 
-                          size="sm" 
-                          className="review-action-btn"
-                          onClick={() => setShowReportModal(true)}
-                        >
-                          <FaFlag className="me-1" />
-                          Report
-                        </Button>
-                      </div>
-                    </div>
+          {/* Skills */}
+          <Card className="mb-4">
+            <Card.Body>
+              <h5>Skills & Specializations</h5>
+              <div className="skills-grid">
+                {labour.skills && labour.skills.length > 0 ? (
+                  labour.skills.map((skill, index) => (
+                    <Badge key={index} bg="light" text="dark" className="skill-badge">
+                      {skill}
+                    </Badge>
                   ))
                 ) : (
-                  <div className="no-reviews-state">
-                    <div className="no-reviews-icon">
-                      <FaStar className="text-muted" size={48} />
-                    </div>
-                    <h5>No Reviews Yet</h5>
-                    <p className="text-muted">
-                      Be the first to leave a review for {labour.labourName}!
-                    </p>
-                    <Button 
-                      variant="outline-primary" 
-                      className="mt-3"
-                      onClick={() => setShowBookingModal(true)}
-                    >
-                      Book & Review
-                    </Button>
-                  </div>
+                  <p className="text-muted">No specific skills listed. Contact for more information about services offered.</p>
                 )}
               </div>
             </Card.Body>
           </Card>
-        </Tab>
 
-        <Tab eventKey="availability" title="Availability">
-          <Card>
+          {/* Work Gallery */}
+          <Card className="mb-4">
+            <Card.Body>
+              <h5>Work Gallery</h5>
+              <div className="work-gallery">
+                {labour.workImages && labour.workImages.length > 0 ? (
+                  labour.workImages.map((image, index) => (
+                    <div
+                      key={index}
+                      className={`gallery-item ${selectedImageIndex === index ? 'active' : ''}`}
+                      onClick={() => setSelectedImageIndex(index)}
+                    >
+                      <img src={image} alt={`Work ${index + 1}`} onError={(e) => {
+                        e.target.style.display = 'none';
+                      }} />
+                      <div className="gallery-overlay">
+                        <FaCamera />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-muted">No work samples available yet.</p>
+                )}
+              </div>
+            </Card.Body>
+          </Card>
+
+          {/* Availability */}
+          <Card className="mb-4">
             <Card.Body>
               <h5>Weekly Schedule</h5>
               <div className="availability-grid">
@@ -688,8 +510,170 @@ const LabourDetailsPage = () => {
               </Alert>
             </Card.Body>
           </Card>
-        </Tab>
-      </Tabs>
+        </Col>
+        
+        <Col lg={4}>
+          {/* Contact Card */}
+          <Card className="mb-4 contact-card">
+            <Card.Body>
+              <h5>Contact Information</h5>
+              
+              <div className="contact-item">
+                <FaPhone className="contact-icon" />
+                <div>
+                  <p className="mb-1">Phone</p>
+                  <a href={`tel:${labour.labourMobileNo}`} className="contact-link">
+                    {labour.labourMobileNo}
+                  </a>
+                </div>
+              </div>
+              
+              <div className="contact-item">
+                <FaWhatsapp className="contact-icon text-success" />
+                <div>
+                  <p className="mb-1">WhatsApp</p>
+                  <a href={`https://wa.me/${labour.labourMobileNo ? labour.labourMobileNo.replace(/\D/g, '') : ''}`} className="contact-link">
+                    Chat on WhatsApp
+                  </a>
+                </div>
+              </div>
+              
+              <div className="contact-item">
+                <FaEnvelope className="contact-icon" />
+                <div>
+                  <p className="mb-1">Email</p>
+                  <a href={`mailto:${labour.email}`} className="contact-link">
+                    {labour.email}
+                  </a>
+                </div>
+              </div>
+              
+              <hr />
+              
+              <div className="mb-3">
+                <p className="mb-1"><strong>Service Radius:</strong></p>
+                <p>{labour.serviceRadius}</p>
+              </div>
+              
+              <div className="mb-3">
+                <p className="mb-1"><strong>Languages:</strong></p>
+                <p>{labour.languages && labour.languages.length > 0 ? labour.languages.join(', ') : 'Not specified'}</p>
+              </div>
+            </Card.Body>
+          </Card>
+
+          {/* Stats Card */}
+          <Card className="mb-4">
+            <Card.Body>
+              <h5>Performance Stats</h5>
+              
+              <div className="stat-item">
+                <div className="stat-number">{labour.stats.totalJobs}</div>
+                <div className="stat-label">Total Jobs</div>
+              </div>
+              
+              <div className="stat-item">
+                <div className="stat-number">{labour.stats.repeatCustomers}%</div>
+                <div className="stat-label">Repeat Customers</div>
+              </div>
+              
+              <div className="stat-item">
+                <div className="stat-number">{labour.stats.onTimeCompletion}%</div>
+                <div className="stat-label">On-Time Completion</div>
+              </div>
+              
+              <div className="stat-item">
+                <div className="stat-number">{labour.stats.responseTime}</div>
+                <div className="stat-label">Response Time</div>
+              </div>
+            </Card.Body>
+          </Card>
+
+          {/* Certifications */}
+          <Card className="mb-4">
+            <Card.Body>
+              <h5>Certifications</h5>
+              {labour.certifications && labour.certifications.length > 0 ? (
+                labour.certifications.map((cert, index) => (
+                  <div key={index} className="certification-item">
+                    <FaCertificate className="me-2 text-primary" />
+                    <span>{cert}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted">No certifications listed.</p>
+              )}
+            </Card.Body>
+          </Card>
+
+          {/* Reviews Section - Compact */}
+          <Card className="mb-4 reviews-compact-card">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="mb-0">
+                  <FaStar className="me-2 text-warning" />
+                  Reviews ({labour.reviewCount || 0})
+                </h5>
+              </div>
+              
+              {/* Rating Summary */}
+              <div className="rating-summary-compact mb-3 p-3 bg-light rounded">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center">
+                    <div className="rating-number-compact me-3">
+                      {labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : 'No rating'}
+                    </div>
+                    <div>
+                      <div className="rating-stars-compact mb-1">
+                        {renderStars(labour.rating)}
+                      </div>
+                      <small className="text-muted">{labour.reviewCount} review{labour.reviewCount !== 1 ? 's' : ''}</small>
+                    </div>
+                  </div>
+                  <div className="text-end">
+                    <small className="text-muted">Overall Rating</small>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Reviews */}
+              <div className="recent-reviews">
+                {labour.reviews && labour.reviews.length > 0 ? (
+                  labour.reviews.slice(0, 3).map((review, index) => (
+                    <div key={review.id} className="review-item-compact mb-3 p-3 border rounded">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="d-flex align-items-center">
+                          <FaUser className="text-primary me-2" size={16} />
+                          <div>
+                            <div className="reviewer-name-compact fw-bold small">
+                              {review.customerName}
+                            </div>
+                            <div className="review-rating-compact">
+                              {renderStars(review.rating)}
+                              <span className="ms-1 small text-muted">{review.rating}/5</span>
+                            </div>
+                          </div>
+                        </div>
+                        <small className="text-muted">
+                          {new Date(review.reviewTime).toLocaleDateString()}
+                        </small>
+                      </div>
+                      <p className="review-text-compact mb-0 small">
+                        {review.review.length > 100 ? review.review.substring(0, 100) + '...' : review.review}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-reviews-compact text-center py-3">
+                    <FaStar className="text-muted mb-2" size={24} />
+                    <p className="text-muted small mb-0">No reviews yet</p>
+                  </div>
+                )}
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Booking Modal */}
       <Modal show={showBookingModal} onHide={() => setShowBookingModal(false)} centered>
