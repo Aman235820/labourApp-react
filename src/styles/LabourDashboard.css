@@ -1385,6 +1385,42 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-2px);
 }
 
+/* Pricing Card States */
+.pricing-card.border-primary {
+  background: linear-gradient(135deg, #e7f3ff, #f0f8ff);
+  border-color: #007bff !important;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+.pricing-card.border-primary:hover {
+  background: linear-gradient(135deg, #cce7ff, #e7f3ff);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+.pricing-card:not(.border-primary) {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  opacity: 0.7;
+}
+
+.pricing-card:not(.border-primary):hover {
+  opacity: 0.85;
+  background: linear-gradient(135deg, #f0f0f0, #e9ecef);
+}
+
+/* Disabled Pricing Card State */
+.pricing-card-disabled {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  opacity: 0.6 !important;
+  border-color: #dee2e6 !important;
+}
+
+.pricing-card-disabled:hover {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  opacity: 0.7 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* Experience Feature Cards */
 .experience-feature {
   background: #fff;
@@ -1409,6 +1445,29 @@ h1, h2, h3, h4, h5, h6 {
 .working-hours-card:hover {
   border-color: #007bff !important;
   box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+}
+
+/* Working Hours Card States */
+.working-hours-card.border-success {
+  background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+  border-color: #28a745 !important;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.15);
+}
+
+.working-hours-card.border-success:hover {
+  background: linear-gradient(135deg, #d4edda, #e8f5e8);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.25);
+}
+
+.working-hours-card.border-danger {
+  background: linear-gradient(135deg, #fce8e6, #fff0f0);
+  border-color: #dc3545 !important;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.15);
+}
+
+.working-hours-card.border-danger:hover {
+  background: linear-gradient(135deg, #f8d7da, #fce8e6);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.25);
 }
 
 /* Social Media Cards */

@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert, ProgressBar, Tooltip, OverlayTrigger, Modal } from 'react-bootstrap';
-import { FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, FaIdCard, FaSync, FaChartLine, FaChartBar, FaAward, FaEye, FaQuoteLeft, FaThumbsUp, FaUserTie, FaBusinessTime, FaHandshake, FaTrashAlt, FaCog, FaList, FaInstagram, FaFacebook, FaYoutube, FaCertificate, FaShieldAlt, FaHeadset, FaDollarSign } from 'react-icons/fa';
+import { 
+  FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, 
+  FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, 
+  FaIdCard, FaSync, FaChartLine, FaChartBar, FaAward, FaEye, 
+  FaQuoteLeft, FaThumbsUp, FaUserTie, FaBusinessTime, FaHandshake, 
+  FaTrashAlt, FaCog, FaList, FaInstagram, FaFacebook, FaYoutube, 
+  FaCertificate, FaShieldAlt, FaHeadset, FaRupeeSign 
+} from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import axios from 'axios';
@@ -35,7 +42,9 @@ const LabourDashboard = () => {
   // Profile Settings State
   const [profileSettings, setProfileSettings] = useState({
     // Pricing & Payment
+    pricingInfoEnabled: true, // Master switch for pricing section
     hourlyRates: {},
+    pricingEnabled: {}, // Track which subservices have pricing enabled
     
     // Customer Experience
     satisfactionGuarantee: false,
@@ -83,6 +92,27 @@ const LabourDashboard = () => {
       fetchRequestedServices(true);
       fetchReviews();
       fetchOverallRatings();
+      
+      // Set default pricing enabled for all subservices with default rates
+      if (labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0) {
+        const defaultPricingEnabled = {};
+        const defaultHourlyRates = {};
+        
+        labourDetails.labourSubSkills.forEach(subSkill => {
+          const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+          defaultPricingEnabled[skillName] = true;
+          defaultHourlyRates[skillName] = {
+            min: '100',
+            max: '200'
+          };
+        });
+        
+        setProfileSettings(prev => ({
+          ...prev,
+          pricingEnabled: defaultPricingEnabled,
+          hourlyRates: defaultHourlyRates
+        }));
+      }
     }
   }, [labourDetails]);
 
@@ -91,6 +121,8 @@ const LabourDashboard = () => {
       fetchReviews();
     }
   }, [sortConfig, labourDetails]);
+
+
 
   const fetchRequestedServices = async (initial = false) => {
     try {
@@ -278,6 +310,52 @@ const LabourDashboard = () => {
     }));
   };
 
+  const handlePricingEnabledChange = (subSkill, enabled) => {
+    setProfileSettings(prev => ({
+      ...prev,
+      pricingEnabled: {
+        ...prev.pricingEnabled,
+        [subSkill]: enabled
+      },
+      // Set default values when enabled, clear when disabled
+      hourlyRates: {
+        ...prev.hourlyRates,
+        [subSkill]: enabled ? { min: '100', max: '200' } : { min: '', max: '' }
+      }
+    }));
+  };
+
+  const handleMasterPricingToggle = (enabled) => {
+    if (!labourDetails?.labourSubSkills) return;
+    
+    // Create new pricing enabled state for all subservices
+    const newPricingEnabled = {};
+    const newHourlyRates = {};
+    
+    labourDetails.labourSubSkills.forEach(subSkill => {
+      const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+      newPricingEnabled[skillName] = enabled;
+      
+      if (enabled) {
+        // Set default values when enabling
+        newHourlyRates[skillName] = {
+          min: '100',
+          max: '200'
+        };
+      } else {
+        // Clear values when disabling
+        newHourlyRates[skillName] = { min: '', max: '' };
+      }
+    });
+
+    setProfileSettings(prev => ({
+      ...prev,
+      pricingInfoEnabled: enabled,
+      pricingEnabled: newPricingEnabled,
+      hourlyRates: newHourlyRates
+    }));
+  };
+
   const handleCertificationAdd = () => {
     setProfileSettings(prev => ({
       ...prev,
@@ -340,46 +418,290 @@ const LabourDashboard = () => {
     }));
   };
 
+  // Validation functions
+  const validatePricing = () => {
+    const errors = [];
+    
+    // Only validate pricing if master pricing is enabled
+    if (profileSettings.pricingInfoEnabled) {
+      Object.entries(profileSettings.pricingEnabled).forEach(([subSkill, enabled]) => {
+        if (enabled) {
+          const rates = profileSettings.hourlyRates[subSkill];
+          
+          if (!rates || !rates.min || !rates.max || rates.min.trim() === '' || rates.max.trim() === '') {
+            errors.push(`Please fill both min and max rates for ${subSkill}`);
+          } else {
+            const minRate = parseFloat(rates.min);
+            const maxRate = parseFloat(rates.max);
+            
+            if (isNaN(minRate) || isNaN(maxRate) || minRate <= 0 || maxRate <= 0) {
+              errors.push(`Please enter valid positive numbers for ${subSkill} rates`);
+            } else if (minRate >= maxRate) {
+              errors.push(`Min rate must be less than max rate for ${subSkill}`);
+            }
+          }
+        }
+      });
+    }
+    
+    return errors;
+  };
+
+  const validateWorkingHours = () => {
+    const errors = [];
+    
+    Object.entries(profileSettings.workingHours).forEach(([day, hours]) => {
+      if (hours.available) {
+        if (!hours.start || !hours.end) {
+          errors.push(`Please set both start and end time for ${day.charAt(0).toUpperCase() + day.slice(1)}`);
+        } else {
+          // Convert time strings to minutes for comparison
+          const startMinutes = timeToMinutes(hours.start);
+          const endMinutes = timeToMinutes(hours.end);
+          
+          if (startMinutes >= endMinutes) {
+            errors.push(`Start time must be earlier than end time for ${day.charAt(0).toUpperCase() + day.slice(1)}`);
+          }
+        }
+      }
+    });
+    
+    return errors;
+  };
+
+  const timeToMinutes = (timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const validateCustomerExperience = () => {
+    const errors = [];
+    
+    // Validate warranty duration if warranty is enabled
+    if (profileSettings.warrantyOnWork) {
+      if (!profileSettings.warrantyDuration || profileSettings.warrantyDuration.trim() === '') {
+        errors.push('Please provide warranty duration details when warranty is enabled');
+      }
+    }
+    
+    // Validate emergency contact if provided
+    if (profileSettings.emergencyContact && profileSettings.emergencyContact.trim() !== '') {
+      // Basic phone number validation (should contain numbers)
+      const phoneRegex = /\d/;
+      if (!phoneRegex.test(profileSettings.emergencyContact)) {
+        errors.push('Emergency contact should contain valid contact information');
+      }
+    }
+    
+    return errors;
+  };
+
+  const validateSocialMedia = () => {
+    const errors = [];
+    
+    if (profileSettings.socialMediaEnabled) {
+      const hasAnyValidUrl = Object.values(profileSettings.socialMedia).some(url => 
+        url && url.trim() !== '' && url.startsWith('http')
+      );
+      
+      if (!hasAnyValidUrl) {
+        errors.push('Please provide at least one valid social media URL when social media is enabled');
+      }
+      
+      // Validate individual URLs if provided
+      Object.entries(profileSettings.socialMedia).forEach(([platform, url]) => {
+        if (url && url.trim() !== '') {
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            errors.push(`${platform.charAt(0).toUpperCase() + platform.slice(1)} URL must start with http:// or https://`);
+          }
+        }
+      });
+    }
+    
+    return errors;
+  };
+
+  const validateCertifications = () => {
+    const errors = [];
+    
+    if (profileSettings.certificationsEnabled) {
+      if (profileSettings.certifications.length === 0) {
+        errors.push('Please add at least one certification when certifications are enabled');
+      } else {
+        profileSettings.certifications.forEach((cert, index) => {
+          if (!cert.name || cert.name.trim() === '') {
+            errors.push(`Please provide a name for certification #${index + 1}`);
+          }
+          if (cert.link && cert.link.trim() !== '' && !cert.link.startsWith('http')) {
+            errors.push(`Certification #${index + 1} link must start with http:// or https://`);
+          }
+        });
+      }
+    }
+    
+    return errors;
+  };
+
+  const validateTestimonialVideos = () => {
+    const errors = [];
+    
+    if (profileSettings.testimonialVideosEnabled) {
+      if (profileSettings.testimonialVideos.length === 0) {
+        errors.push('Please add at least one testimonial video when testimonial videos are enabled');
+      } else {
+        profileSettings.testimonialVideos.forEach((video, index) => {
+          if (!video.title || video.title.trim() === '') {
+            errors.push(`Please provide a title for testimonial video #${index + 1}`);
+          }
+          if (!video.url || video.url.trim() === '') {
+            errors.push(`Please provide a URL for testimonial video #${index + 1}`);
+          } else if (!video.url.startsWith('http')) {
+            errors.push(`Testimonial video #${index + 1} URL must start with http:// or https://`);
+          }
+        });
+      }
+    }
+    
+    return errors;
+  };
+
+  const getAllValidationErrors = useMemo(() => {
+    return {
+      pricing: validatePricing(),
+      workingHours: validateWorkingHours(),
+      customerExperience: validateCustomerExperience(),
+      socialMedia: validateSocialMedia(),
+      certifications: validateCertifications(),
+      videos: validateTestimonialVideos()
+    };
+  }, [profileSettings]);
+
+  const hasValidationErrors = useMemo(() => {
+    return Object.values(getAllValidationErrors).some(errorArray => errorArray.length > 0);
+  }, [getAllValidationErrors]);
+
+  const hasAnySettingsEnabled = () => {
+    // Check if pricing master switch is enabled (regardless of individual subservices)
+    const hasPricingEnabled = profileSettings.pricingInfoEnabled;
+    
+    // Check if any customer experience features are enabled
+    const hasCustomerFeatures = profileSettings.satisfactionGuarantee || 
+                                profileSettings.warrantyOnWork || 
+                                profileSettings.followUpService || 
+                                (profileSettings.emergencyContact && profileSettings.emergencyContact.trim());
+    
+    // Check if working hours are enabled (any day is available)
+    const hasWorkingHours = Object.values(profileSettings.workingHours).some(day => day.available);
+    
+    // Check if social media master switch is enabled
+    const hasSocialMedia = profileSettings.socialMediaEnabled;
+    
+    // Check if certifications master switch is enabled
+    const hasCertifications = profileSettings.certificationsEnabled;
+    
+    // Check if testimonial videos master switch is enabled
+    const hasVideos = profileSettings.testimonialVideosEnabled;
+    
+    return hasPricingEnabled || hasCustomerFeatures || hasWorkingHours || hasSocialMedia || hasCertifications || hasVideos;
+  };
+
   const handleSaveProfileSettings = async () => {
     try {
       setIsSavingProfile(true);
       
-      // Prepare the data object for the API
+      // Validate all sections before saving
+      const allErrors = Object.values(getAllValidationErrors).flat();
+      
+      if (allErrors.length > 0) {
+        alert('Validation Errors:\n\n' + allErrors.map((error, index) => `${index + 1}. ${error}`).join('\n'));
+        return;
+      }
+      
+      // Prepare the base data object for the API
       const apiData = {
         labourId: labourDetails.labourId,
         timestamp: new Date().toISOString(),
-        profileSettings: {
-          // Pricing & Payment
-          hourlyRates: profileSettings.hourlyRates,
-          
-          // Customer Experience
-          satisfactionGuarantee: profileSettings.satisfactionGuarantee,
-          warrantyOnWork: profileSettings.warrantyOnWork,
-          warrantyDuration: profileSettings.warrantyDuration,
-          followUpService: profileSettings.followUpService,
-          emergencyContact: profileSettings.emergencyContact,
-          workingHours: profileSettings.workingHours
-        }
+        profileSettings: {}
       };
 
-      // Only include enabled social proof sections
+      // Only include hourly rates if master pricing is enabled
+      if (profileSettings.pricingInfoEnabled) {
+        const enabledRates = {};
+        Object.entries(profileSettings.pricingEnabled).forEach(([skill, enabled]) => {
+          if (enabled && profileSettings.hourlyRates[skill]) {
+            const rates = profileSettings.hourlyRates[skill];
+            if (rates.min && rates.max) {
+              enabledRates[skill] = rates;
+            }
+          }
+        });
+        
+        if (Object.keys(enabledRates).length > 0) {
+          apiData.profileSettings.hourlyRates = enabledRates;
+        }
+      }
+
+      // Customer Experience Features - only include if enabled/set
+      if (profileSettings.satisfactionGuarantee) {
+        apiData.profileSettings.satisfactionGuarantee = true;
+      }
+      
+      if (profileSettings.warrantyOnWork) {
+        apiData.profileSettings.warrantyOnWork = true;
+        if (profileSettings.warrantyDuration && profileSettings.warrantyDuration.trim()) {
+          apiData.profileSettings.warrantyDuration = profileSettings.warrantyDuration.trim();
+        }
+      }
+      
+      if (profileSettings.followUpService) {
+        apiData.profileSettings.followUpService = true;
+      }
+      
+      if (profileSettings.emergencyContact && profileSettings.emergencyContact.trim()) {
+        apiData.profileSettings.emergencyContact = profileSettings.emergencyContact.trim();
+      }
+
+      // Working Hours - always include as it's core functionality
+      apiData.profileSettings.workingHours = profileSettings.workingHours;
+
+      // Social Media - only include if enabled and has valid data
       if (profileSettings.socialMediaEnabled) {
-        apiData.profileSettings.socialMedia = profileSettings.socialMedia;
+        const socialMediaData = {};
+        Object.entries(profileSettings.socialMedia).forEach(([platform, url]) => {
+          if (url && url.trim()) {
+            socialMediaData[platform] = url.trim();
+          }
+        });
+        if (Object.keys(socialMediaData).length > 0) {
+          apiData.profileSettings.socialMedia = socialMediaData;
+        }
       }
       
-      if (profileSettings.certificationsEnabled) {
-        apiData.profileSettings.certifications = profileSettings.certifications;
+      // Certifications - only include if enabled and has valid data
+      if (profileSettings.certificationsEnabled && profileSettings.certifications.length > 0) {
+        const validCertifications = profileSettings.certifications.filter(cert => 
+          cert.name && cert.name.trim()
+        );
+        if (validCertifications.length > 0) {
+          apiData.profileSettings.certifications = validCertifications;
+        }
       }
       
-      if (profileSettings.testimonialVideosEnabled) {
-        apiData.profileSettings.testimonialVideos = profileSettings.testimonialVideos;
+      // Testimonial Videos - only include if enabled and has valid data
+      if (profileSettings.testimonialVideosEnabled && profileSettings.testimonialVideos.length > 0) {
+        const validVideos = profileSettings.testimonialVideos.filter(video => 
+          video.title && video.title.trim() && video.url && video.url.trim()
+        );
+        if (validVideos.length > 0) {
+          apiData.profileSettings.testimonialVideos = validVideos;
+        }
       }
 
       console.log('Saving profile settings at:', new Date().toLocaleString());
       console.log('API Data:', apiData);
 
-      // Make the API call
-      const response = await axios.post(
+      // Make the API call using PATCH method
+      const response = await axios.patch(
         'http://localhost:4000/labourapp/labour/updateAdditionalLabourData',
         apiData,
         {
@@ -389,7 +711,7 @@ const LabourDashboard = () => {
         }
       );
 
-      if (response.data && response.data.success) {
+      if (response.data && (response.data.success || response.status === 200)) {
         alert('Profile settings saved successfully!');
         console.log('API Response:', response.data);
       } else {
@@ -397,7 +719,12 @@ const LabourDashboard = () => {
       }
     } catch (error) {
       console.error('Error saving profile settings:', error);
-      alert('Failed to save profile settings. Please try again.');
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        alert(`Failed to save profile settings: ${error.response.data.message || 'Server error'}`);
+      } else {
+        alert('Failed to save profile settings. Please try again.');
+      }
     } finally {
       setIsSavingProfile(false);
     }
@@ -1373,18 +1700,43 @@ const LabourDashboard = () => {
                     Profile Settings
                   </h3>
                   <p className="text-muted mb-0">Configure your business profile and service details</p>
+                  {hasAnySettingsEnabled() && (
+                    <div className="mt-2">
+                      {hasValidationErrors ? (
+                        <Badge bg="danger" className="me-2">
+                          <FaTimesCircle className="me-1" size={12} />
+                          Validation Errors Found
+                        </Badge>
+                      ) : (
+                        <Badge bg="success" className="me-2">
+                          <FaCheckCircle className="me-1" size={12} />
+                          Settings Ready to Save
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <Button 
                   variant="primary" 
                   size="lg"
                   onClick={handleSaveProfileSettings}
-                  disabled={isSavingProfile}
+                  disabled={isSavingProfile || !hasAnySettingsEnabled() || hasValidationErrors}
                   className="save-settings-btn"
                 >
                   {isSavingProfile ? (
                     <>
                       <Spinner animation="border" size="sm" className="me-2" />
                       Saving...
+                    </>
+                  ) : !hasAnySettingsEnabled() ? (
+                    <>
+                      <FaCog className="me-2" />
+                      No Settings Enabled
+                    </>
+                  ) : hasValidationErrors ? (
+                    <>
+                      <FaTimesCircle className="me-2" />
+                      Fix Validation Errors
                     </>
                   ) : (
                     <>
@@ -1401,47 +1753,116 @@ const LabourDashboard = () => {
                   <Card className="border-0 shadow-sm settings-card">
                     <Card.Header className="bg-primary bg-opacity-10 border-0">
                       <h5 className="mb-0 fw-bold">
-                        <FaDollarSign className="me-2 text-primary" />
+                        <FaRupeeSign className="me-2 text-primary" />
                         Pricing & Payment Information
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
-                      <h6 className="mb-3">Hourly Rates for Subservices</h6>
-                      {labourDetails?.labourSubSkills && labourDetails.labourSubSkills.length > 0 ? (
-                        <Row className="g-3">
-                          {labourDetails.labourSubSkills.map((subSkill, index) => {
-                            const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
-                            return (
-                              <Col key={index} xs={12} md={6} lg={4}>
-                                <div className="pricing-card p-3 border rounded">
-                                  <h6 className="mb-3 text-primary">{skillName}</h6>
-                                  <Row className="g-2">
-                                    <Col xs={6}>
-                                      <Form.Label className="small fw-semibold">Min Rate (₹/hr)</Form.Label>
-                                      <Form.Control
+                      <div className="d-flex align-items-center justify-content-between mb-4">
+                        <h6 className="mb-0">Hourly Rates for Subservices</h6>
+                        <div className="d-flex align-items-center">
+                          <Form.Check
+                            type="checkbox"
+                            id="master-pricing-toggle"
+                            checked={profileSettings.pricingInfoEnabled}
+                            onChange={(e) => handleMasterPricingToggle(e.target.checked)}
+                            className="me-2"
+                          />
+                          <Form.Label htmlFor="master-pricing-toggle" className="mb-0 fw-semibold text-primary">
+                            Enable Pricing Info
+                          </Form.Label>
+                        </div>
+                      </div>
+                      
+                                             {labourDetails?.labourSubSkills && labourDetails.labourSubSkills.length > 0 ? (
+                        <>
+                          {!profileSettings.pricingInfoEnabled && (
+                            <div className="alert alert-info mb-4 d-flex align-items-center">
+                              <FaRupeeSign className="me-2 text-info" size={20} />
+                              <div>
+                                <strong>Pricing Information Disabled</strong>
+                                <div className="small">Enable the "Enable Pricing Info" checkbox above to activate pricing for your services</div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <Row className="g-3">
+                            {labourDetails.labourSubSkills.map((subSkill, index) => {
+                              const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+                              const isPricingEnabled = profileSettings.pricingEnabled[skillName] || false;
+                              const isCardActive = isPricingEnabled && profileSettings.pricingInfoEnabled;
+                              
+                              return (
+                                <Col key={index} xs={12} md={6} lg={4}>
+                                  <div className={`pricing-card p-3 border rounded ${
+                                    !profileSettings.pricingInfoEnabled ? 'pricing-card-disabled' : 
+                                    isCardActive ? 'border-primary' : ''
+                                  }`}>
+                                    <div className="d-flex align-items-center justify-content-between mb-3">
+                                      <h6 className={`mb-0 ${!profileSettings.pricingInfoEnabled ? 'text-muted' : 'text-primary'}`}>
+                                        {skillName}
+                                      </h6>
+                                      <Form.Check
+                                        type="checkbox"
+                                        checked={isPricingEnabled}
+                                        onChange={(e) => handlePricingEnabledChange(skillName, e.target.checked)}
+                                        disabled={!profileSettings.pricingInfoEnabled}
+                                        label=""
+                                      />
+                                    </div>
+                                    
+                                    <Row className="g-2">
+                                      <Col xs={6}>
+                                        <Form.Label className="small fw-semibold">Min Rate (₹/hr)</Form.Label>
+                                                                              <Form.Control
                                         type="number"
-                                        placeholder="200"
+                                        placeholder="100"
                                         value={profileSettings.hourlyRates[skillName]?.min || ''}
                                         onChange={(e) => handleHourlyRateChange(skillName, 'min', e.target.value)}
                                         size="sm"
+                                        required
+                                        min="1"
+                                        disabled={!profileSettings.pricingInfoEnabled || !isPricingEnabled}
                                       />
                                     </Col>
                                     <Col xs={6}>
                                       <Form.Label className="small fw-semibold">Max Rate (₹/hr)</Form.Label>
                                       <Form.Control
                                         type="number"
-                                        placeholder="500"
+                                        placeholder="200"
                                         value={profileSettings.hourlyRates[skillName]?.max || ''}
                                         onChange={(e) => handleHourlyRateChange(skillName, 'max', e.target.value)}
                                         size="sm"
+                                        required
+                                        min="1"
+                                        disabled={!profileSettings.pricingInfoEnabled || !isPricingEnabled}
                                       />
-                                    </Col>
-                                  </Row>
-                                </div>
-                              </Col>
-                            );
-                          })}
-                        </Row>
+                                      </Col>
+                                    </Row>
+                                    
+                                    {!profileSettings.pricingInfoEnabled && (
+                                      <div className="text-center py-2 mt-2">
+                                        <small className="text-muted">
+                                          <FaRupeeSign className="me-1" />
+                                          Enable "Pricing Info" above to activate pricing
+                                        </small>
+                                      </div>
+                                    )}
+                                    
+                                    {profileSettings.pricingInfoEnabled && !isPricingEnabled && (
+                                      <div className="text-center py-2 mt-2">
+                                        <small className="text-muted">
+                                          <FaRupeeSign className="me-1" />
+                                          Enable checkbox to set pricing for this service
+                                        </small>
+                                      </div>
+                                    )}
+                                  </div>
+                                </Col>
+                              );
+                            })}
+                          </Row>
+                        </>
                       ) : (
                         <div className="text-center py-4">
                           <FaTools className="text-muted mb-3" size={48} />
@@ -1496,7 +1917,12 @@ const LabourDashboard = () => {
                                 placeholder="Describe your warranty terms (e.g., 6 months warranty on electrical work)"
                                 value={profileSettings.warrantyDuration}
                                 onChange={(e) => handleProfileSettingsChange('warrantyDuration', null, e.target.value)}
-                                className="mt-2"
+                                className={`mt-2 ${
+                                  profileSettings.warrantyOnWork && 
+                                  (!profileSettings.warrantyDuration || profileSettings.warrantyDuration.trim() === '') 
+                                    ? 'is-invalid' : ''
+                                }`}
+                                required
                               />
                             )}
                           </div>
@@ -1523,6 +1949,12 @@ const LabourDashboard = () => {
                               placeholder="Emergency contact number or name"
                               value={profileSettings.emergencyContact}
                               onChange={(e) => handleProfileSettingsChange('emergencyContact', null, e.target.value)}
+                              className={
+                                profileSettings.emergencyContact && 
+                                profileSettings.emergencyContact.trim() !== '' &&
+                                !/\d/.test(profileSettings.emergencyContact)
+                                  ? 'is-invalid' : ''
+                              }
                             />
                             <small className="text-muted">Alternative contact for urgent issues</small>
                           </div>
@@ -1533,42 +1965,79 @@ const LabourDashboard = () => {
                       <hr className="my-4" />
                       <h6 className="mb-3">Working Hours</h6>
                       <Row className="g-3">
-                        {Object.entries(profileSettings.workingHours).map(([day, hours]) => (
-                          <Col key={day} xs={12} sm={6} md={4}>
-                            <div className="working-hours-card p-3 border rounded">
-                              <div className="d-flex align-items-center justify-content-between mb-3">
-                                <h6 className="mb-0 text-capitalize fw-semibold">{day}</h6>
-                                <Form.Check
-                                  type="checkbox"
-                                  checked={hours.available}
-                                  onChange={(e) => handleWorkingHoursChange(day, 'available', e.target.checked)}
-                                />
+                        {Object.entries(profileSettings.workingHours).map(([day, hours]) => {
+                          const hasTimeError = hours.available && hours.start && hours.end && 
+                                              timeToMinutes(hours.start) >= timeToMinutes(hours.end);
+                          const hasEmptyFields = hours.available && (!hours.start || !hours.end);
+                          const hasError = hasTimeError || hasEmptyFields;
+                          
+                          return (
+                            <Col key={day} xs={12} sm={6} md={4}>
+                              <div className={`working-hours-card p-3 border rounded ${hasError ? 'border-danger' : hours.available ? 'border-success' : ''}`}>
+                                <div className="d-flex align-items-center justify-content-between mb-3">
+                                  <h6 className="mb-0 text-capitalize fw-semibold">{day}</h6>
+                                  <Form.Check
+                                    type="checkbox"
+                                    checked={hours.available}
+                                    onChange={(e) => handleWorkingHoursChange(day, 'available', e.target.checked)}
+                                  />
+                                </div>
+                                {hours.available && (
+                                  <>
+                                    <Row className="g-2">
+                                      <Col xs={6}>
+                                        <Form.Label className="small fw-semibold">Start</Form.Label>
+                                        <Form.Control
+                                          type="time"
+                                          value={hours.start}
+                                          onChange={(e) => handleWorkingHoursChange(day, 'start', e.target.value)}
+                                          size="sm"
+                                          required
+                                          className={hasEmptyFields && !hours.start ? 'is-invalid' : hasTimeError ? 'is-invalid' : ''}
+                                        />
+                                      </Col>
+                                      <Col xs={6}>
+                                        <Form.Label className="small fw-semibold">End</Form.Label>
+                                        <Form.Control
+                                          type="time"
+                                          value={hours.end}
+                                          onChange={(e) => handleWorkingHoursChange(day, 'end', e.target.value)}
+                                          size="sm"
+                                          required
+                                          className={hasEmptyFields && !hours.end ? 'is-invalid' : hasTimeError ? 'is-invalid' : ''}
+                                        />
+                                      </Col>
+                                    </Row>
+                                    {hasTimeError && (
+                                      <div className="mt-2">
+                                        <small className="text-danger">
+                                          <FaTimesCircle className="me-1" />
+                                          Start time must be earlier than end time
+                                        </small>
+                                      </div>
+                                    )}
+                                    {hasEmptyFields && (
+                                      <div className="mt-2">
+                                        <small className="text-danger">
+                                          <FaTimesCircle className="me-1" />
+                                          Please set both start and end time
+                                        </small>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
+                                {!hours.available && (
+                                  <div className="text-center py-2">
+                                    <small className="text-muted">
+                                      <FaClock className="me-1" />
+                                      Day off
+                                    </small>
+                                  </div>
+                                )}
                               </div>
-                              {hours.available && (
-                                <Row className="g-2">
-                                  <Col xs={6}>
-                                    <Form.Label className="small fw-semibold">Start</Form.Label>
-                                    <Form.Control
-                                      type="time"
-                                      value={hours.start}
-                                      onChange={(e) => handleWorkingHoursChange(day, 'start', e.target.value)}
-                                      size="sm"
-                                    />
-                                  </Col>
-                                  <Col xs={6}>
-                                    <Form.Label className="small fw-semibold">End</Form.Label>
-                                    <Form.Control
-                                      type="time"
-                                      value={hours.end}
-                                      onChange={(e) => handleWorkingHoursChange(day, 'end', e.target.value)}
-                                      size="sm"
-                                    />
-                                  </Col>
-                                </Row>
-                              )}
-                            </div>
-                          </Col>
-                        ))}
+                            </Col>
+                          );
+                        })}
                       </Row>
                     </Card.Body>
                   </Card>
@@ -1607,6 +2076,13 @@ const LabourDashboard = () => {
                                 placeholder="https://instagram.com/yourprofile"
                                 value={profileSettings.socialMedia.instagram}
                                 onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                                className={
+                                  profileSettings.socialMediaEnabled && 
+                                  profileSettings.socialMedia.instagram &&
+                                  profileSettings.socialMedia.instagram.trim() !== '' &&
+                                  !profileSettings.socialMedia.instagram.startsWith('http') 
+                                    ? 'is-invalid' : ''
+                                }
                               />
                             </div>
                           </Col>
@@ -1619,6 +2095,13 @@ const LabourDashboard = () => {
                                 placeholder="https://facebook.com/yourprofile"
                                 value={profileSettings.socialMedia.facebook}
                                 onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                                className={
+                                  profileSettings.socialMediaEnabled && 
+                                  profileSettings.socialMedia.facebook &&
+                                  profileSettings.socialMedia.facebook.trim() !== '' &&
+                                  !profileSettings.socialMedia.facebook.startsWith('http') 
+                                    ? 'is-invalid' : ''
+                                }
                               />
                             </div>
                           </Col>
@@ -1631,6 +2114,13 @@ const LabourDashboard = () => {
                                 placeholder="https://youtube.com/yourchannel"
                                 value={profileSettings.socialMedia.youtube}
                                 onChange={(e) => handleSocialMediaChange('youtube', e.target.value)}
+                                className={
+                                  profileSettings.socialMediaEnabled && 
+                                  profileSettings.socialMedia.youtube &&
+                                  profileSettings.socialMedia.youtube.trim() !== '' &&
+                                  !profileSettings.socialMedia.youtube.startsWith('http') 
+                                    ? 'is-invalid' : ''
+                                }
                               />
                             </div>
                           </Col>
@@ -1663,6 +2153,12 @@ const LabourDashboard = () => {
                                   value={cert.name}
                                   onChange={(e) => handleCertificationChange(index, 'name', e.target.value)}
                                   size="sm"
+                                  className={
+                                    profileSettings.certificationsEnabled && 
+                                    (!cert.name || cert.name.trim() === '') 
+                                      ? 'is-invalid' : ''
+                                  }
+                                  required
                                 />
                               </Col>
                               <Col xs={12} md={4}>
@@ -1735,6 +2231,12 @@ const LabourDashboard = () => {
                                   value={video.title}
                                   onChange={(e) => handleVideoChange(index, 'title', e.target.value)}
                                   size="sm"
+                                  className={
+                                    profileSettings.testimonialVideosEnabled && 
+                                    (!video.title || video.title.trim() === '') 
+                                      ? 'is-invalid' : ''
+                                  }
+                                  required
                                 />
                               </Col>
                               <Col xs={12} md={6}>
@@ -1745,6 +2247,13 @@ const LabourDashboard = () => {
                                   value={video.url}
                                   onChange={(e) => handleVideoChange(index, 'url', e.target.value)}
                                   size="sm"
+                                  className={
+                                    profileSettings.testimonialVideosEnabled && 
+                                    ((!video.url || video.url.trim() === '') ||
+                                    (video.url && video.url.trim() !== '' && !video.url.startsWith('http')))
+                                      ? 'is-invalid' : ''
+                                  }
+                                  required
                                 />
                               </Col>
                               <Col xs={12} md={1} className="d-flex align-items-end">
