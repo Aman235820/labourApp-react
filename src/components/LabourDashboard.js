@@ -731,6 +731,12 @@ const LabourDashboard = () => {
         return;
       }
       
+      // Validate labourId is present
+      if (!labourDetails || !labourDetails.labourId) {
+        alert('Error: Labour ID is missing. Please refresh the page and try again.');
+        return;
+      }
+
       // Prepare the base data object for the API
       const apiData = {
         labourId: labourDetails.labourId,
@@ -817,19 +823,64 @@ const LabourDashboard = () => {
       // Make the API call using the service method
       const response = await labourService.updateAdditionalLabourData(apiData);
 
-      if (response.data && (response.data.success || response.status === 200)) {
+      console.log('Component received response:', response);
+      
+      // Check for successful response
+      if (response && response.status === 200 && response.data) {
+        // Check if the API returned an error
+        if (response.data.hasError) {
+          throw new Error(response.data.message || 'Failed to save profile settings');
+        }
+        
+        // Success case
         alert('Profile settings saved successfully!');
         console.log('API Response:', response.data);
-        // Refresh the profile settings to show the updated data
-        await fetchAdditionalLabourDetails();
+        
+        // Update the profile settings with the returned data
+        if (response.data.returnValue && response.data.returnValue.profileSettings) {
+          const updatedSettings = response.data.returnValue.profileSettings;
+          
+          // Update the profile settings state with the returned data
+          setProfileSettings(prev => ({
+            ...prev,
+            // Pricing & Payment
+            hourlyRates: updatedSettings.hourlyRates || prev.hourlyRates,
+            pricingInfoEnabled: updatedSettings.hourlyRates && Object.keys(updatedSettings.hourlyRates).length > 0,
+            
+            // Customer Experience
+            satisfactionGuarantee: updatedSettings.satisfactionGuarantee || false,
+            warrantyOnWork: updatedSettings.warrantyOnWork || false,
+            warrantyDuration: updatedSettings.warrantyDuration || '',
+            followUpService: updatedSettings.followUpService || false,
+            emergencyContact: updatedSettings.emergencyContact || '',
+            workingHours: updatedSettings.workingHours || prev.workingHours,
+            
+            // Social Proof
+            socialMedia: updatedSettings.socialMedia || prev.socialMedia,
+            socialMediaEnabled: updatedSettings.socialMedia && Object.values(updatedSettings.socialMedia).some(url => url && url.trim() !== ''),
+            certifications: updatedSettings.certifications || [],
+            certificationsEnabled: updatedSettings.certifications && updatedSettings.certifications.length > 0,
+            testimonialVideos: updatedSettings.testimonialVideos || [],
+            testimonialVideosEnabled: updatedSettings.testimonialVideos && updatedSettings.testimonialVideos.length > 0
+          }));
+          
+          console.log('Profile settings updated with returned data');
+        } else {
+          // Fallback: refresh the profile settings to show the updated data
+          await fetchAdditionalLabourDetails();
+        }
       } else {
-        throw new Error('Failed to save profile settings');
+        throw new Error('Failed to save profile settings - unexpected response');
       }
     } catch (error) {
       console.error('Error saving profile settings:', error);
-      if (error.response) {
+      
+      // Handle the new error structure
+      if (error.message) {
+        alert(`Failed to save profile settings: ${error.message}`);
+      } else if (error.response) {
         console.error('Error response:', error.response.data);
-        alert(`Failed to save profile settings: ${error.response.data.message || 'Server error'}`);
+        alert(`Failed to save profile settings: ${error.response.data?.message || 'Server error'}`);
       } else {
         alert('Failed to save profile settings. Please try again.');
       }

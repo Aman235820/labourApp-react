@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const appUrl = process.env.REACT_APP_API_BASEURL;
+const appUrl = process.env.REACT_APP_API_BASEURL || 'https://labourapp.onrender.com';
 const baseurl = `${appUrl}/labourapp`;
 
 export const labourService = {
@@ -176,21 +176,50 @@ export const labourService = {
   updateAdditionalLabourData: async (labourData) => {
     try {
       const endpoint = `${baseurl}/labour/updateAdditionalLabourData`;
+      console.log('Base URL:', appUrl);
+      console.log('Full endpoint:', endpoint);
+      console.log('Sending request to:', endpoint);
+      console.log('Request data:', labourData);
+      
       const response = await axios.patch(endpoint, labourData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
       
+      console.log('API Response:', response);
+      console.log('Response data:', response.data);
+      
       // Check if the API returned an error
-      if (response.data.hasError) {
+      if (response.data && response.data.hasError) {
         throw new Error(response.data.message || 'Failed to update additional labour data');
       }
       
-      return response.data;
+      // Return the full response for the component to handle
+      return response;
     } catch (error) {
       console.error('Error updating additional labour data:', error);
-      throw error.response?.data || error.message;
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+      
+      // Return detailed error information
+      if (error.response) {
+        throw {
+          message: error.response.data?.message || 'Server error occurred',
+          status: error.response.status,
+          data: error.response.data
+        };
+      } else if (error.request) {
+        throw {
+          message: 'Network error - no response received',
+          status: 'NETWORK_ERROR'
+        };
+      } else {
+        throw {
+          message: error.message || 'Unknown error occurred',
+          status: 'UNKNOWN_ERROR'
+        };
+      }
     }
   }
 };
