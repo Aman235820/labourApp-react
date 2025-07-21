@@ -814,16 +814,8 @@ const LabourDashboard = () => {
       console.log('Saving profile settings at:', new Date().toLocaleString());
       console.log('API Data:', apiData);
 
-      // Make the API call using PATCH method
-      const response = await axios.patch(
-        'http://localhost:4000/labourapp/labour/updateAdditionalLabourData',
-        apiData,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // Make the API call using the service method
+      const response = await labourService.updateAdditionalLabourData(apiData);
 
       if (response.data && (response.data.success || response.status === 200)) {
         alert('Profile settings saved successfully!');

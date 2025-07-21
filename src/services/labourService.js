@@ -170,6 +170,28 @@ export const labourService = {
       // Return null instead of throwing to prevent breaking the page
       return null;
     }
+  },
+
+  // Update additional labour data (profile settings)
+  updateAdditionalLabourData: async (labourData) => {
+    try {
+      const endpoint = `${baseurl}/labour/updateAdditionalLabourData`;
+      const response = await axios.patch(endpoint, labourData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Check if the API returned an error
+      if (response.data.hasError) {
+        throw new Error(response.data.message || 'Failed to update additional labour data');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error updating additional labour data:', error);
+      throw error.response?.data || error.message;
+    }
   }
 };
 
