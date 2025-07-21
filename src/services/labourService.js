@@ -150,6 +150,26 @@ export const labourService = {
     } catch (error) {
       throw error.response?.data || error.message;
     }
+  },
+
+  // Get additional labour details (profile settings)
+  getAdditionalLabourDetails: async (labourId) => {
+    try {
+      const endpoint = `${baseurl}/labour/getAdditionalLabourDetails/${labourId}`;
+      const response = await axios.get(endpoint);
+      
+      // Check if the API returned an error
+      if (response.data.hasError) {
+        throw new Error(response.data.message || 'Failed to fetch additional labour details');
+      }
+      
+      // Return the actual data from returnValue
+      return response.data.returnValue;
+    } catch (error) {
+      console.error('Error fetching additional labour details:', error);
+      // Return null instead of throwing to prevent breaking the page
+      return null;
+    }
   }
 };
 

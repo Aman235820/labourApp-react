@@ -6,7 +6,7 @@ import {
   FaClock, FaCheckCircle, FaTimesCircle, FaHeart, FaShare, 
   FaTools, FaUser, FaWhatsapp, FaEnvelope, FaArrowLeft,
   FaCamera, FaThumbsUp, FaThumbsDown, FaFlag, FaBookmark,
-  FaShield, FaAward, FaCertificate, FaGraduationCap
+  FaShieldAlt, FaAward, FaCertificate, FaGraduationCap
 } from 'react-icons/fa';
 import { labourService } from '../services/labourService';
 import { bookLabour } from '../services/BookingService';
@@ -91,11 +91,67 @@ const LabourDetailsPage = () => {
             repeatCustomers: response.repeatCustomers || 0,
             onTimeCompletion: response.onTimeCompletion || 0,
             responseTime: response.responseTime || '< 2 hours'
-          }
+          },
+          // Initialize additional details
+          hourlyRates: {},
+          satisfactionGuarantee: false,
+          followUpService: false,
+          emergencyContact: '',
+          workingHours: {
+            monday: { start: '09:00', end: '17:00', available: true },
+            tuesday: { start: '09:00', end: '17:00', available: true },
+            wednesday: { start: '09:00', end: '17:00', available: true },
+            thursday: { start: '09:00', end: '17:00', available: true },
+            friday: { start: '09:00', end: '17:00', available: true },
+            saturday: { start: '09:00', end: '14:00', available: true },
+            sunday: { start: '00:00', end: '00:00', available: false }
+          },
+          socialMedia: {
+            youtube: '',
+            instagram: '',
+            facebook: ''
+          },
+          certifications: [],
+          testimonialVideos: []
         };
         
         console.log('LabourDetailsPage - Mapped labour data:', mappedLabour);
         setLabour(mappedLabour);
+        
+        // Fetch additional labour details (profile settings)
+        try {
+          const additionalDetails = await labourService.getAdditionalLabourDetails(labourId);
+          console.log('LabourDetailsPage - Additional details API response:', additionalDetails);
+          
+          if (additionalDetails && additionalDetails.length > 0) {
+            const latestSettings = additionalDetails[0]; // Get the most recent settings
+            const profileData = latestSettings.profileSettings;
+            
+            if (profileData) {
+              console.log('LabourDetailsPage - Profile settings found:', profileData);
+              
+              // Update labour with additional details
+              setLabour(prev => ({
+                ...prev,
+                hourlyRates: profileData.hourlyRates || {},
+                satisfactionGuarantee: profileData.satisfactionGuarantee || false,
+                followUpService: profileData.followUpService || false,
+                emergencyContact: profileData.emergencyContact || '',
+                workingHours: profileData.workingHours || prev.workingHours,
+                socialMedia: profileData.socialMedia || prev.socialMedia,
+                certifications: profileData.certifications || [],
+                testimonialVideos: profileData.testimonialVideos || []
+              }));
+              
+              console.log('LabourDetailsPage - Additional details integrated successfully');
+            }
+          } else {
+            console.log('LabourDetailsPage - No additional details found');
+          }
+        } catch (additionalError) {
+          console.error('LabourDetailsPage - Error fetching additional details:', additionalError);
+          // Continue with basic labour data even if additional details fail
+        }
         
         // Fetch reviews separately using the reviews API
         try {
@@ -452,6 +508,46 @@ const LabourDetailsPage = () => {
             </Card.Body>
           </Card>
 
+          {/* Pricing */}
+          {labour.hourlyRates && Object.keys(labour.hourlyRates).length > 0 && (
+            <Card className="mb-4">
+              <Card.Body>
+                <h5>Service Pricing</h5>
+                <div className="pricing-grid">
+                  {Object.entries(labour.hourlyRates).map(([service, rates]) => (
+                    <div key={service} className="pricing-item">
+                      <div className="service-name">{service}</div>
+                      <div className="price-range">
+                        ₹{rates.min || '0'} - ₹{rates.max || '0'}
+                        <small className="text-muted d-block">per hour</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {labour.satisfactionGuarantee && (
+                  <Alert variant="success" className="mt-3">
+                    <FaShieldAlt className="me-2" />
+                    <strong>Satisfaction Guarantee:</strong> We guarantee your satisfaction with our work quality and service.
+                  </Alert>
+                )}
+                
+                {labour.followUpService && (
+                  <Alert variant="info" className="mt-3">
+                    <FaCheckCircle className="me-2" />
+                    <strong>Follow-up Service:</strong> We provide follow-up service to ensure your complete satisfaction.
+                  </Alert>
+                )}
+                
+                {labour.emergencyContact && (
+                  <Alert variant="warning" className="mt-3">
+                    <FaPhone className="me-2" />
+                    <strong>Emergency Contact:</strong> {labour.emergencyContact} (Available 24/7 for urgent requirements)
+                  </Alert>
+                )}
+              </Card.Body>
+            </Card>
+          )}
+
           {/* Work Gallery */}
           <Card className="mb-4">
             <Card.Body>
@@ -479,24 +575,53 @@ const LabourDetailsPage = () => {
             </Card.Body>
           </Card>
 
+          {/* Testimonial Videos */}
+          {labour.testimonialVideos && labour.testimonialVideos.length > 0 && (
+            <Card className="mb-4">
+              <Card.Body>
+                <h5>Testimonial Videos</h5>
+                <div className="testimonial-videos">
+                  {labour.testimonialVideos.map((video, index) => (
+                    <div key={video.id || index} className="video-item">
+                      <div className="video-thumbnail">
+                        <FaCamera className="video-icon" />
+                      </div>
+                      <div className="video-info">
+                        <h6>{video.title}</h6>
+                        <a 
+                          href={video.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="video-link"
+                        >
+                          Watch Video
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card.Body>
+            </Card>
+          )}
+
           {/* Availability */}
           <Card className="mb-4">
             <Card.Body>
               <h5>Weekly Schedule</h5>
               <div className="availability-grid">
-                {Object.entries(labour.availability).map(([day, schedule]) => (
+                {Object.entries(labour.workingHours).map(([day, schedule]) => (
                   <div key={day} className="availability-item">
                     <div className="day-name">{getDayName(day)}</div>
                     <div className={`schedule ${schedule.available ? 'available' : 'unavailable'}`}>
                       {schedule.available ? (
                         <>
                           <FaCheckCircle className="text-success me-2" />
-                          {schedule.hours}
+                          {schedule.start && schedule.end ? `${schedule.start} - ${schedule.end}` : 'Available'}
                         </>
                       ) : (
                         <>
                           <FaTimesCircle className="text-danger me-2" />
-                          {schedule.hours}
+                          Closed
                         </>
                       )}
                     </div>
@@ -589,15 +714,54 @@ const LabourDetailsPage = () => {
             </Card.Body>
           </Card>
 
+          {/* Social Media */}
+          {labour.socialMedia && (labour.socialMedia.youtube || labour.socialMedia.instagram || labour.socialMedia.facebook) && (
+            <Card className="mb-4">
+              <Card.Body>
+                <h5>Social Media</h5>
+                <div className="social-media-links">
+                  {labour.socialMedia.youtube && (
+                    <a href={labour.socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="social-link youtube">
+                      <FaShare className="me-2" />
+                      YouTube
+                    </a>
+                  )}
+                  {labour.socialMedia.instagram && (
+                    <a href={labour.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="social-link instagram">
+                      <FaShare className="me-2" />
+                      Instagram
+                    </a>
+                  )}
+                  {labour.socialMedia.facebook && (
+                    <a href={labour.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="social-link facebook">
+                      <FaShare className="me-2" />
+                      Facebook
+                    </a>
+                  )}
+                </div>
+              </Card.Body>
+            </Card>
+          )}
+
           {/* Certifications */}
           <Card className="mb-4">
             <Card.Body>
               <h5>Certifications</h5>
               {labour.certifications && labour.certifications.length > 0 ? (
                 labour.certifications.map((cert, index) => (
-                  <div key={index} className="certification-item">
+                  <div key={cert.id || index} className="certification-item">
                     <FaCertificate className="me-2 text-primary" />
-                    <span>{cert}</span>
+                    <div>
+                      <div className="cert-name">{cert.name}</div>
+                      {cert.issueDate && (
+                        <small className="text-muted">Issued: {new Date(cert.issueDate).toLocaleDateString()}</small>
+                      )}
+                      {cert.link && (
+                        <a href={cert.link} target="_blank" rel="noopener noreferrer" className="cert-link">
+                          View Certificate
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (

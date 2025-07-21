@@ -37,6 +37,7 @@ const LabourDashboard = () => {
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isLoadingProfileSettings, setIsLoadingProfileSettings] = useState(false);
   const navigate = useNavigate();
 
   // Profile Settings State
@@ -92,27 +93,7 @@ const LabourDashboard = () => {
       fetchRequestedServices(true);
       fetchReviews();
       fetchOverallRatings();
-      
-      // Set default pricing enabled for all subservices with default rates
-      if (labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0) {
-        const defaultPricingEnabled = {};
-        const defaultHourlyRates = {};
-        
-        labourDetails.labourSubSkills.forEach(subSkill => {
-          const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
-          defaultPricingEnabled[skillName] = true;
-          defaultHourlyRates[skillName] = {
-            min: '100',
-            max: '200'
-          };
-        });
-        
-        setProfileSettings(prev => ({
-          ...prev,
-          pricingEnabled: defaultPricingEnabled,
-          hourlyRates: defaultHourlyRates
-        }));
-      }
+      fetchAdditionalLabourDetails();
     }
   }, [labourDetails]);
 
@@ -193,6 +174,139 @@ const LabourDashboard = () => {
       setIsRatingsLoading(false);
     }
   };
+
+  const fetchAdditionalLabourDetails = async () => {
+    try {
+      setIsLoadingProfileSettings(true);
+      const response = await labourService.getAdditionalLabourDetails(labourDetails?.labourId);
+      
+      console.log('API Response:', response);
+      
+      if (response && response.length > 0) {
+        const latestSettings = response[0]; // Get the most recent settings
+        const profileData = latestSettings.profileSettings;
+        
+        console.log('Loaded profile settings:', profileData);
+        
+        if (profileData) {
+          // Initialize default pricing settings
+          const defaultPricingEnabled = {};
+          const defaultHourlyRates = {};
+          
+          if (labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0) {
+            labourDetails.labourSubSkills.forEach(subSkill => {
+              const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+              defaultPricingEnabled[skillName] = false;
+              defaultHourlyRates[skillName] = { min: '', max: '' };
+            });
+          }
+          
+          // Update with saved data
+          if (profileData.hourlyRates) {
+            Object.keys(profileData.hourlyRates).forEach(skillName => {
+              defaultPricingEnabled[skillName] = true;
+              defaultHourlyRates[skillName] = profileData.hourlyRates[skillName];
+            });
+          }
+          
+          // Determine if pricing info is enabled (if any rates are set)
+          const pricingInfoEnabled = Object.keys(defaultPricingEnabled).some(skill => defaultPricingEnabled[skill]);
+          
+          // If no saved data exists, default to false for master pricing toggle
+          const shouldEnablePricing = response.length > 0 ? pricingInfoEnabled : false;
+          
+          console.log('Pricing settings:', {
+            hasSavedData: response.length > 0,
+            pricingInfoEnabled,
+            shouldEnablePricing,
+            defaultPricingEnabled
+          });
+          
+          // Determine if social media is enabled (if any social media URLs are set)
+          const socialMediaEnabled = profileData.socialMedia && 
+            Object.values(profileData.socialMedia).some(url => url && url.trim() !== '');
+          
+          // Ensure social media object has all required properties
+          const socialMedia = profileData.socialMedia || { instagram: '', facebook: '', youtube: '' };
+          
+          // Determine if certifications are enabled (if any certifications exist)
+          const certificationsEnabled = profileData.certifications && profileData.certifications.length > 0;
+          
+          // Determine if testimonial videos are enabled (if any videos exist)
+          const testimonialVideosEnabled = profileData.testimonialVideos && profileData.testimonialVideos.length > 0;
+          
+          setProfileSettings(prev => ({
+            ...prev,
+            // Pricing & Payment
+            pricingInfoEnabled: shouldEnablePricing,
+            pricingEnabled: defaultPricingEnabled,
+            hourlyRates: defaultHourlyRates,
+            
+            // Customer Experience
+            satisfactionGuarantee: profileData.satisfactionGuarantee || false,
+            warrantyOnWork: profileData.warrantyOnWork || false,
+            warrantyDuration: profileData.warrantyDuration || '',
+            followUpService: profileData.followUpService || false,
+            emergencyContact: profileData.emergencyContact || '',
+            workingHours: profileData.workingHours || prev.workingHours,
+            
+            // Social Proof
+            socialMedia: socialMedia,
+            socialMediaEnabled,
+            certifications: profileData.certifications || [],
+            certificationsEnabled,
+                         testimonialVideos: profileData.testimonialVideos || [],
+             testimonialVideosEnabled
+           }));
+           
+           console.log('Profile settings loaded successfully');
+         }
+             } else {
+         // No saved settings found, set defaults
+         console.log('No saved profile settings found, setting defaults');
+         console.log('Setting master pricing toggle to false for fresh case');
+         if (labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0) {
+           const defaultPricingEnabled = {};
+           const defaultHourlyRates = {};
+           
+           labourDetails.labourSubSkills.forEach(subSkill => {
+             const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+             defaultPricingEnabled[skillName] = false;
+             defaultHourlyRates[skillName] = { min: '', max: '' };
+           });
+           
+           setProfileSettings(prev => ({
+             ...prev,
+             pricingInfoEnabled: false, // Master toggle should be false for fresh case
+             pricingEnabled: defaultPricingEnabled,
+             hourlyRates: defaultHourlyRates
+           }));
+         }
+       }
+    } catch (error) {
+      console.error('Error fetching additional labour details:', error);
+      // Set defaults on error
+      if (labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0) {
+        const defaultPricingEnabled = {};
+        const defaultHourlyRates = {};
+        
+        labourDetails.labourSubSkills.forEach(subSkill => {
+          const skillName = typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill;
+          defaultPricingEnabled[skillName] = false;
+          defaultHourlyRates[skillName] = { min: '', max: '' };
+        });
+        
+                 setProfileSettings(prev => ({
+           ...prev,
+           pricingInfoEnabled: false, // Master toggle should be false on error
+           pricingEnabled: defaultPricingEnabled,
+           hourlyRates: defaultHourlyRates
+         }));
+       }
+     } finally {
+       setIsLoadingProfileSettings(false);
+     }
+   };
 
   const handleStatusUpdate = async (bookingId, newStatus) => {
     try {
@@ -714,6 +828,8 @@ const LabourDashboard = () => {
       if (response.data && (response.data.success || response.status === 200)) {
         alert('Profile settings saved successfully!');
         console.log('API Response:', response.data);
+        // Refresh the profile settings to show the updated data
+        await fetchAdditionalLabourDetails();
       } else {
         throw new Error('Failed to save profile settings');
       }
@@ -1693,7 +1809,14 @@ const LabourDashboard = () => {
         <Row className="mt-5">
           <Col>
             <div className="profile-settings-section">
-              <div className="d-flex justify-content-between align-items-center mb-4">
+              {isLoadingProfileSettings ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" className="text-primary mb-3" />
+                  <p className="text-muted">Loading profile settings...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                   <h3 className="fw-bold text-dark mb-2">
                     <FaCog className="me-3 text-primary" />
@@ -2284,6 +2407,8 @@ const LabourDashboard = () => {
                   </Card>
                 </Col>
               </Row>
+                </>
+              )}
             </div>
           </Col>
         </Row>
