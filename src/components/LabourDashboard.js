@@ -6,7 +6,8 @@ import {
   FaIdCard, FaSync, FaChartLine, FaChartBar, FaAward, FaEye, 
   FaQuoteLeft, FaThumbsUp, FaUserTie, FaBusinessTime, FaHandshake, 
   FaTrashAlt, FaCog, FaList, FaInstagram, FaFacebook, FaYoutube, 
-  FaCertificate, FaShieldAlt, FaHeadset, FaRupeeSign 
+  FaCertificate, FaShieldAlt, FaHeadset, FaRupeeSign, FaCamera, 
+  FaUpload, FaImage, FaUserCircle 
 } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { labourService } from '../services/labourService';
@@ -36,8 +37,13 @@ const LabourDashboard = () => {
   });
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isLoadingProfileSettings, setIsLoadingProfileSettings] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [imageUploadError, setImageUploadError] = useState(null);
+  const [imageUploadSuccess, setImageUploadSuccess] = useState(false);
   const navigate = useNavigate();
 
   // Profile Settings State
@@ -375,6 +381,102 @@ const LabourDashboard = () => {
   const handleAadhaarVerification = () => {
     navigate('/aadhar');
   };
+
+  // Profile Image Upload Handler
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setImageUploadError('Please select a valid image file (JPEG, PNG, or WebP)');
+      return;
+    }
+
+    // Validate file size (max 10MB as per server requirement)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setImageUploadError('Image size should be less than 10MB');
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      setImageUploadError(null);
+      setImageUploadSuccess(false);
+
+      const response = await labourService.uploadProfileImage(labourDetails.labourId, file);
+      
+      if (response && response.url) {
+        setProfileImageUrl(response.url);
+        setImageUploadSuccess(true);
+        console.log('Profile image uploaded successfully:', response.url);
+        
+        // Update labour details with new image URL
+        const updatedLabourDetails = {
+          ...labourDetails,
+          profileImageUrl: response.url
+        };
+        setLabourDetails(updatedLabourDetails);
+        
+        // Update localStorage
+        localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setImageUploadSuccess(false), 5000);
+      } else {
+        setImageUploadError('Failed to upload image. Please try again.');
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      
+      // Handle different types of errors
+      if (error.status) {
+        // Error from labourService with status
+        if (error.status === 500) {
+          setImageUploadError('Unable to upload the image. Please check the file type or size should be less than 10MB');
+        } else if (error.status === 413) {
+          setImageUploadError('File size too large. Please select an image smaller than 10MB');
+        } else if (error.status === 400) {
+          setImageUploadError('Invalid file format. Please select a valid image file');
+        } else if (error.status === 'NETWORK_ERROR') {
+          setImageUploadError('Network error. Please check your internet connection and try again.');
+        } else {
+          setImageUploadError(`Upload failed (${error.status}). Please try again.`);
+        }
+      } else if (error.response) {
+        // Direct axios error response
+        if (error.response.status === 500) {
+          setImageUploadError('Unable to upload the image. Please check the file type or size should be less than 10MB');
+        } else if (error.response.status === 413) {
+          setImageUploadError('File size too large. Please select an image smaller than 10MB');
+        } else if (error.response.status === 400) {
+          setImageUploadError('Invalid file format. Please select a valid image file');
+        } else {
+          setImageUploadError(`Upload failed (${error.response.status}). Please try again.`);
+        }
+      } else if (error.request) {
+        // Network error
+        setImageUploadError('Network error. Please check your internet connection and try again.');
+      } else {
+        // Other errors
+        setImageUploadError('Unable to upload the image. Please check the file type or size should be less than 10MB');
+      }
+    } finally {
+      setIsUploadingImage(false);
+      // Clear the file input
+      event.target.value = '';
+    }
+  };
+
+  // Clear image upload messages
+  useEffect(() => {
+    if (imageUploadError) {
+      const timer = setTimeout(() => setImageUploadError(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [imageUploadError]);
 
   // Profile Settings Handlers
   const handleProfileSettingsChange = (section, field, value) => {
@@ -1054,9 +1156,58 @@ const LabourDashboard = () => {
             <Col>
               <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                 <div className="d-flex align-items-center mb-3 mb-md-0 w-100 w-md-auto">
-                  <div className="profile-badge me-3 me-md-4">
-                    <div className="avatar-professional">
-                      <FaUserTie className="text-primary" size={24} />
+                  <div className="profile-badge me-3 me-md-4 position-relative">
+                    <div className="avatar-professional position-relative">
+                      {profileImageUrl || labourDetails.profileImageUrl ? (
+                        <img 
+                          src={profileImageUrl || labourDetails.profileImageUrl} 
+                          alt="Profile" 
+                          className="rounded-circle"
+                          style={{ 
+                            width: '60px', 
+                            height: '60px', 
+                            objectFit: 'cover',
+                            border: '3px solid #fff',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          }}
+                        />
+                      ) : (
+                        <FaUserTie className="text-primary" size={24} />
+                      )}
+                      
+                      {/* Upload Button Overlay */}
+                      <div className="position-absolute bottom-0 end-0">
+                        <label 
+                          htmlFor="profile-image-upload" 
+                          className="btn btn-primary btn-sm rounded-circle p-1"
+                          style={{ 
+                            width: '24px', 
+                            height: '24px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Upload Profile Image"
+                        >
+                          <FaCamera size={12} />
+                        </label>
+                        <input
+                          id="profile-image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          style={{ display: 'none' }}
+                          disabled={isUploadingImage}
+                        />
+                      </div>
+                      
+                      {/* Upload Loading Indicator */}
+                      {isUploadingImage && (
+                        <div className="position-absolute top-50 start-50 translate-middle">
+                          <Spinner animation="border" size="sm" variant="light" />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex-grow-1">
@@ -1121,6 +1272,25 @@ const LabourDashboard = () => {
           </Row>
         </Container>
       </div>
+
+      {/* Image Upload Messages */}
+      {imageUploadSuccess && (
+        <Container className="mt-3">
+          <Alert variant="success" className="mb-0" onClose={() => setImageUploadSuccess(false)} dismissible>
+            <FaCheckCircle className="me-2" />
+            Profile image uploaded successfully! Your new profile picture is now visible.
+          </Alert>
+        </Container>
+      )}
+      
+      {imageUploadError && (
+        <Container className="mt-3">
+          <Alert variant="danger" className="mb-0" onClose={() => setImageUploadError(null)} dismissible>
+            <FaTimesCircle className="me-2" />
+            {imageUploadError}
+          </Alert>
+        </Container>
+      )}
 
       <Container className="py-2 py-md-4">
         {/* Analytics Dashboard */}
@@ -1848,6 +2018,114 @@ const LabourDashboard = () => {
           </Col>
         </Row>
 
+        {/* Profile Image Section - Independent Section */}
+        <Row className="mt-5">
+          <Col>
+            <Card className="border-0 shadow-sm">
+              <Card.Header className="bg-info bg-opacity-10 border-0">
+                <h4 className="mb-0 fw-bold">
+                  <FaImage className="me-3 text-info" />
+                  Profile Image
+                </h4>
+                <p className="text-muted mb-0 mt-2">Upload a professional profile picture to build trust with customers</p>
+              </Card.Header>
+              <Card.Body className="p-4">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center">
+                    <div className="me-4">
+                      {profileImageUrl || labourDetails.profileImageUrl ? (
+                        <div className="profile-image-container">
+                          <img 
+                            src={profileImageUrl || labourDetails.profileImageUrl} 
+                            alt="Profile" 
+                            className="rounded-circle clickable"
+                            onClick={() => setShowImageModal(true)}
+                            style={{ 
+                              width: '150px', 
+                              height: '150px', 
+                              objectFit: 'cover',
+                              border: '3px solid #dee2e6',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
+                            }}
+                          />
+                          <div className="image-click-overlay">
+                            <FaCamera size={20} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div 
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                          style={{ 
+                            width: '150px', 
+                            height: '150px',
+                            border: '3px solid #dee2e6'
+                          }}
+                        >
+                          <FaUser size={72} className="text-muted" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h6 className="mb-2">Profile Picture</h6>
+                      <p className="text-muted mb-3">
+                        A professional profile picture helps customers recognize and trust you. 
+                        Upload a clear, high-quality image that represents your professional appearance.
+                      </p>
+                      <div className="d-flex gap-2">
+                        <label 
+                          htmlFor="profile-image-upload-standalone" 
+                          className="btn btn-primary"
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {isUploadingImage ? (
+                            <>
+                              <Spinner animation="border" size="sm" className="me-2" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <FaUpload className="me-2" />
+                              Upload Image
+                            </>
+                          )}
+                        </label>
+                        <input
+                          id="profile-image-upload-standalone"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          style={{ display: 'none' }}
+                          disabled={isUploadingImage}
+                        />
+                        {(profileImageUrl || labourDetails.profileImageUrl) && (
+                          <Button 
+                            variant="outline-secondary"
+                            onClick={() => {
+                              setProfileImageUrl(null);
+                              const updatedLabourDetails = {
+                                ...labourDetails,
+                                profileImageUrl: null
+                              };
+                              setLabourDetails(updatedLabourDetails);
+                              localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                      <small className="text-muted d-block mt-2">
+                        Supported formats: JPEG, PNG, WebP (max 10MB)
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
         {/* Profile Settings Section - Independent Section */}
         <Row className="mt-5">
           <Col>
@@ -1912,6 +2190,8 @@ const LabourDashboard = () => {
                   )}
                 </Button>
               </div>
+
+
 
               {/* Pricing & Payment Information */}
               <Row className="mb-4">
@@ -2463,6 +2743,42 @@ const LabourDashboard = () => {
         labourDetails={labourDetails}
         onUpdateSuccess={handleUpdateSuccess}
       />
+
+      {/* Profile Image Modal */}
+      <Modal 
+        show={showImageModal} 
+        onHide={() => setShowImageModal(false)} 
+        centered
+        className="image-modal-compact"
+        backdrop="static"
+        keyboard={true}
+      >
+        <Modal.Body className="p-0 position-relative">
+          {(profileImageUrl || labourDetails.profileImageUrl) && (
+            <img 
+              src={profileImageUrl || labourDetails.profileImageUrl} 
+              alt={`${labourDetails.labourName}'s profile picture`}
+              className="modal-profile-image-compact"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          )}
+          <div className="fallback-modal-image-compact" style={{ display: 'none' }}>
+            <FaUserCircle size={120} className="text-muted" />
+          </div>
+          
+          {/* Close button overlay */}
+          <button 
+            className="modal-close-overlay"
+            onClick={() => setShowImageModal(false)}
+            aria-label="Close modal"
+          >
+            <FaTimesCircle size={24} />
+          </button>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

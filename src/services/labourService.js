@@ -221,6 +221,55 @@ export const labourService = {
         };
       }
     }
+  },
+
+  // Upload profile image
+  uploadProfileImage: async (labourId, imageFile) => {
+    try {
+      const endpoint = `${baseurl}/labour/uploadImage/${labourId}`;
+      
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      
+      console.log('Uploading profile image for labour ID:', labourId);
+      console.log('File:', imageFile);
+      console.log('Endpoint:', endpoint);
+      
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      console.log('Upload response:', response.data);
+      
+      // Check if the API returned an error
+      if (response.data && response.data.hasError) {
+        throw new Error(response.data.message || 'Failed to upload profile image');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      
+      if (error.response) {
+        throw {
+          message: error.response.data?.message || 'Server error occurred during upload',
+          status: error.response.status,
+          data: error.response.data
+        };
+      } else if (error.request) {
+        throw {
+          message: 'Network error - no response received during upload',
+          status: 'NETWORK_ERROR'
+        };
+      } else {
+        throw {
+          message: error.message || 'Unknown error occurred during upload',
+          status: 'UNKNOWN_ERROR'
+        };
+      }
+    }
   }
 };
 

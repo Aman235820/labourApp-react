@@ -1756,3 +1756,353 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 } 
+
+/* Profile Image Upload Styles */
+.profile-image-upload {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-image-upload .avatar-professional {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-image-upload .avatar-professional img {
+  transition: all 0.3s ease;
+}
+
+.profile-image-upload .avatar-professional:hover img {
+  transform: scale(1.05);
+}
+
+.profile-image-upload .upload-overlay {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  z-index: 10;
+}
+
+.profile-image-upload .upload-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.profile-image-upload .upload-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-image-upload .upload-btn:active {
+  transform: scale(0.95);
+}
+
+.profile-image-upload .upload-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+}
+
+.profile-image-upload .upload-loading .spinner-border {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+/* Profile Image Settings Section */
+.profile-image-settings {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.profile-image-settings:hover {
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-settings .image-preview {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-image-settings .image-preview img {
+  border: 3px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.profile-image-settings .image-preview:hover img {
+  border-color: #007bff;
+  transform: scale(1.02);
+}
+
+.profile-image-settings .image-placeholder {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border: 3px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.profile-image-settings .image-placeholder:hover {
+  background: linear-gradient(135deg, #e9ecef, #dee2e6);
+  border-color: #007bff;
+}
+
+.profile-image-settings .upload-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.profile-image-settings .upload-controls .btn {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.profile-image-settings .upload-controls .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-image-settings .upload-controls .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.profile-image-settings .upload-info {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+/* Image Upload Messages */
+.image-upload-messages {
+  margin-top: 1rem;
+}
+
+.image-upload-messages .alert {
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+}
+
+.image-upload-messages .alert-success {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+}
+
+.image-upload-messages .alert-danger {
+  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+  color: #721c24;
+}
+
+/* Mobile Responsive for Profile Image */
+@media (max-width: 768px) {
+  .profile-image-upload .upload-btn {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .profile-image-upload .upload-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .profile-image-settings {
+    padding: 1rem;
+  }
+  
+  .profile-image-settings .upload-controls {
+    flex-direction: column;
+  }
+  
+  .profile-image-settings .upload-controls .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-image-upload .upload-btn {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .profile-image-upload .upload-btn svg {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .profile-image-settings {
+    padding: 0.75rem;
+  }
+  
+  .profile-image-settings .image-preview img,
+  .profile-image-settings .image-placeholder {
+    width: 60px;
+    height: 60px;
+  }
+} 
+
+/* Profile Image Container and Modal Styles */
+.profile-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-image-container .clickable {
+  transition: all 0.3s ease;
+}
+
+.profile-image-container .clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.image-click-overlay {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.profile-image-container:hover .image-click-overlay {
+  opacity: 1;
+}
+
+/* Compact Profile Image Modal Styles */
+.image-modal-compact .modal-content {
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background: transparent;
+}
+
+.image-modal-compact .modal-body {
+  padding: 0;
+  background: transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-profile-image-compact {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.modal-profile-image-compact:hover {
+  transform: scale(1.01);
+}
+
+.fallback-modal-image-compact {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-close-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.modal-close-overlay:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+/* Mobile responsive styles for compact image modal */
+@media (max-width: 768px) {
+  .image-modal-compact .modal-dialog {
+    margin: 10px;
+    max-width: 95vw;
+  }
+  
+  .modal-profile-image-compact {
+    max-width: 95vw;
+    max-height: 70vh;
+  }
+  
+  .fallback-modal-image-compact {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .modal-close-overlay {
+    top: 5px;
+    right: 5px;
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 576px) {
+  .image-modal-compact .modal-dialog {
+    margin: 5px;
+    max-width: 98vw;
+  }
+  
+  .modal-profile-image-compact {
+    max-width: 98vw;
+    max-height: 60vh;
+  }
+  
+  .fallback-modal-image-compact {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .modal-close-overlay {
+    top: 3px;
+    right: 3px;
+    width: 30px;
+    height: 30px;
+  }
+} 

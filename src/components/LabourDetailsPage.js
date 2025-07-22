@@ -23,6 +23,7 @@ const LabourDetailsPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingStatus, setBookingStatus] = useState(null);
   const [bookingData, setBookingData] = useState({
@@ -69,6 +70,7 @@ const LabourDetailsPage = () => {
           description: response.labourDescription || `Professional ${response.labourSkill || 'worker'} with expertise in various services. Committed to quality work and customer satisfaction.`,
           skills: response.labourSubSkills ? response.labourSubSkills.map(skill => skill.subSkillName) : [],
           certifications: response.certifications || [],
+          profileImage: response.profileImage || null,
           workImages: response.workImages || (response.labourSkill ? [
             `/images/${response.labourSkill?.toLowerCase().replace(/\s+/g, '')}1.jpg`,
             `/images/${response.labourSkill?.toLowerCase().replace(/\s+/g, '')}2.jpg`,
@@ -336,7 +338,32 @@ const LabourDetailsPage = () => {
             
             <div className="d-flex align-items-center">
               <div className="labour-avatar me-4">
-                <FaUserCircle size={80} className="text-primary" />
+                {labour.profileImage ? (
+                  <div className="profile-image-container">
+                    <img 
+                      src={labour.profileImage} 
+                      alt={labour.labourName}
+                      className="profile-image clickable"
+                      onClick={() => setShowImageModal(true)}
+                      onError={(e) => {
+                        // Replace the image with fallback icon
+                        e.target.style.display = 'none';
+                        const fallbackIcon = document.createElement('div');
+                        fallbackIcon.innerHTML = '<svg class="text-primary" width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                        fallbackIcon.className = 'fallback-icon';
+                        e.target.parentNode.appendChild(fallbackIcon);
+                      }}
+                    />
+                    <div className="image-click-overlay">
+                      <FaCamera size={16} />
+                    </div>
+                  </div>
+                ) : (
+                  <FaUserCircle 
+                    size={80} 
+                    className="text-primary"
+                  />
+                )}
                 {labour.isVerified && (
                   <div className="verified-badge">
                     <FaCheckCircle className="text-success" />
@@ -973,6 +1000,42 @@ const LabourDetailsPage = () => {
             Submit Report
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Profile Image Modal */}
+      <Modal 
+        show={showImageModal} 
+        onHide={() => setShowImageModal(false)} 
+        centered
+        className="image-modal-compact"
+        backdrop="static"
+        keyboard={true}
+      >
+        <Modal.Body className="p-0 position-relative">
+          {labour.profileImage && (
+            <img 
+              src={labour.profileImage} 
+              alt={`${labour.labourName}'s profile picture`}
+              className="modal-profile-image-compact"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          )}
+          <div className="fallback-modal-image-compact" style={{ display: 'none' }}>
+            <FaUserCircle size={120} className="text-muted" />
+          </div>
+          
+          {/* Close button overlay */}
+          <button 
+            className="modal-close-overlay"
+            onClick={() => setShowImageModal(false)}
+            aria-label="Close modal"
+          >
+            <FaTimesCircle size={24} />
+          </button>
+        </Modal.Body>
       </Modal>
     </Container>
   );

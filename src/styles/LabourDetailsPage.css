@@ -170,6 +170,77 @@
   display: inline-block;
 }
 
+.labour-avatar .profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.labour-avatar .profile-image.clickable {
+  cursor: pointer;
+}
+
+.labour-avatar .profile-image.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.labour-avatar .profile-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.labour-avatar .image-click-overlay {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.labour-avatar .profile-image-container:hover .image-click-overlay {
+  opacity: 1;
+}
+
+.labour-avatar .profile-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.labour-avatar .text-primary {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.labour-avatar .fallback-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
 .verified-badge {
   position: absolute;
   bottom: -5px;
@@ -1134,6 +1205,21 @@
     margin-bottom: 1rem;
   }
   
+  .labour-avatar .profile-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .labour-avatar .text-primary {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .labour-avatar .fallback-icon {
+    width: 60px;
+    height: 60px;
+  }
+  
   .action-buttons {
     justify-content: center;
     margin-top: 1rem;
@@ -1285,6 +1371,21 @@
   
   .labour-name {
     font-size: 1.8rem;
+  }
+  
+  .labour-avatar .profile-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .labour-avatar .text-primary {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .labour-avatar .fallback-icon {
+    width: 50px;
+    height: 50px;
   }
   
   .action-buttons .btn {
@@ -1503,4 +1604,119 @@
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+} 
+
+/* Compact Profile Image Modal Styles */
+.image-modal-compact .modal-content {
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background: transparent;
+}
+
+.image-modal-compact .modal-body {
+  padding: 0;
+  background: transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-profile-image-compact {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.modal-profile-image-compact:hover {
+  transform: scale(1.01);
+}
+
+.fallback-modal-image-compact {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-close-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.modal-close-overlay:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+/* Mobile responsive styles for compact image modal */
+@media (max-width: 768px) {
+  .image-modal-compact .modal-dialog {
+    margin: 10px;
+    max-width: 95vw;
+  }
+  
+  .modal-profile-image-compact {
+    max-width: 95vw;
+    max-height: 70vh;
+  }
+  
+  .fallback-modal-image-compact {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .modal-close-overlay {
+    top: 5px;
+    right: 5px;
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 576px) {
+  .image-modal-compact .modal-dialog {
+    margin: 5px;
+    max-width: 98vw;
+  }
+  
+  .modal-profile-image-compact {
+    max-width: 98vw;
+    max-height: 60vh;
+  }
+  
+  .fallback-modal-image-compact {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .modal-close-overlay {
+    top: 3px;
+    right: 3px;
+    width: 30px;
+    height: 30px;
+  }
 } 
