@@ -337,7 +337,7 @@ const LabourDetailsPage = () => {
             </Button>
             
             <div className="d-flex align-items-center">
-              <div className="labour-avatar me-4">
+              <div className="labour-avatar">
                 {labour.profileImage ? (
                   <div className="profile-image-container">
                     <img 
@@ -349,20 +349,22 @@ const LabourDetailsPage = () => {
                         // Replace the image with fallback icon
                         e.target.style.display = 'none';
                         const fallbackIcon = document.createElement('div');
-                        fallbackIcon.innerHTML = '<svg class="text-primary" width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                        fallbackIcon.innerHTML = '<svg class="text-primary" width="120" height="120" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
                         fallbackIcon.className = 'fallback-icon';
                         e.target.parentNode.appendChild(fallbackIcon);
                       }}
                     />
                     <div className="image-click-overlay">
-                      <FaCamera size={16} />
+                      <FaCamera size={20} />
                     </div>
                   </div>
                 ) : (
-                  <FaUserCircle 
-                    size={80} 
-                    className="text-primary"
-                  />
+                  <div className="profile-placeholder">
+                    <FaUserCircle 
+                      size={120} 
+                      className="text-primary"
+                    />
+                  </div>
                 )}
                 {labour.isVerified && (
                   <div className="verified-badge">
@@ -371,7 +373,7 @@ const LabourDetailsPage = () => {
                 )}
               </div>
               
-              <div>
+              <div className="labour-info">
                 <h1 className="labour-name">{labour.labourName}</h1>
                 <p className="labour-skill">{labour.labourSkill}</p>
                 

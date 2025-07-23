@@ -142,6 +142,32 @@
   overflow: hidden;
 }
 
+/* Header layout improvements to prevent overlapping */
+.labour-header .row {
+  align-items: flex-start;
+}
+
+.labour-header .col-md-8 {
+  display: flex;
+  flex-direction: column;
+}
+
+.labour-header .d-flex.align-items-center {
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.labour-header .labour-avatar {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+.labour-header .labour-info {
+  flex: 1;
+  min-width: 0;
+}
+
 .labour-header::before {
   content: '';
   position: absolute;
@@ -167,16 +193,28 @@
 
 .labour-avatar {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.labour-avatar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
 
 .labour-avatar .profile-image {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 4px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   display: block;
 }
@@ -187,7 +225,7 @@
 
 .labour-avatar .profile-image.clickable:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
 .labour-avatar .profile-image-container {
@@ -197,58 +235,79 @@
 
 .labour-avatar .image-click-overlay {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  background: rgba(0, 0, 0, 0.7);
+  bottom: -3px;
+  right: -3px;
+  background: rgba(0, 0, 0, 0.8);
   color: white;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: all 0.3s ease;
   z-index: 10;
+  border: 2px solid #fff;
 }
 
 .labour-avatar .profile-image-container:hover .image-click-overlay {
   opacity: 1;
+  transform: scale(1.1);
 }
 
 .labour-avatar .profile-image:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
-.labour-avatar .text-primary {
-  width: 80px;
-  height: 80px;
+.labour-avatar .profile-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.labour-avatar .profile-placeholder:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
 }
 
 .labour-avatar .fallback-icon {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 3px solid #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 4px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .verified-badge {
   position: absolute;
-  bottom: -5px;
-  right: -5px;
+  bottom: -8px;
+  right: -8px;
   background: white;
   border-radius: 50%;
-  padding: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  border: 2px solid #fff;
+  z-index: 5;
+}
+
+.verified-badge svg {
+  width: 20px;
+  height: 20px;
 }
 
 .labour-name {
@@ -257,6 +316,8 @@
   color: #2c3e50;
   margin-bottom: 0.5rem;
   line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .labour-skill {
@@ -264,6 +325,8 @@
   color: #667eea;
   font-weight: 600;
   margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .rating-section {
@@ -283,6 +346,8 @@
 .labour-meta span {
   display: flex;
   align-items: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .action-buttons {
@@ -1193,6 +1258,17 @@
     margin-bottom: 1rem;
   }
   
+  .labour-header .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .labour-header .labour-info {
+    width: 100%;
+  }
+  
   .labour-name {
     font-size: 2rem;
   }
@@ -1203,21 +1279,34 @@
   
   .labour-avatar {
     margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 15px;
   }
   
   .labour-avatar .profile-image {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
   }
   
-  .labour-avatar .text-primary {
-    width: 60px;
-    height: 60px;
+  .labour-avatar .profile-placeholder {
+    width: 80px;
+    height: 80px;
   }
   
   .labour-avatar .fallback-icon {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
+  }
+  
+  .verified-badge {
+    bottom: -6px;
+    right: -6px;
+    padding: 3px;
+  }
+  
+  .verified-badge svg {
+    width: 18px;
+    height: 18px;
   }
   
   .action-buttons {
@@ -1369,23 +1458,50 @@
     padding: 1rem;
   }
   
+  .labour-header .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .labour-header .labour-info {
+    width: 100%;
+  }
+  
   .labour-name {
     font-size: 1.8rem;
   }
   
-  .labour-avatar .profile-image {
-    width: 50px;
-    height: 50px;
+  .labour-avatar {
+    padding: 0.75rem;
+    border-radius: 12px;
   }
   
-  .labour-avatar .text-primary {
-    width: 50px;
-    height: 50px;
+  .labour-avatar .profile-image {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .labour-avatar .profile-placeholder {
+    width: 70px;
+    height: 70px;
   }
   
   .labour-avatar .fallback-icon {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
+  }
+  
+  .verified-badge {
+    bottom: -5px;
+    right: -5px;
+    padding: 3px;
+  }
+  
+  .verified-badge svg {
+    width: 16px;
+    height: 16px;
   }
   
   .action-buttons .btn {

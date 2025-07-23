@@ -176,19 +176,12 @@ export const labourService = {
   updateAdditionalLabourData: async (labourData) => {
     try {
       const endpoint = `${baseurl}/labour/updateAdditionalLabourData`;
-      console.log('Base URL:', appUrl);
-      console.log('Full endpoint:', endpoint);
-      console.log('Sending request to:', endpoint);
-      console.log('Request data:', labourData);
       
       const response = await axios.patch(endpoint, labourData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      
-      console.log('API Response:', response);
-      console.log('Response data:', response.data);
       
       // Check if the API returned an error
       if (response.data && response.data.hasError) {
@@ -199,8 +192,6 @@ export const labourService = {
       return response;
     } catch (error) {
       console.error('Error updating additional labour data:', error);
-      console.error('Error response:', error.response);
-      console.error('Error message:', error.message);
       
       // Return detailed error information
       if (error.response) {
@@ -231,17 +222,11 @@ export const labourService = {
       const formData = new FormData();
       formData.append('file', imageFile);
       
-      console.log('Uploading profile image for labour ID:', labourId);
-      console.log('File:', imageFile);
-      console.log('Endpoint:', endpoint);
-      
       const response = await axios.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
-      console.log('Upload response:', response.data);
       
       // Check if the API returned an error
       if (response.data && response.data.hasError) {
@@ -266,6 +251,42 @@ export const labourService = {
       } else {
         throw {
           message: error.message || 'Unknown error occurred during upload',
+          status: 'UNKNOWN_ERROR'
+        };
+      }
+    }
+  },
+
+  // Delete profile image
+  deleteProfileImage: async (labourId) => {
+    try {
+      const endpoint = `${baseurl}/labour/deleteLabourImage/${labourId}`;
+      
+      const response = await axios.delete(endpoint);
+      
+      // Check if the API returned an error
+      if (response.data && response.data.hasError) {
+        throw new Error(response.data.message || 'Failed to delete profile image');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting profile image:', error);
+      
+      if (error.response) {
+        throw {
+          message: error.response.data?.message || 'Server error occurred during deletion',
+          status: error.response.status,
+          data: error.response.data
+        };
+      } else if (error.request) {
+        throw {
+          message: 'Network error - no response received during deletion',
+          status: 'NETWORK_ERROR'
+        };
+      } else {
+        throw {
+          message: error.message || 'Unknown error occurred during deletion',
           status: 'UNKNOWN_ERROR'
         };
       }

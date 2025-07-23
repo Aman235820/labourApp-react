@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, Spinner, Alert, ProgressBar, Tooltip, OverlayTrigger, Modal } from 'react-bootstrap';
 import { 
-  FaUser, FaPhone, FaTools, FaStar, FaSignOutAlt, FaCalendarAlt, 
+  FaUser, FaTools, FaStar, FaSignOutAlt, 
   FaCheckCircle, FaClock, FaTimesCircle, FaHistory, FaSort, FaEdit, 
   FaIdCard, FaSync, FaChartLine, FaChartBar, FaAward, FaEye, 
-  FaQuoteLeft, FaThumbsUp, FaUserTie, FaBusinessTime, FaHandshake, 
+  FaQuoteLeft, FaMapMarkerAlt, FaBusinessTime, FaHandshake, 
   FaTrashAlt, FaCog, FaList, FaInstagram, FaFacebook, FaYoutube, 
-  FaCertificate, FaShieldAlt, FaHeadset, FaRupeeSign, FaCamera, 
+  FaCertificate, FaShieldAlt, FaRupeeSign, FaCamera, 
   FaUpload, FaImage, FaUserCircle 
 } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -411,7 +411,6 @@ const LabourDashboard = () => {
       if (response && response.url) {
         setProfileImageUrl(response.url);
         setImageUploadSuccess(true);
-        console.log('Profile image uploaded successfully:', response.url);
         
         // Update labour details with new image URL
         const updatedLabourDetails = {
@@ -467,6 +466,53 @@ const LabourDashboard = () => {
       setIsUploadingImage(false);
       // Clear the file input
       event.target.value = '';
+    }
+  };
+
+  // Profile Image Remove Handler
+  const handleImageRemove = async () => {
+    try {
+      // Call the API to delete the profile image
+      await labourService.deleteProfileImage(labourDetails.labourId);
+      
+      // Update local state to remove the image
+      setProfileImageUrl(null);
+      const updatedLabourDetails = {
+        ...labourDetails,
+        profileImageUrl: null
+      };
+      setLabourDetails(updatedLabourDetails);
+      localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
+      
+      // Show success message
+      alert('Profile image removed successfully!');
+    } catch (error) {
+      console.error('Error removing profile image:', error);
+      
+      // Handle different types of errors
+      if (error.status) {
+        if (error.status === 500) {
+          alert('Unable to remove the image. Please try again later.');
+        } else if (error.status === 404) {
+          alert('Image not found. It may have already been removed.');
+        } else if (error.status === 'NETWORK_ERROR') {
+          alert('Network error. Please check your internet connection and try again.');
+        } else {
+          alert(`Failed to remove image (${error.status}). Please try again.`);
+        }
+      } else if (error.response) {
+        if (error.response.status === 500) {
+          alert('Unable to remove the image. Please try again later.');
+        } else if (error.response.status === 404) {
+          alert('Image not found. It may have already been removed.');
+        } else {
+          alert(`Failed to remove image (${error.response.status}). Please try again.`);
+        }
+      } else if (error.request) {
+        alert('Network error. Please check your internet connection and try again.');
+      } else {
+        alert('Unable to remove the image. Please try again.');
+      }
     }
   };
 
@@ -919,13 +965,8 @@ const LabourDashboard = () => {
         }
       }
 
-      console.log('Saving profile settings at:', new Date().toLocaleString());
-      console.log('API Data:', apiData);
-
       // Make the API call using the service method
       const response = await labourService.updateAdditionalLabourData(apiData);
-
-      console.log('Component received response:', response);
       
       // Check for successful response
       if (response && response.status === 200 && response.data) {
@@ -936,7 +977,6 @@ const LabourDashboard = () => {
         
         // Success case
         alert('Profile settings saved successfully!');
-        console.log('API Response:', response.data);
         
         // Update the profile settings with the returned data
         if (response.data.returnValue && response.data.returnValue.profileSettings) {
@@ -965,8 +1005,6 @@ const LabourDashboard = () => {
             testimonialVideos: updatedSettings.testimonialVideos || [],
             testimonialVideosEnabled: updatedSettings.testimonialVideos && updatedSettings.testimonialVideos.length > 0
           }));
-          
-          console.log('Profile settings updated with returned data');
         } else {
           // Fallback: refresh the profile settings to show the updated data
           await fetchAdditionalLabourDetails();
@@ -1150,124 +1188,162 @@ const LabourDashboard = () => {
   return (
     <Container fluid className="dashboard-container bg-light min-vh-100">
       {/* Professional Header */}
-      <div className="dashboard-header bg-white shadow-sm border-bottom">
+      <div className="labour-header">
         <Container>
-          <Row className="py-3 py-md-4">
-            <Col>
-              <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                <div className="d-flex align-items-center mb-3 mb-md-0 w-100 w-md-auto">
-                  <div className="profile-badge me-3 me-md-4 position-relative">
-                    <div className="avatar-professional position-relative">
-                      {profileImageUrl || labourDetails.profileImageUrl ? (
-                        <img 
-                          src={profileImageUrl || labourDetails.profileImageUrl} 
-                          alt="Profile" 
-                          className="rounded-circle"
-                          style={{ 
-                            width: '60px', 
-                            height: '60px', 
-                            objectFit: 'cover',
-                            border: '3px solid #fff',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          }}
+          <Row className="align-items-center mb-4">
+            <Col md={8} xs={12}>
+              <div className="d-flex align-items-center">
+                <div className="labour-avatar">
+                  <div className="profile-image-container">
+                    {profileImageUrl || labourDetails.profileImageUrl ? (
+                      <img 
+                        src={profileImageUrl || labourDetails.profileImageUrl} 
+                        alt={labourDetails.labourName}
+                        className="profile-image clickable"
+                        onClick={() => setShowImageModal(true)}
+                        onError={(e) => {
+                          // Replace the image with fallback icon
+                          e.target.style.display = 'none';
+                          const fallbackIcon = document.createElement('div');
+                          fallbackIcon.innerHTML = '<svg class="text-primary" width="120" height="120" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                          fallbackIcon.className = 'fallback-icon';
+                          e.target.parentNode.appendChild(fallbackIcon);
+                        }}
+                      />
+                    ) : (
+                      <div className="profile-placeholder">
+                        <FaUserCircle 
+                          size={120} 
+                          className="text-primary"
                         />
-                      ) : (
-                        <FaUserTie className="text-primary" size={24} />
-                      )}
-                      
-                      {/* Upload Button Overlay */}
-                      <div className="position-absolute bottom-0 end-0">
-                        <label 
-                          htmlFor="profile-image-upload" 
-                          className="btn btn-primary btn-sm rounded-circle p-1"
-                          style={{ 
-                            width: '24px', 
-                            height: '24px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Upload Profile Image"
-                        >
-                          <FaCamera size={12} />
-                        </label>
-                        <input
-                          id="profile-image-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          style={{ display: 'none' }}
-                          disabled={isUploadingImage}
-                        />
-                      </div>
-                      
-                      {/* Upload Loading Indicator */}
-                      {isUploadingImage && (
-                        <div className="position-absolute top-50 start-50 translate-middle">
-                          <Spinner animation="border" size="sm" variant="light" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-grow-1">
-                    <h1 className="h4 h-md-3 mb-1 fw-bold text-dark">{labourDetails.labourName}</h1>
-                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center text-muted mb-2 gap-2 gap-sm-3">
-                      <span className="small">ID: {labourDetails.labourId}</span>
-                      <Badge bg="primary" className="me-0 me-sm-3">{labourDetails.labourSkill}</Badge>
-                      <div className="d-flex align-items-center">
-                        <FaStar className="text-warning me-1" size={14} />
-                        <span className="fw-semibold">{overallRating.toFixed(1)}</span>
-                        <span className="text-muted ms-1">({ratingCount})</span>
-                      </div>
-                    </div>
-                    {/* Subskills Section */}
-                    {labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0 && (
-                      <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center">
-                        <div className="d-flex align-items-center mb-1 mb-sm-0">
-                          <FaList className="text-muted me-2" size={12} />
-                          <span className="text-muted small me-2">Specializations:</span>
-                        </div>
-                        <div className="d-flex flex-wrap gap-1">
-                          {labourDetails.labourSubSkills.map((subSkill, index) => (
-                            <Badge 
-                              key={index} 
-                              bg="light" 
-                              text="dark" 
-                              className="px-2 py-1 small"
-                              style={{ fontSize: '0.7rem' }}
-                            >
-                              {typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill}
-                            </Badge>
-                          ))}
-                        </div>
                       </div>
                     )}
+                    
+                    {/* Upload Button Overlay */}
+                    <div className="position-absolute bottom-0 end-0">
+                      <label 
+                        htmlFor="profile-image-upload" 
+                        className="btn btn-primary btn-sm rounded-circle p-1"
+                        title="Upload Profile Image"
+                        style={{ 
+                          width: '28px', 
+                          height: '28px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 10
+                        }}
+                      >
+                        <FaCamera size={14} />
+                      </label>
+                      <input
+                        id="profile-image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                        disabled={isUploadingImage}
+                      />
+                    </div>
+                    
+                    {/* Upload Loading Indicator */}
+                    {isUploadingImage && (
+                      <div className="position-absolute top-50 start-50 translate-middle">
+                        <Spinner animation="border" size="sm" variant="light" />
+                      </div>
+                    )}
+                    
+                    <div className="image-click-overlay">
+                      <FaCamera size={20} />
+                    </div>
                   </div>
                 </div>
-                <div className="d-flex gap-2 align-self-stretch align-self-md-auto">
-                  <Button 
-                    variant="outline-primary" 
-                    onClick={handleUpdateDetails}
-                    className="d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0"
-                    size="sm"
-                  >
-                    <FaEdit className="me-1 me-md-2" size={14} />
-                    <span className="d-none d-sm-inline">Edit Profile</span>
-                    <span className="d-inline d-sm-none">Edit</span>
-                  </Button>
-                  <Button 
-                    variant="outline-danger" 
-                    onClick={handleLogout}
-                    className="d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0"
-                    size="sm"
-                  >
+                
+                <div className="labour-info">
+                  <h1 className="labour-name">{labourDetails.labourName}</h1>
+                  <p className="labour-skill">{labourDetails.labourSkill}</p>
+                  
+                  <div className="d-flex align-items-center mb-2">
+                    <div className="rating-section me-3">
+                      {renderStars(overallRating)}
+                      <span className="ms-2 fw-bold">
+                        {overallRating && overallRating > 0 ? overallRating.toFixed(1) : 'No rating'}
+                      </span>
+                      <span className="text-muted">
+                        ({ratingCount} review{ratingCount !== 1 ? 's' : ''})
+                      </span>
+                    </div>
+                    
+                    <Badge bg={labourDetails.isAvailable !== false ? 'success' : 'danger'}>
+                      {labourDetails.isAvailable !== false ? 'Available' : 'Busy'}
+                    </Badge>
+                  </div>
+                  
+                  <div className="labour-meta">
+                    <span className="me-3">
+                      <FaMapMarkerAlt className="me-1" />
+                      {labourDetails.labourAddress || 'Location not specified'}
+                    </span>
+                    <span className="me-3">
+                      <FaClock className="me-1" />
+                      {labourDetails.labourExperience || 'Experience not specified'}
+                    </span>
+                    <span>
+                      <FaTools className="me-1" />
+                      {labourDetails.priceRange || 'Price on request'}
+                    </span>
+                  </div>
+                  
+                  {/* Subskills Section */}
+                  {labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0 && (
+                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center mt-2">
+                      <div className="d-flex align-items-center mb-1 mb-sm-0">
+                        <FaList className="text-muted me-2" size={12} />
+                        <span className="text-muted small me-2">Specializations:</span>
+                      </div>
+                      <div className="d-flex flex-wrap gap-1">
+                        {labourDetails.labourSubSkills.map((subSkill, index) => (
+                          <Badge 
+                            key={index} 
+                            bg="light" 
+                            text="dark" 
+                            className="px-2 py-1 small"
+                            style={{ fontSize: '0.7rem' }}
+                          >
+                            {typeof subSkill === 'string' ? subSkill : subSkill.subSkillName || subSkill.name || subSkill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Col>
+            
+            <Col md={4} xs={12} className="text-md-end">
+              <div className="action-buttons">
+                <Button 
+                  variant="outline-primary" 
+                  onClick={handleUpdateDetails}
+                  className="me-2"
+                  size="sm"
+                >
+                  <FaEdit className="me-1 me-md-2" size={14} />
+                  <span className="d-none d-sm-inline">Edit Profile</span>
+                  <span className="d-inline d-sm-none">Edit</span>
+                </Button>
+                <Button 
+                  variant="outline-danger" 
+                  onClick={handleLogout}
+                  className="me-2"
+                  size="sm"
+                >
                     <FaSignOutAlt className="me-1 me-md-2" size={14} />
                     <span className="d-none d-sm-inline">Logout</span>
                     <span className="d-inline d-sm-none">Exit</span>
                   </Button>
                 </div>
-              </div>
             </Col>
           </Row>
         </Container>
@@ -2101,15 +2177,7 @@ const LabourDashboard = () => {
                         {(profileImageUrl || labourDetails.profileImageUrl) && (
                           <Button 
                             variant="outline-secondary"
-                            onClick={() => {
-                              setProfileImageUrl(null);
-                              const updatedLabourDetails = {
-                                ...labourDetails,
-                                profileImageUrl: null
-                              };
-                              setLabourDetails(updatedLabourDetails);
-                              localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
-                            }}
+                            onClick={handleImageRemove}
                           >
                             Remove
                           </Button>
@@ -2750,7 +2818,7 @@ const LabourDashboard = () => {
         onHide={() => setShowImageModal(false)} 
         centered
         className="image-modal-compact"
-        backdrop="static"
+        backdrop={true}
         keyboard={true}
       >
         <Modal.Body className="p-0 position-relative">

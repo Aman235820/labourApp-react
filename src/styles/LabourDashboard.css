@@ -16,6 +16,329 @@
   z-index: 1000;
 }
 
+/* Import LabourDetailsPage header styles for consistency */
+.labour-header {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.labour-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+}
+
+/* Header layout improvements to prevent overlapping */
+.labour-header .row {
+  align-items: flex-start;
+}
+
+.labour-header .col-md-8 {
+  display: flex;
+  flex-direction: column;
+}
+
+.labour-header .d-flex.align-items-center {
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.labour-header .labour-avatar {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+.labour-header .labour-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.labour-header .labour-info h1 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.labour-header .labour-info .text-muted {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Labour avatar styles */
+.labour-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.labour-avatar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.labour-avatar .profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.labour-avatar .profile-image.clickable {
+  cursor: pointer;
+}
+
+.labour-avatar .profile-image.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.labour-avatar .profile-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.labour-avatar .image-click-overlay {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 10;
+  border: 2px solid #fff;
+}
+
+.labour-avatar .profile-image-container:hover .image-click-overlay {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.labour-avatar .profile-image:hover {
+  transform: scale(1.05);
+}
+
+.labour-avatar .profile-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.labour-avatar .profile-placeholder:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.labour-avatar .fallback-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Labour info styles */
+.labour-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.labour-skill {
+  font-size: 1.3rem;
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.rating-section {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.labour-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.labour-meta span {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.action-buttons .btn {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .labour-header {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .labour-header .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .labour-header .labour-info {
+    width: 100%;
+  }
+  
+  .labour-name {
+    font-size: 2rem;
+  }
+  
+  .labour-skill {
+    font-size: 1.1rem;
+  }
+  
+  .labour-avatar {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 15px;
+  }
+  
+  .labour-avatar .profile-image {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .labour-avatar .profile-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .labour-avatar .fallback-icon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .labour-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .labour-header {
+    padding: 1rem;
+  }
+  
+  .labour-header .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .labour-header .labour-info {
+    width: 100%;
+  }
+  
+  .labour-name {
+    font-size: 1.25rem;
+  }
+  
+  .labour-avatar {
+    gap: 0.5rem;
+  }
+  
+  .labour-avatar .profile-image {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .labour-avatar .profile-placeholder {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .labour-avatar .fallback-icon {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+  }
+}
+
 .profile-section {
   padding: 1.5rem 0;
 }
@@ -672,6 +995,20 @@
     font-size: 0.875rem;
   }
   
+  /* Improve mobile layout */
+  .dashboard-header .d-flex.flex-column.flex-md-row {
+    gap: 1rem;
+  }
+  
+  .dashboard-header .w-100.w-md-auto {
+    width: 100% !important;
+  }
+  
+  .dashboard-header .d-flex.gap-2 {
+    width: 100%;
+    justify-content: center;
+  }
+  
   .profile-section {
     padding: 1rem 0;
   }
@@ -833,6 +1170,20 @@
   .avatar-professional {
     width: 45px;
     height: 45px;
+  }
+  
+  /* Improve small mobile layout */
+  .dashboard-header .d-flex.flex-column.flex-md-row {
+    gap: 0.75rem;
+  }
+  
+  .dashboard-header .d-flex.gap-2 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .dashboard-header .d-flex.gap-2 .btn {
+    width: 100%;
   }
   
   /* Ultra-compact analytics */
@@ -1990,6 +2341,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .profile-image-container:hover .image-click-overlay {
   opacity: 1;
+}
+
+/* Profile Image Clickable Styles */
+.profile-image-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-image-clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.profile-image-clickable:active {
+  transform: scale(0.98);
 }
 
 /* Compact Profile Image Modal Styles */
