@@ -144,7 +144,7 @@ const SearchLabourModal = ({
                     <div className="col-6">
                         <div className="d-flex align-items-center text-muted">
                             <FaMapMarkerAlt className="me-2" size={12} />
-                            <small>{labour.labourAddress || 'Location not specified'}</small>
+                            <small>{labour.labourLocation || labour.labourAddress || 'Location not specified'}</small>
                         </div>
                     </div>
                 </div>

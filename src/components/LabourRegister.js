@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Card, Alert, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
-import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
+import LocationService from '../services/LocationService';
+import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle, FaMapMarkerAlt, FaLocationArrow } from 'react-icons/fa';
 import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
 import '../styles/LabourRegister.css';
 
 function LabourRegister() {
@@ -12,7 +14,8 @@ function LabourRegister() {
     labourName: '',
     labourSkill: '',
     labourSubSkill: [],
-    labourMobileNo: ''
+    labourMobileNo: '',
+    labourLocation: ''
   });
   const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState('');
@@ -23,6 +26,71 @@ function LabourRegister() {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showOtp, setShowOtp] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [cities, setCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
+
+  // Search cities with exact text matching only
+  const searchCities = (inputValue) => {
+    if (!cities || cities.length === 0) {
+      return [];
+    }
+    
+    if (!inputValue || inputValue.length < 1) {
+      // Return first 5 cities when no input
+      return cities.slice(0, 5).map(city => ({
+        value: city.CityName,
+        label: city.CityName
+      }));
+    }
+    
+    const searchTerm = inputValue.toLowerCase();
+    
+    return cities
+      .filter(city => {
+        const cityName = city.CityName.toLowerCase();
+        
+        // Exact start match (highest priority)
+        if (cityName.startsWith(searchTerm)) return true;
+        
+        // Contains match
+        if (cityName.includes(searchTerm)) return true;
+        
+        return false;
+      })
+      .slice(0, 5) // Limit to 5 results
+      .map(city => ({
+        value: city.CityName,
+        label: city.CityName
+      }));
+  };
+
+  // Find closest city match for auto-detection
+  const findClosestCity = (detectedCity) => {
+    if (!detectedCity) {
+      return null;
+    }
+    
+    const searchResults = searchCities(detectedCity);
+    
+    if (searchResults.length > 0) {
+      return searchResults[0]; // Return the best match
+    }
+    
+    // If no match found, try with individual words
+    const words = detectedCity.split(' ');
+    
+    for (const word of words) {
+      if (word.length > 2) { // Only try words longer than 2 characters
+        const wordResults = searchCities(word);
+        if (wordResults.length > 0) {
+          return wordResults[0];
+        }
+      }
+    }
+    
+    return null;
+  };
 
   useEffect(() => {
     // Fetch services data
@@ -30,6 +98,12 @@ function LabourRegister() {
       .then(response => response.json())
       .then(data => setServices(data.services))
       .catch(error => console.error('Error loading services:', error));
+
+    // Fetch cities data
+    fetch('/cities.json')
+      .then(response => response.json())
+      .then(data => setCities(data))
+      .catch(error => console.error('Error loading cities:', error));
   }, []);
 
   useEffect(() => {
@@ -83,6 +157,42 @@ function LabourRegister() {
     }
   };
 
+  const handleDetectLocation = async () => {
+    setLocationLoading(true);
+    setError(''); // Clear previous errors
+    
+    try {
+      const coords = await LocationService.getCurrentLocation();
+      const locationData = await LocationService.getLocationFromCoordinates(coords.latitude, coords.longitude);
+      
+      // Extract city name from the location data
+      const detectedCity = locationData.address?.city || 
+                          locationData.address?.town || 
+                          locationData.address?.village || 
+                          locationData.address?.state_district || 
+                          locationData.address?.county || 
+                          'Unknown';
+      
+      // Find the closest matching city from our list
+      const closestCity = findClosestCity(detectedCity);
+      
+      if (closestCity) {
+        setSelectedCity(closestCity);
+        setFormData(prev => ({
+          ...prev,
+          labourLocation: closestCity.value
+        }));
+        setSuccess(`Location detected: ${closestCity.value}`);
+      } else {
+        setError(`Could not find "${detectedCity}" in our city list. Please select manually.`);
+      }
+    } catch (error) {
+      setError(`Failed to detect location: ${error.message}. Please select manually.`);
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
   const handleRequestOTP = async () => {
     setOtpStatus('');
     setOtpLoading(true);
@@ -107,20 +217,57 @@ function LabourRegister() {
     setError('');
     setSuccess('');
     setIsLoading(true);
+    
     if (selectedService && formData.labourSubSkill.length === 0) {
       setError('Please select at least one sub skill.');
       setIsLoading(false);
       return;
     }
     try {
+      let finalLocation = formData.labourLocation;
+      
+      // If no location provided, auto-detect it
+      if (!finalLocation || finalLocation.trim() === '') {
+        try {
+          const coords = await LocationService.getCurrentLocation();
+          const locationData = await LocationService.getLocationFromCoordinates(coords.latitude, coords.longitude);
+          
+          // Extract city name from the location data
+          const detectedCity = locationData.address?.city || 
+                              locationData.address?.town || 
+                              locationData.address?.village || 
+                              locationData.address?.state_district || 
+                              locationData.address?.county || 
+                              'Unknown';
+          
+          // Find the closest matching city from our list
+          const closestCity = findClosestCity(detectedCity);
+          finalLocation = closestCity ? closestCity.value : 'Not specified';
+        } catch (locationError) {
+          finalLocation = 'Not specified';
+        }
+      }
+      
+      // Validate that the selected city is from our list
+      const isValidCity = cities.some(city => city.CityName === finalLocation);
+      
+      if (finalLocation !== 'Not specified' && !isValidCity) {
+        setError('Please select a valid city from the dropdown.');
+        setIsLoading(false);
+        return;
+      }
+      
       // Prepare subSkills array for API
       const labourData = {
         labourName: formData.labourName,
         labourSkill: formData.labourSkill,
         labourSubSkills: formData.labourSubSkill.map(subSkill => ({ subSkillName: subSkill })),
-        labourMobileNo: formData.labourMobileNo
+        labourMobileNo: formData.labourMobileNo,
+        labourLocation: finalLocation
       };
+      
       const response = await labourService.registerLabour(labourData, otp);
+      
       if (response.token && response.returnValue) {
         // Filter out reviews data before storing in localStorage
         const { reviews, ...labourDataWithoutReviews } = response.returnValue;
@@ -285,6 +432,70 @@ function LabourRegister() {
                       {showOtp ? <FaEyeSlash /> : <FaEye />}
                     </Button>
                   </InputGroup>
+                </Form.Group>
+                <Form.Group className="mb-4">
+                  <div className="d-flex align-items-center">
+                    <FaMapMarkerAlt className="me-2" />
+                    <Form.Label className="fw-bold mb-0">Location (Optional)</Form.Label>
+                  </div>
+                  <InputGroup>
+                    <div style={{ flex: 1 }}>
+                      <AsyncSelect
+                        name="labourLocation"
+                        loadOptions={(inputValue) => {
+                          return new Promise((resolve) => {
+                            setTimeout(() => {
+                              resolve(searchCities(inputValue));
+                            }, 300);
+                          });
+                        }}
+                        onChange={(selectedOption) => {
+                          setSelectedCity(selectedOption);
+                          setFormData(prev => ({
+                            ...prev,
+                            labourLocation: selectedOption ? selectedOption.value : ''
+                          }));
+                        }}
+                        value={selectedCity}
+                        placeholder="Type to search cities..."
+                        isClearable
+                        cacheOptions
+                        defaultOptions={cities.length > 0 ? searchCities('') : []}
+                        className="basic-single"
+                        classNamePrefix="select"
+                        menuPortalTarget={document.body}
+                        styles={{ 
+                          menuPortal: base => ({ ...base, zIndex: 9999 }),
+                          control: base => ({ ...base, minHeight: '46px' })
+                        }}
+                        noOptionsMessage={({ inputValue }) => 
+                          inputValue ? `No cities found matching "${inputValue}"` : 'Type to search cities'
+                        }
+                      />
+                    </div>
+                    <Button
+                      variant="outline-primary"
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={locationLoading}
+                      style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                    >
+                      {locationLoading ? (
+                        <>
+                          <Spinner size="sm" className="me-1" />
+                          Detecting...
+                        </>
+                      ) : (
+                        <>
+                          <FaLocationArrow className="me-1" />
+                          Auto-detect
+                        </>
+                      )}
+                    </Button>
+                  </InputGroup>
+                  <Form.Text className="text-muted">
+                    Type to search and select from available cities. Auto-detection will find the closest match.
+                  </Form.Text>
                 </Form.Group>
                 <div className="d-grid gap-2">
                   <Button 

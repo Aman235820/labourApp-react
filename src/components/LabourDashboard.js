@@ -1283,7 +1283,7 @@ const LabourDashboard = () => {
                   <div className="labour-meta">
                     <span className="me-3">
                       <FaMapMarkerAlt className="me-1" />
-                      {labourDetails.labourAddress || 'Location not specified'}
+                      {labourDetails.labourLocation || labourDetails.labourAddress || 'Location not specified'}
                     </span>
                     <span className="me-3">
                       <FaClock className="me-1" />

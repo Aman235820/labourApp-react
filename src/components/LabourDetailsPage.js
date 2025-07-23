@@ -60,7 +60,7 @@ const LabourDetailsPage = () => {
           reviewCount: response.ratingCount || 0,
           labourMobileNo: response.labourMobileNo,
           email: response.labourEmail || (response.labourName ? `${response.labourName.toLowerCase().replace(/\s+/g, '.')}@gmail.com` : 'contact@example.com'),
-          location: response.labourAddress || 'Location not specified',
+          location: response.labourLocation || response.labourAddress || 'Location not specified',
           experience: response.labourExperience || 'Experience not specified',
           isVerified: response.isVerified || false,
           isAvailable: response.isAvailable !== false, // Default to true if not specified
