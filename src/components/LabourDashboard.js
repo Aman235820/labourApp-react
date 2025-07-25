@@ -1264,17 +1264,16 @@ const LabourDashboard = () => {
                   <h1 className="labour-name">{labourDetails.labourName}</h1>
                   <p className="labour-skill">{labourDetails.labourSkill}</p>
                   
-                  <div className="d-flex align-items-center mb-2">
-                    <div className="rating-section me-3">
+                  <div className="rating-section">
+                    <div className="rating-stars">
                       {renderStars(overallRating)}
-                      <span className="ms-2 fw-bold">
-                        {overallRating && overallRating > 0 ? overallRating.toFixed(1) : 'No rating'}
-                      </span>
-                      <span className="text-muted">
-                        ({ratingCount} review{ratingCount !== 1 ? 's' : ''})
-                      </span>
                     </div>
-                    
+                    <span className="fw-bold">
+                      {overallRating && overallRating > 0 ? overallRating.toFixed(1) : 'No rating'}
+                    </span>
+                    <span className="text-muted">
+                      ({ratingCount} review{ratingCount !== 1 ? 's' : ''})
+                    </span>
                     <Badge bg={labourDetails.isAvailable !== false ? 'success' : 'danger'}>
                       {labourDetails.isAvailable !== false ? 'Available' : 'Busy'}
                     </Badge>

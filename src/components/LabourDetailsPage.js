@@ -329,7 +329,7 @@ const LabourDetailsPage = () => {
           <Col xs={12} md={8}>
             <Button 
               variant="link" 
-              className="back-btn p-0 mb-3"
+              className="back-btn p-0"
               onClick={() => navigate(-1)}
             >
               <FaArrowLeft className="me-2" />
@@ -377,17 +377,16 @@ const LabourDetailsPage = () => {
                 <h1 className="labour-name">{labour.labourName}</h1>
                 <p className="labour-skill">{labour.labourSkill}</p>
                 
-                <div className="d-flex align-items-center mb-2">
-                  <div className="rating-section me-3">
+                <div className="rating-section">
+                  <div className="rating-stars">
                     {renderStars(labour.rating)}
-                    <span className="ms-2 fw-bold">
-                      {labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : 'No rating'}
-                    </span>
-                    <span className="text-muted">
-                      ({labour.reviewCount} review{labour.reviewCount !== 1 ? 's' : ''})
-                    </span>
                   </div>
-                  
+                  <span className="fw-bold">
+                    {labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : 'No rating'}
+                  </span>
+                  <span className="text-muted">
+                    ({labour.reviewCount} review{labour.reviewCount !== 1 ? 's' : ''})
+                  </span>
                   <Badge bg={labour.isAvailable ? 'success' : 'danger'}>
                     {labour.isAvailable ? 'Available' : 'Busy'}
                   </Badge>

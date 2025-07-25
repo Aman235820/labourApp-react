@@ -387,7 +387,7 @@ function Home() {
                     </InputGroup.Text>
                     <Form.Control
                       type="text"
-                      placeholder="Search for skilled labourers..."
+                      placeholder="Search for skilled professionals..."
                       value={searchTerm}
                       onChange={(e) => {
                         setSearchTerm(e.target.value);

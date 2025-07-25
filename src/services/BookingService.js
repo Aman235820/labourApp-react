@@ -30,7 +30,11 @@ export const getUserBookings = async (userId) => {
 export const rateLabour = async (ratingData) => {
     try {
         const endpoint = `${baseurl}/rateLabour`;
-        const response = await axios.post(endpoint, ratingData);
+        const response = await axios.post(endpoint, ratingData, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to rate labour');

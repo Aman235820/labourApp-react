@@ -19,7 +19,7 @@
 /* Import LabourDetailsPage header styles for consistency */
 .labour-header {
   background: white;
-  border-radius: 15px;
+  border-radius: 0 0 15px 15px;
   padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
@@ -39,38 +39,118 @@
 
 /* Header layout improvements to prevent overlapping */
 .labour-header .row {
-  align-items: flex-start;
+  align-items: stretch;
+  min-height: 200px;
 }
 
 .labour-header .col-md-8 {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  padding-right: 2rem;
 }
 
 .labour-header .d-flex.align-items-center {
+  width: 100%;
+  gap: 2rem;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: flex-start;
 }
 
 .labour-header .labour-avatar {
   flex-shrink: 0;
   margin-right: 0;
+  align-self: center;
 }
 
 .labour-header .labour-info {
   flex: 1;
-  min-width: 0;
+  min-width: 250px;
+  align-self: center;
 }
 
 .labour-header .labour-info h1 {
   word-wrap: break-word;
   overflow-wrap: break-word;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
 }
 
 .labour-header .labour-info .text-muted {
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+.labour-header .col-md-4 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-left: 2rem;
+}
+
+.labour-header .action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+  min-width: 180px;
+}
+
+/* Medium screens - prevent overlap */
+@media (min-width: 768px) and (max-width: 991px) {
+  .labour-header .d-flex.align-items-center {
+    gap: 1.5rem;
+  }
+  
+  .labour-header .labour-info {
+    min-width: 200px;
+  }
+  
+  .labour-header .labour-avatar {
+    padding: 1.5rem;
+  }
+  
+  .labour-header .labour-avatar .profile-image,
+  .labour-header .labour-avatar .profile-placeholder,
+  .labour-header .labour-avatar .fallback-icon {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Better spacing for desktop */
+@media (min-width: 992px) {
+  .labour-header {
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .labour-header .row {
+    min-height: 180px;
+  }
+  
+  .labour-header .d-flex.align-items-center {
+    gap: 2.5rem;
+  }
+  
+  .labour-header .labour-avatar {
+    padding: 2rem;
+  }
+  
+  .labour-header .labour-info {
+    padding-right: 1rem;
+  }
+  
+  .labour-header .action-buttons {
+    min-width: 200px;
+  }
+  
+  .labour-header .action-buttons .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    min-height: 44px;
+  }
 }
 
 /* Labour avatar styles */
@@ -202,9 +282,12 @@
 .labour-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
   color: #6c757d;
   font-size: 0.95rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
 }
 
 .labour-meta span {
@@ -213,23 +296,82 @@
   white-space: nowrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.action-buttons .btn {
-  transition: all 0.3s ease;
-  border-radius: 8px;
+  background: #f8f9fa;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.action-buttons .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.labour-meta span:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.labour-meta span svg {
+  margin-right: 0.5rem;
+  color: #007bff;
+}
+
+.rating-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fff8e1, #fff3c4);
+  border-radius: 10px;
+  border: 1px solid #ffd54f;
+}
+
+.rating-section .rating-stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.rating-section .rating-stars svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rating-section .text-muted {
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+/* Desktop action buttons already styled above */
+
+/* Badge improvements */
+.labour-header .badge {
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.25px;
+}
+
+/* Subskills styling within header */
+.labour-header .d-flex.flex-column.flex-sm-row.align-items-start.align-items-sm-center {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.labour-header .d-flex.flex-wrap.gap-1 {
+  gap: 0.5rem !important;
+}
+
+.labour-header .badge.bg-light.text-dark {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  border: 1px solid #dee2e6 !important;
+  color: #495057 !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.labour-header .badge.bg-light.text-dark:hover {
+  background: linear-gradient(135deg, #e9ecef, #dee2e6) !important;
+  transform: translateY(-1px);
 }
 
 /* Mobile responsive improvements */
@@ -239,15 +381,48 @@
     margin-bottom: 1rem;
   }
   
+  .labour-header .row {
+    min-height: auto;
+  }
+  
+  .labour-header .col-md-8 {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-right: 1rem;
+  }
+  
   .labour-header .d-flex.align-items-center {
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 1rem;
+    flex-wrap: wrap;
   }
   
   .labour-header .labour-info {
     width: 100%;
+  }
+  
+  .labour-header .col-md-4 {
+    padding-left: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
+  }
+  
+  .labour-header .action-buttons {
+    flex-direction: row;
+    gap: 0.5rem;
+    min-width: auto;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .labour-header .action-buttons .btn {
+    flex: 1;
+    min-height: 40px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
   
   .labour-name {
@@ -279,14 +454,19 @@
     height: 80px;
   }
   
-  .action-buttons {
+  .labour-meta {
     justify-content: center;
-    margin-top: 1rem;
+    gap: 0.75rem;
   }
   
-  .labour-meta {
-    flex-direction: column;
-    gap: 0.5rem;
+  .labour-meta span {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .rating-section {
+    padding: 0.5rem 0.75rem;
+    gap: 0.75rem;
   }
 }
 
@@ -304,14 +484,32 @@
   
   .labour-header .labour-info {
     width: 100%;
+    min-width: unset;
+  }
+  
+  .labour-header .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  .labour-header .action-buttons .btn {
+    width: 100%;
+    min-height: 36px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
   }
   
   .labour-name {
-    font-size: 1.25rem;
+    font-size: 1.75rem;
+  }
+  
+  .labour-skill {
+    font-size: 1rem;
   }
   
   .labour-avatar {
-    gap: 0.5rem;
+    padding: 0.75rem;
   }
   
   .labour-avatar .profile-image {
@@ -329,13 +527,27 @@
     height: 70px;
   }
   
-  .action-buttons {
+  .labour-meta {
     flex-direction: column;
     gap: 0.5rem;
+    align-items: center;
   }
   
-  .action-buttons .btn {
-    width: 100%;
+  .labour-meta span {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .rating-section {
+    padding: 0.4rem 0.6rem;
+    gap: 0.5rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .rating-section .rating-stars svg {
+    width: 16px;
+    height: 16px;
   }
 }
 

@@ -134,7 +134,7 @@
 /* Header Section */
 .labour-header {
   background: white;
-  border-radius: 15px;
+  border-radius: 0 0 15px 15px;
   padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
@@ -144,28 +144,103 @@
 
 /* Header layout improvements to prevent overlapping */
 .labour-header .row {
-  align-items: flex-start;
+  align-items: stretch;
+  min-height: 200px;
+  margin-top: 1rem; /* Space for back button */
 }
 
 .labour-header .col-md-8 {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  padding-right: 2rem;
 }
 
 .labour-header .d-flex.align-items-center {
+  width: 100%;
+  gap: 2rem;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: flex-start;
 }
 
 .labour-header .labour-avatar {
   flex-shrink: 0;
   margin-right: 0;
+  align-self: center;
 }
 
 .labour-header .labour-info {
   flex: 1;
-  min-width: 0;
+  min-width: 250px;
+  align-self: center;
+}
+
+.labour-header .col-md-4 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-left: 2rem;
+}
+
+/* Medium screens - prevent overlap */
+@media (min-width: 768px) and (max-width: 991px) {
+  .labour-header .d-flex.align-items-center {
+    gap: 1.5rem;
+  }
+  
+  .labour-header .labour-info {
+    min-width: 200px;
+  }
+  
+  .labour-header .labour-avatar {
+    padding: 1.5rem;
+  }
+  
+  .labour-header .labour-avatar .profile-image,
+  .labour-header .labour-avatar .profile-placeholder,
+  .labour-header .labour-avatar .fallback-icon {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .back-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Better spacing for desktop */
+@media (min-width: 992px) {
+  .labour-header {
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .labour-header .row {
+    min-height: 180px;
+    margin-top: 1.5rem;
+  }
+  
+  .back-btn {
+    top: 1.5rem;
+    left: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+  
+  .labour-header .d-flex.align-items-center {
+    gap: 2.5rem;
+  }
+  
+  .labour-header .labour-avatar {
+    padding: 2rem;
+  }
+  
+  .labour-header .labour-info {
+    padding-right: 1rem;
+  }
 }
 
 .labour-header::before {
@@ -179,16 +254,28 @@
 }
 
 .back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
   color: #6c757d;
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn:hover {
   color: #495057;
   text-decoration: none;
   transform: translateX(-5px);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .labour-avatar {
@@ -332,15 +419,38 @@
 .rating-section {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fff8e1, #fff3c4);
+  border-radius: 10px;
+  border: 1px solid #ffd54f;
+}
+
+.rating-section .rating-stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.rating-section .rating-stars svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rating-section .text-muted {
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
 }
 
 .labour-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
   color: #6c757d;
   font-size: 0.95rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
 }
 
 .labour-meta span {
@@ -348,6 +458,21 @@
   align-items: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  background: #f8f9fa;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.labour-meta span:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.labour-meta span svg {
+  margin-right: 0.5rem;
+  color: #007bff;
 }
 
 .action-buttons {
@@ -1258,15 +1383,41 @@
     margin-bottom: 1rem;
   }
   
+  .labour-header .row {
+    min-height: auto;
+    margin-top: 0.75rem;
+  }
+  
+  .back-btn {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .labour-header .col-md-8 {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-right: 1rem;
+  }
+  
   .labour-header .d-flex.align-items-center {
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 1rem;
+    flex-wrap: wrap;
   }
   
   .labour-header .labour-info {
     width: 100%;
+  }
+  
+  .labour-header .col-md-4 {
+    padding-left: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
   }
   
   .labour-name {
@@ -1315,8 +1466,18 @@
   }
   
   .labour-meta {
-    flex-direction: column;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .labour-meta span {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .rating-section {
+    padding: 0.5rem 0.75rem;
+    gap: 0.75rem;
   }
   
   .work-gallery {
@@ -1458,6 +1619,13 @@
     padding: 1rem;
   }
   
+  .back-btn {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  
   .labour-header .d-flex.align-items-center {
     flex-direction: column;
     align-items: center;
@@ -1467,10 +1635,15 @@
   
   .labour-header .labour-info {
     width: 100%;
+    min-width: unset;
   }
   
   .labour-name {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
+  }
+  
+  .labour-skill {
+    font-size: 1rem;
   }
   
   .labour-avatar {
@@ -1507,6 +1680,29 @@
   .action-buttons .btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
+  }
+  
+  .labour-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .labour-meta span {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .rating-section {
+    padding: 0.4rem 0.6rem;
+    gap: 0.5rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .rating-section .rating-stars svg {
+    width: 16px;
+    height: 16px;
   }
   
   .work-gallery {

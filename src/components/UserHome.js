@@ -232,7 +232,13 @@ const UserHome = () => {
         if (!selectedBooking) return;
         
         try {
-            await rateLabour(selectedBooking.bookingId, rating, review);
+            await rateLabour({
+                userId: userId,
+                labourId: selectedBooking.labourId || selectedBooking.bookingId, // fallback to bookingId if labourId not available
+                labourRating: rating,
+                review: review,
+                bookingId: selectedBooking.bookingId
+            });
             setShowRatingModal(false);
             setSelectedBooking(null);
             // Refresh bookings to update the UI

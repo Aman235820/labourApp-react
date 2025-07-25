@@ -28,6 +28,10 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
   const [userData, setUserData] = useState(null);
   const [cityName, setCityName] = useState(''); // State for city name
   const [showLocationModal, setShowLocationModal] = useState(false);
+  
+  // Touch gesture states for mobile swipe
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   // Check if user is logged in
   useEffect(() => {
@@ -127,10 +131,65 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     };
   }, []);
 
-  const closeSidebar = () => {
-    if (isMobile) {
-      setIsOpen(false);
+  // Swipe gesture detection for mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+      setTouchEnd(null);
+      setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => {
+      setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+      if (!touchStart || !touchEnd) return;
+      
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > minSwipeDistance;
+      const isRightSwipe = distance < -minSwipeDistance;
+
+      if (isRightSwipe && !isOpen) {
+        setIsOpen(true);
+      }
+      if (isLeftSwipe && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('touchstart', onTouchStart);
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [touchStart, touchEnd, isOpen, isMobile, setIsOpen]);
+
+  // Prevent body scroll when sidebar is open (mobile only) and handle sidebar scroll
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      // Prevent body scroll when sidebar is open on mobile
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore body scroll when sidebar is closed or on desktop
+      document.body.style.overflow = 'unset';
     }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, isMobile]);
+
+  const closeSidebar = () => {
+    setIsOpen(false);
   };
 
   const isActive = (path) => {
@@ -236,6 +295,26 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
     setCityName(location.city || location.display_name || 'Unknown Location');
   };
 
+  // Handle sidebar scroll to prevent body scroll
+  const handleSidebarWheel = (e) => {
+    const sidebar = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = sidebar;
+    
+    // Check if we're at the top or bottom of the sidebar
+    const isAtTop = scrollTop === 0;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+    
+    // Prevent default if we're scrolling within the sidebar bounds
+    if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
+      e.stopPropagation();
+    }
+  };
+
+  // Handle touch scroll for mobile
+  const handleSidebarTouch = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <>
       {/* Sidebar overlay for mobile */}
@@ -246,8 +325,20 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
         />
       )}
 
+      {/* Sidebar overlay for desktop */}
+      {isOpen && !isMobile && (
+        <div 
+          className={`sidebar-overlay-desktop d-none d-lg-block ${isOpen ? '' : 'sidebar-closed'}`}
+          onClick={closeSidebar}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      <div 
+        className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
+        onWheel={handleSidebarWheel}
+        onTouchMove={handleSidebarTouch}
+      >
         {/* Desktop Sidebar Toggle Button */}
         <div className="sidebar-toggle-container d-none d-lg-block">
           <Button
