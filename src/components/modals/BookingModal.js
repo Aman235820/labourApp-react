@@ -24,6 +24,9 @@ const BookingModal = ({
   const [workingHours, setWorkingHours] = useState(null);
   const [existingBookings, setExistingBookings] = useState([]);
   const [loadingWorkingHours, setLoadingWorkingHours] = useState(false);
+  const [additionalLabourDetails, setAdditionalLabourDetails] = useState(null);
+  const [loadingAdditionalDetails, setLoadingAdditionalDetails] = useState(false);
+  const [hasWorkingHours, setHasWorkingHours] = useState(false);
 
   // Get current date and time
   const getCurrentDateTime = () => {
@@ -33,54 +36,81 @@ const BookingModal = ({
     return { currentDate, currentTime, now };
   };
 
-  // Get working hours for a specific date using labour's profile data
+  // Fetch additional labour details including working hours
+  const fetchAdditionalLabourDetails = async () => {
+    if (!labour?.labourId && !labour?.id) return;
+    
+    try {
+      setLoadingAdditionalDetails(true);
+      const labourId = labour.labourId || labour.id;
+      const additionalDetails = await labourService.getAdditionalLabourDetails(labourId);
+      
+      console.log('BookingModal - Additional details API response:', additionalDetails);
+      
+      if (additionalDetails && additionalDetails.length > 0) {
+        const latestSettings = additionalDetails[0];
+        const profileData = latestSettings.profileSettings;
+        
+        if (profileData && profileData.workingHours) {
+          console.log('BookingModal - Working hours found:', profileData.workingHours);
+          setAdditionalLabourDetails(profileData);
+          setHasWorkingHours(true);
+        } else {
+          console.log('BookingModal - No working hours found in profile settings');
+          setAdditionalLabourDetails(null);
+          setHasWorkingHours(false);
+        }
+      } else {
+        console.log('BookingModal - No additional details found');
+        setAdditionalLabourDetails(null);
+        setHasWorkingHours(false);
+      }
+    } catch (error) {
+      console.error('BookingModal - Error fetching additional details:', error);
+      setAdditionalLabourDetails(null);
+      setHasWorkingHours(false);
+    } finally {
+      setLoadingAdditionalDetails(false);
+    }
+  };
+
+  // Get working hours for a specific date using the fetched profile data
   const getWorkingHoursForDate = (date) => {
-    if (!labour || !date) return;
+    if (!date) return;
     
     try {
       setLoadingWorkingHours(true);
       
-      // Use the helper function from labourService to get working hours
-      const workingHoursData = labourService.getWorkingHoursForDate(labour, date);
-      setWorkingHours(workingHoursData);
+      // If we have working hours from additional details, use them
+      if (hasWorkingHours && additionalLabourDetails?.workingHours) {
+        const dayOfWeek = new Date(date).toLocaleDateString('en', { weekday: 'long' }).toLowerCase();
+        const daySchedule = additionalLabourDetails.workingHours[dayOfWeek];
+        
+        if (daySchedule) {
+          setWorkingHours({
+            available: daySchedule.available,
+            startTime: daySchedule.start,
+            endTime: daySchedule.end,
+            breaks: []
+          });
+        } else {
+          setWorkingHours({
+            available: false,
+            startTime: '00:00',
+            endTime: '00:00',
+            breaks: []
+          });
+        }
+      } else {
+        // No working hours available, set to null to hide date/time fields
+        setWorkingHours(null);
+      }
       
-      // For now, we don't have existing bookings data from API
-      // This can be implemented later when the backend API is available
       setExistingBookings([]);
       
     } catch (error) {
       console.error('Error getting working hours:', error);
-      // Fallback to default working hours
-      const dayOfWeek = new Date(date).toLocaleDateString('en', { weekday: 'short' }).toLowerCase();
-      const dayMapping = {
-        'sun': 'sunday',
-        'mon': 'monday', 
-        'tue': 'tuesday',
-        'wed': 'wednesday',
-        'thu': 'thursday',
-        'fri': 'friday',
-        'sat': 'saturday'
-      };
-      
-      const fullDayName = dayMapping[dayOfWeek] || 'monday';
-      const defaultHours = getDefaultWorkingHours();
-      const daySchedule = defaultHours[fullDayName];
-      
-      if (daySchedule && daySchedule.available) {
-        setWorkingHours({
-          available: true,
-          startTime: daySchedule.start,
-          endTime: daySchedule.end,
-          breaks: []
-        });
-      } else {
-        setWorkingHours({
-          available: false,
-          startTime: '00:00',
-          endTime: '00:00',
-          breaks: []
-        });
-      }
+      setWorkingHours(null);
       setExistingBookings([]);
     } finally {
       setLoadingWorkingHours(false);
@@ -218,7 +248,7 @@ const BookingModal = ({
     }
   }, [bookingStatus]);
 
-  // Reset form when modal opens and fetch working hours
+  // Reset form when modal opens and fetch additional details
   useEffect(() => {
     if (show && labour) {
       setBookingData({
@@ -228,20 +258,32 @@ const BookingModal = ({
         urgency: 'normal'
       });
       setBookingStatus(null);
+      setWorkingHours(null);
+      setHasWorkingHours(false);
       
-      // Initial reset - working hours will be fetched when date is selected
+      // Fetch additional labour details including working hours
+      fetchAdditionalLabourDetails();
     }
   }, [show, labour]);
 
-  // Get working hours when booking date changes
+  // Get working hours when booking date changes (only if we have working hours available)
   useEffect(() => {
-    if (bookingData.date && labour) {
+    if (bookingData.date && hasWorkingHours) {
       getWorkingHoursForDate(bookingData.date);
+    } else if (bookingData.date && !hasWorkingHours) {
+      // If no working hours available, clear the working hours state
+      setWorkingHours(null);
     }
-  }, [bookingData.date, labour]);
+  }, [bookingData.date, hasWorkingHours, additionalLabourDetails]);
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if working hours are available
+    if (!hasWorkingHours) {
+      alert('Working hours are not available for this labour. Please contact them directly.');
+      return;
+    }
     
     // Check if user is logged in
     const storedUser = localStorage.getItem('user');
@@ -380,8 +422,14 @@ const BookingModal = ({
         </div>
         
         <Form onSubmit={handleBookingSubmit}>
-          <Row>
-                          <Col md={6}>
+          {loadingAdditionalDetails ? (
+            <div className="mb-3 text-center">
+              <Spinner animation="border" size="sm" className="me-2" />
+              Loading labour availability...
+            </div>
+          ) : hasWorkingHours ? (
+            <Row>
+              <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Preferred Date</Form.Label>
                   <Form.Control
@@ -439,7 +487,8 @@ const BookingModal = ({
                   </Form.Text>
                 </Form.Group>
               </Col>
-          </Row>
+            </Row>
+          ) : null}
           
           <Form.Group className="mb-3">
             <Form.Label>Work Description <span className="text-muted">(Optional)</span></Form.Label>
@@ -466,11 +515,26 @@ const BookingModal = ({
           </Form.Group>
           
           <div className="d-grid gap-2">
-            <Button variant="success" type="submit" size="lg" disabled={isBooking}>
+            <Button 
+              variant="success" 
+              type="submit" 
+              size="lg" 
+              disabled={isBooking || !hasWorkingHours || loadingAdditionalDetails}
+            >
               {isBooking ? (
                 <>
                   <Spinner animation="border" size="sm" className="me-2" />
                   Booking...
+                </>
+              ) : loadingAdditionalDetails ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Loading...
+                </>
+              ) : !hasWorkingHours ? (
+                <>
+                  <FaCalendarAlt className="me-2" />
+                  Contact Labour Directly
                 </>
               ) : (
                 <>
