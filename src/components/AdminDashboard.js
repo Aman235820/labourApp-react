@@ -674,7 +674,7 @@ function AdminDashboard() {
     
     try {
       setDeletingBookingId(bookingId);
-      const response = await adminService.removeBooking(bookingId);
+      const response = await adminService.deleteBooking(bookingId);
       if (response && !response.hasError) {
         fetchBookings();
       } else {
@@ -851,8 +851,11 @@ function AdminDashboard() {
                               <p className="text-muted mt-2 mb-0">Loading recent labours...</p>
                             </div>
                           ) : labours.length > 0 ? (
-                            // Use the same data as the main table, showing top 5 most recent labours
-                            labours.slice(0, 5).map((labour, index) => (
+                            // Sort labours by ID (latest first) and show top 5 most recent labours
+                            labours
+                              .sort((a, b) => (b.labourId || 0) - (a.labourId || 0))
+                              .slice(0, 5)
+                              .map((labour, index) => (
                               <div 
                                 key={labour.labourId} 
                                 className="recent-item clickable-item"
@@ -913,8 +916,11 @@ function AdminDashboard() {
                               <p className="text-muted mt-2 mb-0">Loading recent bookings...</p>
                             </div>
                           ) : bookings.length > 0 ? (
-                            // Use the same data as the main table, showing top 5 most recent bookings
-                            bookings.slice(0, 5).map((booking, index) => (
+                            // Sort bookings by time (latest first) and show top 5 most recent bookings
+                            bookings
+                              .sort((a, b) => new Date(b.bookingTime) - new Date(a.bookingTime))
+                              .slice(0, 5)
+                              .map((booking, index) => (
                               <div 
                                 key={booking.bookingId} 
                                 className="recent-item clickable-item"

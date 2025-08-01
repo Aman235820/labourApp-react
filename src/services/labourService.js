@@ -172,6 +172,44 @@ export const labourService = {
     }
   },
 
+  // Helper function to get working hours for a specific date from labour's profile
+  getWorkingHoursForDate: (labour, selectedDate) => {
+    if (!labour || !labour.workingHours || !selectedDate) {
+      return { available: false, startTime: '00:00', endTime: '00:00', breaks: [] };
+    }
+
+    // Get day of week from selected date
+    const dayOfWeek = new Date(selectedDate).toLocaleDateString('en', { weekday: 'short' }).toLowerCase();
+    const dayMapping = {
+      'sun': 'sunday',
+      'mon': 'monday', 
+      'tue': 'tuesday',
+      'wed': 'wednesday',
+      'thu': 'thursday',
+      'fri': 'friday',
+      'sat': 'saturday'
+    };
+    
+    const fullDayName = dayMapping[dayOfWeek] || 'monday';
+    const daySchedule = labour.workingHours[fullDayName];
+    
+    if (daySchedule && daySchedule.available) {
+      return {
+        available: true,
+        startTime: daySchedule.start || '09:00',
+        endTime: daySchedule.end || '18:00',
+        breaks: daySchedule.breaks || []
+      };
+    } else {
+      return {
+        available: false,
+        startTime: '00:00',
+        endTime: '00:00',
+        breaks: []
+      };
+    }
+  },
+
   // Update additional labour data (profile settings)
   updateAdditionalLabourData: async (labourData) => {
     try {

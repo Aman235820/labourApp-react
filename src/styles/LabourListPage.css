@@ -3,6 +3,15 @@
   min-height: 100vh;
   background-color: #f8f9fa;
   padding: 2rem 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.labour-list-page .container-fluid {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .labour-list-header {
@@ -56,7 +65,10 @@
     0 4px 16px rgba(102, 126, 234, 0.1);
   overflow: hidden;
   border: 1px solid rgba(102, 126, 234, 0.1);
-  padding: 2rem;
+  padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
 .labour-table-container {
@@ -124,12 +136,19 @@
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .labour-list-page {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
+  }
+  
+  .labour-list-page .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   
   .labour-list-header {
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
   
   .labour-list-title {
@@ -137,7 +156,9 @@
   }
   
   .labour-list-content {
-    padding: 1rem 1.5rem;
+    padding: 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
   
   .labour-table-container {
@@ -184,12 +205,19 @@
 
 @media (max-width: 576px) {
   .labour-list-page {
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
+  }
+  
+  .labour-list-page .container-fluid {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
   }
   
   .labour-list-header {
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
   }
   
   .labour-list-title {
@@ -197,7 +225,9 @@
   }
   
   .labour-list-content {
-    padding: 0.75rem 1rem;
+    padding: 0.25rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
   }
   
   .labour-table-container {
@@ -223,5 +253,310 @@
   
   .labour-table-container .rdt_TableCell {
     padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Mobile-first card design */
+.mobile-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin: 0.75rem;
+  overflow: hidden;
+  width: calc(100% - 1.5rem) !important;
+  max-width: calc(100% - 1.5rem) !important;
+  box-sizing: border-box;
+}
+
+.mobile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
+
+.mobile-card .card-body {
+  padding: 1rem;
+}
+
+.mobile-card .labour-avatar {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-card .labour-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.mobile-card .service-type {
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.mobile-card .contact-detail,
+.mobile-card .location-detail,
+.mobile-card .rating-detail {
+  font-size: 0.9rem;
+  color: #4a5568;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.mobile-card .call-btn,
+.mobile-card .book-btn {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  transition: all 0.2s ease;
+}
+
+.mobile-card .call-btn:hover {
+  background-color: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.mobile-card .book-btn:hover {
+  background-color: #28a745;
+  transform: translateY(-1px);
+}
+
+.labour-cards-container {
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+.labour-cards-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.pagination-container {
+  display: flex !important;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 2px solid #667eea;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1rem auto;
+  max-width: 400px;
+}
+
+.pagination-btn {
+  min-width: 100px !important;
+  font-weight: 600 !important;
+  padding: 0.6rem 1rem !important;
+  font-size: 0.9rem !important;
+  border: 2px solid #667eea !important;
+  color: #667eea !important;
+  background: white !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.pagination-btn:hover {
+  background: #667eea !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.pagination-info {
+  font-weight: 600 !important;
+  color: #2d3748 !important;
+  white-space: nowrap;
+  font-size: 1rem !important;
+  background: #f0f4ff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #e0e7ff;
+}
+
+.page-size-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .mobile-card {
+    margin: 0.5rem !important;
+    border-radius: 10px;
+    width: calc(100% - 1rem) !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+  
+  .mobile-card .card-body {
+    padding: 1rem;
+  }
+  
+  .mobile-card .labour-avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .mobile-card .labour-name {
+    font-size: 1.05rem;
+  }
+  
+  .mobile-card .service-type {
+    font-size: 0.85rem;
+  }
+  
+  .mobile-card .contact-detail,
+  .mobile-card .location-detail,
+  .mobile-card .rating-detail {
+    font-size: 0.85rem;
+  }
+  
+  .mobile-card .call-btn,
+  .mobile-card .book-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    min-height: 42px;
+  }
+  
+  .labour-cards-container {
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .labour-cards-grid {
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-card {
+    margin: 0.25rem !important;
+    border-radius: 8px;
+    width: calc(100% - 0.5rem) !important;
+    max-width: calc(100% - 0.5rem) !important;
+  }
+  
+  .mobile-card .card-body {
+    padding: 0.75rem;
+  }
+  
+  .mobile-card .labour-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .mobile-card .labour-name {
+    font-size: 1rem;
+  }
+  
+  .mobile-card .service-type {
+    font-size: 0.8rem;
+  }
+  
+  .mobile-card .contact-detail,
+  .mobile-card .location-detail,
+  .mobile-card .rating-detail {
+    font-size: 0.8rem;
+  }
+  
+  .mobile-card .call-btn,
+  .mobile-card .book-btn {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
+    min-height: 38px;
+  }
+  
+  .mobile-card .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .mobile-card .mb-2 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .labour-cards-container {
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .labour-cards-grid {
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .pagination-container {
+    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
+    flex-direction: column;
+  }
+  
+  .pagination-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    min-width: 70px;
+  }
+  
+  .pagination-info {
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+  }
+  
+  .page-size-container {
+    padding: 0.4rem 0.8rem;
+    gap: 0.4rem;
+  }
+  
+  .page-size-container small {
+    font-size: 0.8rem;
+  }
+  
+  .page-size-container .form-select {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
   }
 } 

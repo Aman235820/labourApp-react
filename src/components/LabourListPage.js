@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Button, Spinner } from 'react-bootstrap';
-import { FaArrowLeft, FaUser, FaTools, FaPhone, FaStar } from 'react-icons/fa';
+import { Container, Row, Col, Button, Spinner, Card, Badge } from 'react-bootstrap';
+import { FaArrowLeft, FaUser, FaTools, FaPhone, FaStar, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
-import DataTable from 'react-data-table-component';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
+import BookingModal from './modals/BookingModal';
 import '../styles/LabourListPage.css';
 
 function LabourListPage() {
@@ -32,123 +32,116 @@ function LabourListPage() {
   const [totalElements, setTotalElements] = useState(initialTotalElements);
   const [selectedLabour, setSelectedLabour] = useState(null);
   const [showLabourModal, setShowLabourModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedLabourForBooking, setSelectedLabourForBooking] = useState(null);
 
-  const columns = [
-    {
-      name: 'Name',
-      selector: row => row.labourName,
-      sortable: true,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <FaUser className="text-primary me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium text-primary">
-            {row.labourName}
-          </span>
-        </div>
-      ),
-    },
-    {
-      name: 'Services',
-      selector: row => row.labourSkill,
-      sortable: true,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <FaTools className="text-success me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.labourSkill}</span>
-        </div>
-      ),
-    },
-    {
-      name: 'Phone',
-      selector: row => row.labourMobileNo,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <Button
-            variant="outline-primary"
-            size="sm"
-            onClick={() => window.location.href = `tel:${row.labourMobileNo}`}
-            className="d-flex align-items-center"
-          >
-            <FaPhone className="me-2" />
-            Call Now
-          </Button>
-        </div>
-      ),
-    },
-    {
-      name: 'Rating',
-      selector: row => row.rating,
-      sortable: true,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <FaStar className="text-warning me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.rating || 'No ratings yet'}</span>
-        </div>
-      ),
-    },
-  ];
+  const handleBookLabour = (labour) => {
+    // Check if user is logged in
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
+      alert('Please login to book a service. Redirecting to registration page.');
+      navigate('/register');
+      return;
+    }
 
-  const customStyles = {
-    headRow: {
-      style: {
-        backgroundColor: '#f8f9fa',
-        borderBottom: '2px solid #dee2e6',
-        fontSize: '1.1rem',
-        fontWeight: 'bold',
-        padding: '1rem',
-      },
-    },
-    headCells: {
-      style: {
-        paddingLeft: '1.5rem',
-        paddingRight: '1.5rem',
-        fontSize: '1.1rem',
-        fontWeight: 'bold',
-        color: '#2c3e50',
-      },
-    },
-    cells: {
-      style: {
-        paddingLeft: '1.5rem',
-        paddingRight: '1.5rem',
-        fontSize: '1rem',
-        verticalAlign: 'middle',
-      },
-    },
-    rows: {
-      style: {
-        minHeight: '80px',
-        fontSize: '1rem',
-        backgroundColor: 'white',
-        '&:nth-of-type(odd)': {
-          backgroundColor: '#fafbfc',
-        },
-        '&:hover': {
-          backgroundColor: '#e8f4ff !important',
-          cursor: 'pointer',
-          transform: 'scale(1.01)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          transition: 'all 0.3s ease',
-        },
-      },
-    },
-    pagination: {
-      style: {
-        borderTop: '1px solid #dee2e6',
-        padding: '1rem 0',
-      },
-    },
-    table: {
-      style: {
-        marginBottom: '0',
-      },
-    },
-    tableWrapper: {
-      style: {
-        overflow: 'visible',
-      },
-    },
+    // Open booking modal
+    setSelectedLabourForBooking(labour);
+    setShowBookingModal(true);
   };
+
+  const handleBookingSuccess = () => {
+    setShowBookingModal(false);
+    setSelectedLabourForBooking(null);
+  };
+
+  // Navigate to LabourDetailsPage
+  const handleCardClicked = (labour) => {
+    navigate(`/labour-details/${labour.labourId}`, {
+      state: { searchCategory: service }
+    });
+  };
+
+  const renderLabourCard = (labour) => (
+    <Card 
+      key={labour.labourId} 
+      className="labour-card mb-3 mobile-card"
+      onClick={() => handleCardClicked(labour)}
+    >
+      <Card.Body className="p-3">
+        {/* Top Row - Avatar and Rating */}
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="labour-avatar">
+            <FaUser className="text-white" size={20} />
+          </div>
+          <div className="rating-section">
+            {labour.rating && parseFloat(labour.rating) > 0 ? (
+              <div className="d-flex align-items-center">
+                <FaStar className="text-warning me-1" size={14} />
+                <span className="fw-bold text-dark">{labour.rating}</span>
+                <small className="text-muted ms-1">({labour.ratingCount || 0})</small>
+              </div>
+            ) : (
+              <Badge bg="secondary">No Ratings</Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Name and Service */}
+        <div className="mb-3">
+          <h5 className="mb-1 fw-bold text-primary labour-name">{labour.labourName}</h5>
+          <div className="d-flex align-items-center text-muted mb-2">
+            <FaTools className="me-2" size={14} />
+            <span className="service-type">{labour.labourSkill}</span>
+          </div>
+        </div>
+        
+        {/* Location and Rating Information */}
+        <div className="contact-info mb-3">
+          <div className="d-flex align-items-start text-muted mb-2">
+            <FaMapMarkerAlt className="me-2 text-primary mt-1" size={14} />
+            <span className="location-detail">{labour.labourLocation || labour.labourAddress || 'Location not specified'}</span>
+          </div>
+          <div className="d-flex align-items-center text-muted">
+            <FaStar className="me-2 text-warning" size={14} />
+            <span className="rating-detail">
+              {labour.rating && parseFloat(labour.rating) > 0 
+                ? `${labour.rating} rating (${labour.ratingCount || 0} reviews)`
+                : 'No ratings yet'
+              }
+            </span>
+          </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="action-buttons d-grid gap-2">
+          <div className="d-flex gap-2">
+            <Button 
+              variant="outline-primary" 
+              className="flex-fill call-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = `tel:${labour.labourMobileNo}`;
+              }}
+            >
+              <FaPhone className="me-2" />
+              Call Now
+            </Button>
+            <Button 
+              variant="success" 
+              className="flex-fill book-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBookLabour(labour);
+              }}
+            >
+              <FaCalendarAlt className="me-2" />
+              Book for Later
+            </Button>
+          </div>
+        </div>
+      </Card.Body>
+    </Card>
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -175,7 +168,6 @@ function LabourListPage() {
     } catch (error) {
       if (isMounted.current) {
         setError('Failed to fetch labourers. Please try again.');
-        console.error('Search error:', error);
       }
     } finally {
       if (isMounted.current) {
@@ -272,25 +264,66 @@ function LabourListPage() {
               </Button>
             </div>
           ) : (
-            <div className="labour-table-container" style={{ minHeight: '400px' }}>
-              <DataTable
-                columns={columns}
-                data={labourers}
-                pagination
-                paginationServer
-                paginationTotalRows={totalElements}
-                onChangePage={handlePageChange}
-                onChangeRowsPerPage={handlePerRowsChange}
-                progressPending={isLoading}
-                responsive
-                customStyles={customStyles}
-                onRowClicked={handleLabourModalShow}
-                noDataComponent={
-                  <div className="text-center py-4">
-                    <p>No labourers found for this service.</p>
+            <div className="labour-cards-container" style={{ minHeight: '400px' }}>
+              <div className="mb-3">
+                <small className="text-muted">
+                  Showing {labourers.length} of {totalElements} professionals
+                  {totalPages > 1 && ` | Page ${currentPage + 1} of ${totalPages} | Page Size: ${pageSize}`}
+                </small>
+              </div>
+              <div className="labour-cards-grid">
+                {labourers.map(renderLabourCard)}
+              </div>
+              
+              {/* Pagination - Always show if we have data */}
+              {(totalElements > 0 || labourers.length > 0) && (
+                <div className="d-flex justify-content-center mt-4">
+                  <div className="pagination-container">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      disabled={currentPage === 0}
+                      onClick={() => handlePageChange(currentPage)}
+                      className="pagination-btn"
+                    >
+                      ← Previous
+                    </Button>
+                    <span className="mx-3 align-self-center pagination-info">
+                      Page {currentPage + 1} {totalPages > 0 ? `of ${totalPages}` : ''}
+                    </span>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      disabled={labourers.length < pageSize || (totalPages > 0 && currentPage >= totalPages - 1)}
+                      onClick={() => handlePageChange(currentPage + 2)}
+                      className="pagination-btn"
+                    >
+                      Next →
+                    </Button>
                   </div>
-                }
-              />
+                </div>
+              )}
+              
+
+              
+              {/* Page Size Selector for better UX */}
+              {totalElements > 10 && (
+                <div className="d-flex justify-content-center mt-2">
+                  <div className="page-size-container">
+                    <small className="text-muted me-2">Items per page:</small>
+                    <select 
+                      value={pageSize} 
+                      onChange={(e) => handlePerRowsChange(parseInt(e.target.value), 1)}
+                      className="form-select form-select-sm"
+                      style={{ width: 'auto', display: 'inline-block' }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -302,6 +335,15 @@ function LabourListPage() {
         onHide={handleLabourModalClose}
         selectedLabour={selectedLabour}
         service={service}
+      />
+
+      {/* Booking Modal */}
+      <BookingModal
+        show={showBookingModal}
+        onHide={() => setShowBookingModal(false)}
+        labour={selectedLabourForBooking}
+        serviceCategory={service}
+        onBookingSuccess={handleBookingSuccess}
       />
     </div>
   );

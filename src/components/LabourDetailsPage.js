@@ -32,6 +32,129 @@ const LabourDetailsPage = () => {
     description: '',
     urgency: 'normal'
   });
+  const [workingHours, setWorkingHours] = useState(null);
+  const [existingBookings, setExistingBookings] = useState([]);
+  const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
+
+  // Get current date and time
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+    return { currentDate, currentTime, now };
+  };
+
+  // Get working hours for a specific date using labour's profile data
+  const getWorkingHoursForDate = (date) => {
+    if (!labour || !date) return;
+    
+    try {
+      setLoadingTimeSlots(true);
+      
+      // Use the helper function from labourService to get working hours
+      const workingHoursData = labourService.getWorkingHoursForDate(labour, date);
+      setWorkingHours(workingHoursData);
+      
+      // For now, we don't have existing bookings data from API
+      // This can be implemented later when the backend API is available
+      setExistingBookings([]);
+      
+    } catch (error) {
+      console.error('Error getting working hours:', error);
+      // Fallback to not available
+      setWorkingHours({
+        available: false,
+        startTime: '00:00',
+        endTime: '00:00',
+        breaks: []
+      });
+      setExistingBookings([]);
+    } finally {
+      setLoadingTimeSlots(false);
+    }
+  };
+
+  // Generate available time slots based on working hours and existing bookings
+  const generateTimeSlots = () => {
+    if (!workingHours || !workingHours.available) {
+      return [];
+    }
+    
+    const slots = [];
+    const { currentDate, currentTime, now } = getCurrentDateTime();
+    
+    // Parse working hours
+    const [startHour, startMinute] = workingHours.startTime.split(':').map(Number);
+    const [endHour, endMinute] = workingHours.endTime.split(':').map(Number);
+    
+    // Convert to minutes for easier calculation
+    let startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    
+    // If booking for today, ensure we start from at least 1 hour from now
+    if (bookingData.date === currentDate) {
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const minimumStartMinutes = currentMinutes + 60; // 1 hour buffer
+      startMinutes = Math.max(startMinutes, minimumStartMinutes);
+    }
+    
+    // Round up to next 30-minute interval
+    if (startMinutes % 30 !== 0) {
+      startMinutes = Math.ceil(startMinutes / 30) * 30;
+    }
+    
+    // Generate slots every 30 minutes
+    for (let minutes = startMinutes; minutes < endMinutes; minutes += 30) {
+      const hour = Math.floor(minutes / 60);
+      const minute = minutes % 60;
+      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      
+      // Check if this slot conflicts with existing bookings
+      const isBooked = existingBookings.some(booking => {
+        const bookingTime = booking.preferredTime || booking.time;
+        return bookingTime === timeString;
+      });
+      
+      // Check if this slot conflicts with breaks
+      const isBreakTime = workingHours.breaks?.some(breakTime => {
+        const [breakStart] = breakTime.start.split(':').map(Number);
+        const [breakEnd] = breakTime.end.split(':').map(Number);
+        const breakStartMinutes = breakStart * 60;
+        const breakEndMinutes = breakEnd * 60;
+        return minutes >= breakStartMinutes && minutes < breakEndMinutes;
+      });
+      
+      if (!isBooked && !isBreakTime) {
+        slots.push(timeString);
+      }
+    }
+    
+    return slots;
+  };
+
+  // Get minimum date (today)
+  const getMinDate = () => {
+    return getCurrentDateTime().currentDate;
+  };
+
+  // Validate selected time
+  const isValidTime = (selectedTime, selectedDate) => {
+    const { currentDate, currentTime } = getCurrentDateTime();
+    
+    if (selectedDate === currentDate) {
+      return selectedTime > currentTime;
+    }
+    return true;
+  };
+
+  // Convert 24-hour format to 12-hour format for display
+  const convertTo12Hour = (time24) => {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
 
   // Get searchCategory from location state or URL params, with fallback to labour skill
   const searchCategory = location.state?.searchCategory || (labour?.labourSkill || '');
@@ -225,8 +348,41 @@ const LabourDetailsPage = () => {
     fetchLabourDetails();
   }, [labourId]);
 
+  // Get working hours when booking date changes
+  useEffect(() => {
+    if (bookingData.date && labour) {
+      getWorkingHoursForDate(bookingData.date);
+    }
+  }, [bookingData.date, labour]);
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form data
+    if (!bookingData.date) {
+      alert('Please select a preferred date.');
+      return;
+    }
+
+    if (!bookingData.time) {
+      alert('Please select a preferred time slot.');
+      return;
+    }
+
+
+
+    // Validate date is not in the past
+    const { currentDate } = getCurrentDateTime();
+    if (bookingData.date < currentDate) {
+      alert('Please select a date from today onwards.');
+      return;
+    }
+
+    // Validate time is not in the past for today's bookings
+    if (!isValidTime(bookingData.time, bookingData.date)) {
+      alert('Please select a future time slot.');
+      return;
+    }
     
     try {
       setIsBooking(true);
@@ -235,14 +391,18 @@ const LabourDetailsPage = () => {
       const userData = JSON.parse(localStorage.getItem('user'));
       
       // Prepare booking data
-      const bookingData = {
+      const bookingPayload = {
         userId: userData.userId,
         labourId: labour.id,
-        labourSkill: serviceCategory
+        labourSkill: serviceCategory,
+        preferredDate: bookingData.date,
+        preferredTime: bookingData.time,
+        workDescription: bookingData.description,
+        urgencyLevel: bookingData.urgency
       };
       
       // Make the booking API call
-      const response = await bookLabour(bookingData);
+      const response = await bookLabour(bookingPayload);
       
       if (response && !response.hasError) {
         setBookingStatus({
@@ -451,7 +611,7 @@ const LabourDetailsPage = () => {
                     className="action-btn-primary"
                   >
                     <FaCalendarAlt className="me-2" />
-                    Book Now
+                    Book for Later
                   </Button>
                   
                   <Button 
@@ -913,30 +1073,67 @@ const LabourDetailsPage = () => {
                   <Form.Control
                     type="date"
                     value={bookingData.date}
-                    onChange={(e) => setBookingData({...bookingData, date: e.target.value})}
+                    min={getMinDate()}
+                    onChange={(e) => {
+                      setBookingData({...bookingData, date: e.target.value, time: ''}); // Reset time when date changes
+                      // Working hours will be fetched automatically via useEffect
+                    }}
+                    required
                   />
+                  <Form.Text className="text-muted">
+                    Select a date from today onwards
+                  </Form.Text>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Preferred Time</Form.Label>
-                  <Form.Control
-                    type="time"
+                  <Form.Label>Preferred Time Slot</Form.Label>
+                  <Form.Select
                     value={bookingData.time}
                     onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
-                  />
+                    disabled={!bookingData.date || loadingTimeSlots}
+                    required
+                  >
+                    <option value="">
+                      {!bookingData.date 
+                        ? 'Select date first' 
+                        : loadingTimeSlots 
+                        ? 'Loading available slots...'
+                        : workingHours && !workingHours.available
+                        ? 'Labour not available on this day'
+                        : generateTimeSlots().length === 0
+                        ? 'No available slots for this date'
+                        : 'Choose time slot'
+                      }
+                    </option>
+                    {bookingData.date && !loadingTimeSlots && workingHours?.available && generateTimeSlots().map((slot, index) => (
+                      <option key={index} value={slot}>
+                        {slot} ({convertTo12Hour(slot)})
+                      </option>
+                    ))}
+                  </Form.Select>
+                  <Form.Text className="text-muted">
+                    {loadingTimeSlots 
+                      ? 'Checking labour availability...'
+                      : workingHours && !workingHours.available
+                      ? 'Labour is not available on the selected day. Please choose a different date.'
+                      : workingHours?.available && generateTimeSlots().length === 0
+                      ? 'All slots are booked for this date. Please choose a different date.'
+                      : `Available slots based on labour's working hours (${workingHours?.startTime || '09:00'} - ${workingHours?.endTime || '18:00'})`
+                    }
+                  </Form.Text>
                 </Form.Group>
               </Col>
             </Row>
             
             <Form.Group className="mb-3">
-              <Form.Label>Work Description</Form.Label>
+              <Form.Label>Work Description <span className="text-muted">(Optional)</span></Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 value={bookingData.description}
                 onChange={(e) => setBookingData({...bookingData, description: e.target.value})}
-                placeholder="Describe the work you need done..."
+                placeholder="Describe the work you need done (optional)..."
               />
             </Form.Group>
             

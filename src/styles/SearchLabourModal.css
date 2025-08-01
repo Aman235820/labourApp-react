@@ -452,4 +452,252 @@
     font-size: 0.8rem;
     margin-bottom: 0.3rem;
   }
+}
+
+/* Mobile-first card design */
+.mobile-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin: 0.75rem;
+  overflow: hidden;
+  width: calc(100% - 1.5rem);
+  max-width: calc(100% - 1.5rem);
+  box-sizing: border-box;
+}
+
+.mobile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
+
+.mobile-card .card-body {
+  padding: 1rem;
+}
+
+.mobile-card .labour-avatar {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-card .labour-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.mobile-card .service-type {
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.mobile-card .contact-detail,
+.mobile-card .location-detail,
+.mobile-card .rating-detail {
+  font-size: 0.9rem;
+  color: #4a5568;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.mobile-card .call-btn,
+.mobile-card .book-btn {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  transition: all 0.2s ease;
+}
+
+.mobile-card .call-btn:hover {
+  background-color: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.mobile-card .book-btn:hover {
+  background-color: #28a745;
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .mobile-card {
+    margin: 0.5rem;
+    border-radius: 10px;
+    width: calc(100% - 1rem);
+    max-width: calc(100% - 1rem);
+  }
+  
+  .mobile-card .card-body {
+    padding: 1rem;
+  }
+  
+  .mobile-card .labour-avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .mobile-card .labour-name {
+    font-size: 1.05rem;
+  }
+  
+  .mobile-card .service-type {
+    font-size: 0.85rem;
+  }
+  
+  .mobile-card .contact-detail,
+  .mobile-card .location-detail,
+  .mobile-card .rating-detail {
+    font-size: 0.85rem;
+  }
+  
+  .mobile-card .call-btn,
+  .mobile-card .book-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-card {
+    margin: 0.25rem;
+    border-radius: 8px;
+    width: calc(100% - 0.5rem);
+    max-width: calc(100% - 0.5rem);
+  }
+  
+  .mobile-card .card-body {
+    padding: 0.75rem;
+  }
+  
+  .mobile-card .labour-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .mobile-card .labour-name {
+    font-size: 1rem;
+  }
+  
+  .mobile-card .service-type {
+    font-size: 0.8rem;
+  }
+  
+  .mobile-card .contact-detail,
+  .mobile-card .location-detail,
+  .mobile-card .rating-detail {
+    font-size: 0.8rem;
+  }
+  
+  .mobile-card .call-btn,
+  .mobile-card .book-btn {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
+    min-height: 38px;
+  }
+  
+  .mobile-card .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .mobile-card .mb-2 {
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Enhanced mobile styles for labour cards */
+@media (max-width: 768px) {
+  .labour-card {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .labour-card .card-body {
+    padding: 1rem;
+  }
+  
+  .labour-card h6 {
+    font-size: 1rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  
+  .labour-card small {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  
+  .labour-card .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    min-height: 40px;
+  }
+  
+  /* Ensure text doesn't overflow */
+  .text-break {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Better spacing for mobile */
+  .labour-card .d-flex {
+    gap: 0.5rem;
+  }
+  
+  .labour-card .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .labour-card .mb-2 {
+    margin-bottom: 0.75rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .labour-card .card-body {
+    padding: 0.75rem;
+  }
+  
+  .labour-card h6 {
+    font-size: 0.95rem;
+  }
+  
+  .labour-card small {
+    font-size: 0.8rem;
+  }
+  
+  .labour-card .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    min-height: 36px;
+  }
+  
+  .labour-card .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .labour-card .mb-2 {
+    margin-bottom: 0.5rem !important;
+  }
 } 
