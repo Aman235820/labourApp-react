@@ -89,12 +89,12 @@ const BookingModal = ({
 
   // Default working hours fallback
   const getDefaultWorkingHours = () => ({
-    monday: { start: "09:00", end: "18:00", available: true },
-    tuesday: { start: "09:00", end: "18:00", available: true },
-    wednesday: { start: "09:00", end: "18:00", available: true },
-    thursday: { start: "09:00", end: "18:00", available: true },
-    friday: { start: "09:00", end: "18:00", available: true },
-    saturday: { start: "09:00", end: "14:00", available: true },
+    monday: { start: "09:00", end: "17:00", available: true },
+    tuesday: { start: "09:00", end: "17:00", available: true },
+    wednesday: { start: "09:00", end: "17:00", available: true },
+    thursday: { start: "09:00", end: "17:00", available: true },
+    friday: { start: "09:00", end: "17:00", available: true },
+    saturday: { start: "09:00", end: "17:00", available: true },
     sunday: { start: "00:00", end: "00:00", available: false }
   });
 
