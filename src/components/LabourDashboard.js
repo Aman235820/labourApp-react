@@ -1262,7 +1262,13 @@ const LabourDashboard = () => {
                 
                 <div className="labour-info">
                   <h1 className="labour-name">{labourDetails.labourName}</h1>
-                  <p className="labour-skill">{labourDetails.labourSkill}</p>
+                  <div className="d-flex align-items-center gap-3 mb-2">
+                    <p className="labour-skill mb-0">{labourDetails.labourSkill}</p>
+                    <Badge bg="secondary" className="px-2 py-1">
+                      <FaIdCard className="me-1" size={12} />
+                      ID: {labourDetails.labourId}
+                    </Badge>
+                  </div>
                   
                   <div className="rating-section">
                     <div className="rating-stars">
@@ -1573,6 +1579,10 @@ const LabourDashboard = () => {
                             <th className="border-0 bg-light fw-semibold text-dark">Booking</th>
                             <th className="border-0 bg-light fw-semibold text-dark">Client</th>
                             <th className="border-0 bg-light fw-semibold text-dark">Service</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Preferred Date</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Preferred Time</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Work Description</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">Urgency</th>
                             <th className="border-0 bg-light fw-semibold text-dark">Date</th>
                             <th className="border-0 bg-light fw-semibold text-dark">Status</th>
                             <th className="border-0 bg-light fw-semibold text-dark text-center">Actions</th>
@@ -1599,6 +1609,32 @@ const LabourDashboard = () => {
                               <td className="py-3">
                                 <Badge bg="primary" className="px-3 py-2">
                                   {service.labourSkill}
+                                </Badge>
+                              </td>
+                              <td className="py-3">
+                                <div className="fw-semibold">
+                                  {service.preferredDate ? new Date(service.preferredDate).toLocaleDateString() : 'Not specified'}
+                                </div>
+                                <small className="text-muted">Preferred</small>
+                              </td>
+                              <td className="py-3">
+                                <div className="fw-semibold">
+                                  {service.preferredTime || 'Not specified'}
+                                </div>
+                                <small className="text-muted">Time</small>
+                              </td>
+                              <td className="py-3">
+                                <div className="fw-semibold" style={{maxWidth: '200px', wordWrap: 'break-word'}}>
+                                  {service.workDescription || 'No description'}
+                                </div>
+                                <small className="text-muted">Description</small>
+                              </td>
+                              <td className="py-3">
+                                <Badge 
+                                  bg={service.urgencyLevel === 'high' ? 'danger' : service.urgencyLevel === 'medium' ? 'warning' : 'info'} 
+                                  className="px-2 py-1"
+                                >
+                                  {service.urgencyLevel || 'normal'}
                                 </Badge>
                               </td>
                               <td className="py-3">
@@ -1722,6 +1758,47 @@ const LabourDashboard = () => {
                               <div className="text-end">
                                 <div className="fw-semibold small">{formatDate(service.bookingTime)}</div>
                                 <small className="text-muted">Requested</small>
+                              </div>
+                            </div>
+                            
+                            {/* Additional Service Details */}
+                            <div className="mb-3">
+                              <div className="row g-2">
+                                <div className="col-6">
+                                  <div className="p-2 bg-light rounded">
+                                    <small className="text-muted d-block">Preferred Date</small>
+                                    <div className="fw-semibold small">
+                                      {service.preferredDate ? new Date(service.preferredDate).toLocaleDateString() : 'Not specified'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-6">
+                                  <div className="p-2 bg-light rounded">
+                                    <small className="text-muted d-block">Preferred Time</small>
+                                    <div className="fw-semibold small">
+                                      {service.preferredTime || 'Not specified'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-12">
+                                  <div className="p-2 bg-light rounded">
+                                    <small className="text-muted d-block">Work Description</small>
+                                    <div className="fw-semibold small" style={{wordWrap: 'break-word'}}>
+                                      {service.workDescription || 'No description'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-12">
+                                  <div className="d-flex align-items-center justify-content-between">
+                                    <small className="text-muted">Urgency Level</small>
+                                    <Badge 
+                                      bg={service.urgencyLevel === 'high' ? 'danger' : service.urgencyLevel === 'medium' ? 'warning' : 'info'} 
+                                      className="px-2 py-1"
+                                    >
+                                      {service.urgencyLevel || 'normal'}
+                                    </Badge>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                             
