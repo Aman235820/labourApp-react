@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } f
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaSignInAlt, FaArrowLeft, FaPhone, FaKey, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate, Link } from 'react-router-dom';
 import { labourService } from '../services/labourService';
+import { useTranslation } from 'react-i18next';
 import '../styles/LabourLogin.css';
 
 function LabourLogin() {
@@ -14,20 +15,21 @@ function LabourLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleRequestOTP = async () => {
     setOtpStatus('');
     setOtpLoading(true);
     if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
-      setOtpStatus('Please enter a valid 10-digit mobile number before requesting OTP.');
+      setOtpStatus(t('auth.pleaseEnterValidMobile'));
       setOtpLoading(false);
       return;
     }
     try {
       await labourService.requestOTP(mobileNumber, 'LABOUR');
-      setOtpStatus('OTP sent successfully!');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setOtpStatus(err.message || 'Failed to send OTP.');
+      setOtpStatus(err.message || t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
@@ -36,11 +38,11 @@ function LabourLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!mobileNumber.trim()) {
-      setError('Please enter your mobile number');
+      setError(t('auth.pleaseEnterMobileNumber'));
       return;
     }
     if (!otp.trim()) {
-      setError('Please enter the OTP');
+      setError(t('auth.pleaseEnterOtp'));
       return;
     }
     try {
@@ -53,10 +55,10 @@ function LabourLogin() {
         localStorage.setItem('labour', JSON.stringify({ ...labourDataWithoutReviews, token: response.token }));
         navigate('/labourDashboard');
       } else {
-        setError('Invalid mobile number or OTP');
+        setError(t('auth.invalidMobileOrOtp'));
       }
     } catch (err) {
-      setError('Error during login');
+      setError(t('auth.errorDuringLogin'));
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -84,8 +86,8 @@ function LabourLogin() {
           <Card className="shadow-sm login-card">
             <Card.Body className="p-4">
               <div className="text-center mb-4">
-                <h2 className="display-6 mb-3">Labour Login</h2>
-                <p className="text-muted">Enter your mobile number to access your account</p>
+                <h2 className="display-6 mb-3">{t('auth.labourLogin')}</h2>
+                <p className="text-muted">{t('auth.enterMobileToAccess')}</p>
               </div>
               {error && (
                 <Alert variant="danger" className="mb-4 d-flex align-items-center">
@@ -97,12 +99,12 @@ function LabourLogin() {
                 <Form.Group className="mb-4">
                   <Form.Label className="text-muted">
                     <FaPhone className="me-2" />
-                    Mobile Number
+                    {t('auth.mobileNumber')}
                   </Form.Label>
                   <InputGroup>
                     <Form.Control
                       type="tel"
-                      placeholder="Enter your mobile number"
+                      placeholder={t('auth.enterMobileNumber')}
                       value={mobileNumber}
                       onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       className="py-2"
@@ -116,7 +118,7 @@ function LabourLogin() {
                       onClick={handleRequestOTP}
                       disabled={otpLoading}
                     >
-                      {otpLoading ? 'Sending OTP...' : 'Request OTP'}
+                      {otpLoading ? t('auth.sendingOtp') : t('auth.requestOtp')}
                     </Button>
                   </InputGroup>
                   {otpStatus && (
@@ -128,12 +130,12 @@ function LabourLogin() {
                 <Form.Group className="mb-4">
                   <Form.Label className="text-muted">
                     <FaKey className="me-2" />
-                    OTP
+                    {t('auth.otp')}
                   </Form.Label>
                   <InputGroup>
                     <Form.Control
                       type={showOtp ? "text" : "password"}
-                      placeholder="Enter OTP"
+                      placeholder={t('auth.enterOtp')}
                       value={otp}
                       onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       className="py-2"
@@ -166,24 +168,24 @@ function LabourLogin() {
                         aria-hidden="true"
                         className="me-2"
                       />
-                      Logging in...
+                      {t('auth.loggingIn')}
                     </>
                   ) : (
                     <>
-                      Login <FaArrowRight className="ms-2" />
+                      {t('auth.login')} <FaArrowRight className="ms-2" />
                     </>
                   )}
                 </Button>
               </Form>
               <div className="text-center mt-4">
                 <p className="mb-0">
-                  Don't have an account?{' '}
+                  {t('auth.dontHaveAccount')}{' '}
                   <Button
                     variant="link"
                     className="p-0 text-decoration-none"
                     onClick={() => navigate('/labourRegister')}
                   >
-                    Register here
+                    {t('auth.registerHere')}
                   </Button>
                 </p>
               </div>

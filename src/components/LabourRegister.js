@@ -6,10 +6,12 @@ import LocationService from '../services/LocationService';
 import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaMapMarkerAlt, FaLocationArrow, FaCheckCircle } from 'react-icons/fa';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { useTranslation } from 'react-i18next';
 import '../styles/LabourRegister.css';
 
 function LabourRegister() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     labourName: '',
     labourSkill: '',
@@ -182,12 +184,12 @@ function LabourRegister() {
           ...prev,
           labourLocation: closestCity.value
         }));
-        setSuccess(`Location detected: ${closestCity.value}`);
+        setSuccess(`${t('auth.locationDetected')} ${closestCity.value}`);
       } else {
-        setError(`Could not find "${detectedCity}" in our city list. Please select manually.`);
+        setError(`${t('auth.couldNotFindCity')} "${detectedCity}" ${t('auth.inCityList')}`);
       }
     } catch (error) {
-      setError(`Failed to detect location: ${error.message}. Please select manually.`);
+      setError(`${t('auth.failedToDetectLocation')} ${error.message}. ${t('auth.pleaseSelectManually')}`);
     } finally {
       setLocationLoading(false);
     }
@@ -198,15 +200,15 @@ function LabourRegister() {
     setOtpLoading(true);
     const mobile = formData.labourMobileNo;
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-      setOtpStatus('Please enter a valid 10-digit mobile number before requesting OTP.');
+      setOtpStatus(t('auth.pleaseEnterValidMobile'));
       setOtpLoading(false);
       return;
     }
     try {
       await labourService.requestOTP(mobile, 'LABOUR');
-      setOtpStatus('OTP sent successfully!');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setOtpStatus(err.message || 'Failed to send OTP.');
+      setOtpStatus(err.message || t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
@@ -219,7 +221,7 @@ function LabourRegister() {
     setIsLoading(true);
     
     if (selectedService && formData.labourSubSkill.length === 0) {
-      setError('Please select at least one sub skill.');
+      setError(t('auth.pleaseSelectAtLeastOneSubSkill'));
       setIsLoading(false);
       return;
     }
@@ -242,17 +244,17 @@ function LabourRegister() {
           
           // Find the closest matching city from our list
           const closestCity = findClosestCity(detectedCity);
-          finalLocation = closestCity ? closestCity.value : 'Not specified';
+          finalLocation = closestCity ? closestCity.value : t('auth.notSpecified');
         } catch (locationError) {
-          finalLocation = 'Not specified';
+          finalLocation = t('auth.notSpecified');
         }
       }
       
       // Validate that the selected city is from our list
       const isValidCity = cities.some(city => city.CityName === finalLocation);
       
-      if (finalLocation !== 'Not specified' && !isValidCity) {
-        setError('Please select a valid city from the dropdown.');
+      if (finalLocation !== t('auth.notSpecified') && !isValidCity) {
+        setError(t('auth.pleaseSelectValidCity'));
         setIsLoading(false);
         return;
       }
@@ -274,10 +276,10 @@ function LabourRegister() {
         localStorage.setItem('labour', JSON.stringify({ ...labourDataWithoutReviews, token: response.token }));
         navigate('/labourDashboard');
       } else {
-        setError('Registration failed. Please try again.');
+        setError(t('auth.registrationFailed'));
       }
     } catch (error) {
-      setError('Registration failed. Please try again.');
+      setError(t('auth.registrationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -290,8 +292,8 @@ function LabourRegister() {
           <Card className="shadow-lg border-0">
             <Card.Body className="p-5">
               <div className="text-center mb-4">
-                <h2 className="fw-bold text-primary">Labour Registration</h2>
-                <p className="text-muted">Join InstaLab as a skilled professional</p>
+                <h2 className="fw-bold text-primary">{t('auth.labourRegistration')}</h2>
+                <p className="text-muted">{t('auth.joinAsSkilledProfessional')}</p>
               </div>
               {error && (
                 <div className="alert alert-danger d-flex align-items-center" role="alert">
@@ -309,7 +311,7 @@ function LabourRegister() {
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaUser className="me-2" />
-                    <Form.Label className="fw-bold mb-0">Full Name</Form.Label>
+                    <Form.Label className="fw-bold mb-0">{t('auth.fullName')}</Form.Label>
                   </div>
                   <Form.Control
                     type="text"
@@ -318,13 +320,13 @@ function LabourRegister() {
                     onChange={handleChange}
                     required
                     className="form-control-lg"
-                    placeholder="Enter your full name"
+                    placeholder={t('auth.enterFullName')}
                   />
                 </Form.Group>
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaTools className="me-2" />
-                    <Form.Label className="fw-bold mb-0">Main Skill</Form.Label>
+                    <Form.Label className="fw-bold mb-0">{t('auth.mainSkill')}</Form.Label>
                   </div>
                   <Form.Select
                     name="labourSkill"
@@ -333,7 +335,7 @@ function LabourRegister() {
                     required
                     className="form-control-lg"
                   >
-                    <option value="">Select your main skill</option>
+                    <option value="">{t('auth.selectMainSkill')}</option>
                     {services.map((service, index) => (
                       <option key={index} value={service.name}>
                         {service.name}
@@ -345,13 +347,13 @@ function LabourRegister() {
                   <Form.Group className="mb-4">
                     <div className="d-flex align-items-center">
                       <FaTools className="me-2" />
-                      <Form.Label className="fw-bold mb-0">Sub Skill</Form.Label>
+                      <Form.Label className="fw-bold mb-0">{t('auth.subSkill')}</Form.Label>
                     </div>
                     <Select
                       name="labourSubSkill"
                       isMulti
                       options={[
-                        { value: 'all', label: 'Select All' },
+                        { value: 'all', label: t('auth.selectAll') },
                         ...selectedService.subCategories.map(subCategory => ({
                           value: subCategory,
                           label: subCategory
@@ -364,7 +366,7 @@ function LabourRegister() {
                       }))}
                       className="basic-multi-select"
                       classNamePrefix="select"
-                      placeholder="Select your sub skills"
+                      placeholder={t('auth.selectSubSkills')}
                       menuPortalTarget={document.body}
                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                     />
@@ -373,7 +375,7 @@ function LabourRegister() {
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaPhone className="me-2" />
-                    <Form.Label className="fw-bold mb-0">Mobile Number</Form.Label>
+                    <Form.Label className="fw-bold mb-0">{t('auth.mobileNumber')}</Form.Label>
                   </div>
                   <InputGroup>
                     <Form.Control
@@ -390,7 +392,7 @@ function LabourRegister() {
                       required
                       pattern="[0-9]{10}"
                       className="form-control-lg"
-                      placeholder="Enter 10-digit mobile number"
+                      placeholder={t('auth.enterMobileNumber')}
                       maxLength="10"
                     />
                     <Button
@@ -399,7 +401,7 @@ function LabourRegister() {
                       onClick={handleRequestOTP}
                       disabled={otpLoading}
                     >
-                      {otpLoading ? 'Sending OTP...' : 'Request OTP'}
+                      {otpLoading ? t('auth.sendingOtp') : t('auth.requestOtp')}
                     </Button>
                   </InputGroup>
                   {otpStatus && (
@@ -411,12 +413,12 @@ function LabourRegister() {
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaKey className="me-2" />
-                    <Form.Label className="fw-bold mb-0">OTP</Form.Label>
+                    <Form.Label className="fw-bold mb-0">{t('auth.otp')}</Form.Label>
                   </div>
                   <InputGroup>
                     <Form.Control
                       type={showOtp ? "text" : "password"}
-                      placeholder="Enter OTP"
+                      placeholder={t('auth.enterOtp')}
                       value={otp}
                       onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       className="form-control-lg"
@@ -436,7 +438,7 @@ function LabourRegister() {
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaMapMarkerAlt className="me-2" />
-                    <Form.Label className="fw-bold mb-0">Location (Optional)</Form.Label>
+                    <Form.Label className="fw-bold mb-0">{t('auth.location')}</Form.Label>
                   </div>
                   <InputGroup>
                     <div style={{ flex: 1 }}>
@@ -457,7 +459,7 @@ function LabourRegister() {
                           }));
                         }}
                         value={selectedCity}
-                        placeholder="Type to search cities..."
+                        placeholder={t('auth.typeToSearchCities')}
                         isClearable
                         cacheOptions
                         defaultOptions={cities.length > 0 ? searchCities('') : []}
@@ -469,7 +471,7 @@ function LabourRegister() {
                           control: base => ({ ...base, minHeight: '46px' })
                         }}
                         noOptionsMessage={({ inputValue }) => 
-                          inputValue ? `No cities found matching "${inputValue}"` : 'Type to search cities'
+                          inputValue ? `${t('auth.noCitiesFoundMatching')} "${inputValue}"` : t('auth.typeToSearchCities')
                         }
                       />
                     </div>
@@ -483,18 +485,18 @@ function LabourRegister() {
                       {locationLoading ? (
                         <>
                           <Spinner size="sm" className="me-1" />
-                          Detecting...
+                          {t('auth.detecting')}
                         </>
                       ) : (
                         <>
                           <FaLocationArrow className="me-1" />
-                          Auto-detect
+                          {t('auth.autoDetect')}
                         </>
                       )}
                     </Button>
                   </InputGroup>
                   <Form.Text className="text-muted">
-                    Type to search and select from available cities. Auto-detection will find the closest match.
+                    {t('auth.typeToSearchAndSelect')}
                   </Form.Text>
                 </Form.Group>
                 <div className="d-grid gap-2">
@@ -514,24 +516,24 @@ function LabourRegister() {
                           aria-hidden="true"
                           className="me-2"
                         />
-                        Creating Account...
+                        {t('auth.creatingAccount')}
                       </>
                     ) : (
                       <>
-                        Create Account <FaArrowRight className="ms-2" />
+                        {t('auth.createAccountBtn')} <FaArrowRight className="ms-2" />
                       </>
                     )}
                   </Button>
                 </div>
                 <div className="text-center mt-4">
                   <p className="mb-0">
-                    Already have an account?{' '}
+                    {t('auth.alreadyHaveAccount')}{' '}
                     <Button 
                       variant="link" 
                       className="p-0 text-decoration-none"
                       onClick={() => navigate('/labourLogin')}
                     >
-                      Login here
+                      {t('auth.loginHere')}
                     </Button>
                   </p>
                 </div>

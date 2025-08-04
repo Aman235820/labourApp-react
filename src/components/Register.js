@@ -4,10 +4,12 @@ import { useForm } from 'react-hook-form';
 import { registerUser, requestOTP } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
     const { register, handleSubmit, formState: { errors }, getValues } = useForm();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [otpStatus, setOtpStatus] = useState('');
@@ -38,11 +40,11 @@ const Register = () => {
                 localStorage.setItem('user', JSON.stringify({ ...response.returnValue, token: response.token }));
                 navigate('/userHome');
             } else {
-                setError('Registration failed. Please try again.');
+                setError(t('auth.registrationFailed'));
             }
         } catch (error) {
             console.error('Registration failed:', error);
-            setError(error.message || 'Registration failed. Please try again.');
+            setError(error.message || t('auth.registrationFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -53,15 +55,15 @@ const Register = () => {
         setOtpLoading(true);
         const mobile = getValues('mobileNumber');
         if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-            setOtpStatus('Please enter a valid 10-digit mobile number before requesting OTP.');
+            setOtpStatus(t('auth.pleaseEnterValidMobile'));
             setOtpLoading(false);
             return;
         }
         try {
             await requestOTP(mobile, 'USER');
-            setOtpStatus('OTP sent successfully!');
+            setOtpStatus(t('auth.otpSentSuccessfully'));
         } catch (err) {
-            setOtpStatus(err.message || 'Failed to send OTP.');
+            setOtpStatus(err.message || t('auth.failedToSendOtp'));
         } finally {
             setOtpLoading(false);
         }
@@ -74,8 +76,8 @@ const Register = () => {
                     <Card className="shadow-lg border-0">
                         <Card.Body className="p-5">
                             <div className="text-center mb-4">
-                                <h2 className="fw-bold text-primary">Create Account</h2>
-                                <p className="text-muted">Join InstaLab and connect with skilled professionals</p>
+                                <h2 className="fw-bold text-primary">{t('auth.createAccount')}</h2>
+                                <p className="text-muted">{t('auth.joinInstaLab')}</p>
                             </div>
                             
                             {error && (
@@ -89,17 +91,17 @@ const Register = () => {
                                 <Form.Group className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <FaUser className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">Full Name</Form.Label>
+                                        <Form.Label className="fw-bold mb-0">{t('auth.fullName')}</Form.Label>
                                     </div>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Enter your full name"
+                                        placeholder={t('auth.enterFullName')}
                                         className={`form-control-lg ${errors.fullName ? 'is-invalid' : ''}`}
                                         {...register('fullName', { 
-                                            required: 'Full name is required',
+                                            required: t('auth.fullNameRequired'),
                                             minLength: {
                                                 value: 3,
-                                                message: 'Name must be at least 3 characters'
+                                                message: t('auth.nameMustBeAtLeast3')
                                             }
                                         })}
                                     />
@@ -113,17 +115,17 @@ const Register = () => {
                                 <Form.Group className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <FaEnvelope className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">Email Address</Form.Label>
+                                        <Form.Label className="fw-bold mb-0">{t('auth.emailAddress')}</Form.Label>
                                     </div>
                                     <Form.Control
                                         type="email"
-                                        placeholder="Enter your email"
+                                        placeholder={t('auth.enterEmail')}
                                         className={`form-control-lg ${errors.email ? 'is-invalid' : ''}`}
                                         {...register('email', {
-                                            required: 'Email is required',
+                                            required: t('auth.emailRequired'),
                                             pattern: {
                                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                                message: 'Please enter a valid email address'
+                                                message: t('auth.pleaseEnterValidEmail')
                                             }
                                         })}
                                     />
@@ -137,18 +139,18 @@ const Register = () => {
                                 <Form.Group className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <FaPhone className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">Mobile Number</Form.Label>
+                                        <Form.Label className="fw-bold mb-0">{t('auth.mobileNumber')}</Form.Label>
                                     </div>
                                     <InputGroup>
                                         <Form.Control
                                             type="tel"
-                                            placeholder="Enter your mobile number"
+                                            placeholder={t('auth.enterMobileNumber')}
                                             className={`form-control-lg ${errors.mobileNumber ? 'is-invalid' : ''}`}
                                             {...register('mobileNumber', {
-                                                required: 'Mobile number is required',
+                                                required: t('auth.mobileNumberRequired'),
                                                 pattern: {
                                                     value: /^[0-9]{10}$/,
-                                                    message: 'Please enter a valid 10-digit mobile number'
+                                                    message: t('auth.pleaseEnterValidMobileNumber')
                                                 },
                                                 onChange: (e) => {
                                                     const value = e.target.value.replace(/\D/g, '').slice(0, 10);
@@ -163,7 +165,7 @@ const Register = () => {
                                             onClick={handleRequestOTP}
                                             disabled={otpLoading}
                                         >
-                                            {otpLoading ? 'Sending OTP...' : 'Request OTP'}
+                                            {otpLoading ? t('auth.sendingOtp') : t('auth.requestOtp')}
                                         </Button>
                                     </InputGroup>
                                     {errors.mobileNumber && (
@@ -181,18 +183,18 @@ const Register = () => {
                                 <Form.Group className="mb-4">
                                     <div className="d-flex align-items-center">
                                         <FaKey className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">OTP</Form.Label>
+                                        <Form.Label className="fw-bold mb-0">{t('auth.otp')}</Form.Label>
                                     </div>
                                     <InputGroup>
                                         <Form.Control
                                             type={showOtp ? "text" : "password"}
-                                            placeholder="Enter OTP"
+                                            placeholder={t('auth.enterOtp')}
                                             className={`form-control-lg ${errors.otp ? 'is-invalid' : ''}`}
                                             {...register('otp', {
-                                                required: 'OTP is required',
+                                                required: t('auth.otpRequired'),
                                                 pattern: {
                                                     value: /^[0-9]{4,6}$/,
-                                                    message: 'Please enter a valid 4 to 6-digit OTP'
+                                                    message: t('auth.pleaseEnterValidOtp')
                                                 }
                                             })}
                                             maxLength="6"
@@ -230,11 +232,11 @@ const Register = () => {
                                                     aria-hidden="true"
                                                     className="me-2"
                                                 />
-                                                Creating Account...
+                                                {t('auth.creatingAccount')}
                                             </>
                                         ) : (
                                             <>
-                                                Create Account <FaArrowRight className="ms-2" />
+                                                {t('auth.createAccountBtn')} <FaArrowRight className="ms-2" />
                                             </>
                                         )}
                                     </Button>
@@ -242,13 +244,13 @@ const Register = () => {
 
                                 <div className="text-center mt-4">
                                     <p className="mb-0">
-                                        Already have an account?{' '}
+                                        {t('auth.alreadyHaveAccount')}{' '}
                                         <Button 
                                             variant="link" 
                                             className="p-0 text-decoration-none"
                                             onClick={() => navigate('/login')}
                                         >
-                                            Login here
+                                            {t('auth.loginHere')}
                                         </Button>
                                     </p>
                                 </div>
