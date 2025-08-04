@@ -29,10 +29,6 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
   const [cityName, setCityName] = useState(''); // State for city name
   const [showLocationModal, setShowLocationModal] = useState(false);
   
-  // Touch gesture states for mobile swipe
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
   // Check if user is logged in
   useEffect(() => {
     const checkUserLoginStatus = () => {
@@ -130,47 +126,6 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
       window.removeEventListener('storage', updateCity);
     };
   }, []);
-
-  // Swipe gesture detection for mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const minSwipeDistance = 50;
-
-    const onTouchStart = (e) => {
-      setTouchEnd(null);
-      setTouchStart(e.targetTouches[0].clientX);
-    };
-
-    const onTouchMove = (e) => {
-      setTouchEnd(e.targetTouches[0].clientX);
-    };
-
-    const onTouchEnd = () => {
-      if (!touchStart || !touchEnd) return;
-      
-      const distance = touchStart - touchEnd;
-      const isLeftSwipe = distance > minSwipeDistance;
-      const isRightSwipe = distance < -minSwipeDistance;
-
-      if (isRightSwipe && !isOpen) {
-        setIsOpen(true);
-      }
-      if (isLeftSwipe && isOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('touchstart', onTouchStart);
-    document.addEventListener('touchmove', onTouchMove);
-    document.addEventListener('touchend', onTouchEnd);
-
-    return () => {
-      document.removeEventListener('touchstart', onTouchStart);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', onTouchEnd);
-    };
-  }, [touchStart, touchEnd, isOpen, isMobile, setIsOpen]);
 
   // Prevent body scroll when sidebar is open (mobile only) and handle sidebar scroll
   useEffect(() => {

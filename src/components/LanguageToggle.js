@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FaGlobeAmericas } from 'react-icons/fa';
 import '../styles/LanguageToggle.css';
 
-function LanguageToggle() {
+function LanguageToggle({ hideMobileIcon = false }) {
   const { i18n } = useTranslation();
 
   const changeLanguage = (language) => {
@@ -16,7 +16,7 @@ function LanguageToggle() {
 
   return (
     <div className="language-toggle-container">
-      <FaGlobeAmericas className="language-toggle-icon text-light" size={16} />
+      <FaGlobeAmericas className={`language-toggle-icon text-light ${hideMobileIcon ? 'd-none d-lg-block' : ''}`} size={16} />
       <ButtonGroup size="sm">
         <Button
           variant={isEnglish ? "light" : "outline-light"}

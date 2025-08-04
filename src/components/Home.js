@@ -442,8 +442,10 @@ function Home() {
                         />
                       ) : (
                         <>
-                      <span className="d-none d-sm-inline">{t('search.button')}</span>
-                      <span className="d-inline d-sm-none">{t('search.button')}</span>
+                          <span className="d-none d-md-inline">{t('search.button')}</span>
+                          <span className="d-inline d-md-none">
+                            <FaSearch size={16} />
+                          </span>
                         </>
                       )}
                     </Button>

@@ -103,73 +103,112 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
 
   return (
     <>
-      <Navbar 
-        bg="dark" 
-        variant="dark" 
-        expand="lg" 
-        className={`mb-3 ${isMobile ? 'navbar-mobile' : 'navbar-desktop'} ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-      >
-        <Container fluid>
-          {/* Hamburger Menu Button - only visible on mobile */}
-          <Button
-            variant="outline-light"
-            className="sidebar-toggle-btn me-2 d-lg-none"
-            onClick={toggleSidebar}
-            aria-label={t('navigation.toggleSidebar')}
-          >
-            <FaBars size={14} />
-          </Button>
-
-          {/* Brand - Always visible with responsive sizing */}
-          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center flex-grow-1">
-            <img
-              src="/images/instaHelpLogo.jpg"
-              className="navbar-logo me-2"
-              alt="InstaHelp Logo"
-            />
-            <span className="brand-text">{t('navigation.brand')}</span>
-          </Navbar.Brand>
-          
-          {/* Location Display - Left side */}
-          <div className="location-display d-none d-md-flex align-items-center me-3" onClick={handleLocationClick}>
-            <FaMapMarkerAlt className="me-2 text-info" />
-            <span className="location-text">
-              <span className="text-muted">{t('navigation.showingServicesIn')} </span>
-              <span className="fw-bold text-white">
-                {cityName || locationError || t('navigation.setLocation')}
+      {/* Desktop Navigation */}
+      {!isMobile && (
+        <Navbar 
+          bg="dark" 
+          variant="dark" 
+          expand="lg" 
+          className={`mb-3 navbar-desktop ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
+        >
+          <Container fluid>
+            {/* Brand */}
+            <Navbar.Brand as={Link} to="/" className="d-flex align-items-center flex-grow-1">
+              <img
+                src="/images/instaHelpLogo.jpg"
+                className="navbar-logo me-2"
+                alt="InstaHelp Logo"
+              />
+              <span className="brand-text">{t('navigation.brand')}</span>
+            </Navbar.Brand>
+            
+            {/* Location Display */}
+            <div className="location-display d-none d-md-flex align-items-center me-3" onClick={handleLocationClick}>
+              <FaMapMarkerAlt className="me-2 text-info" />
+              <span className="location-text">
+                <span className="text-muted">{t('navigation.showingServicesIn')} </span>
+                <span className="fw-bold text-white">
+                  {cityName || locationError || t('navigation.setLocation')}
+                </span>
               </span>
-            </span>
-            {(!cityName && !locationError) && (
-              <Button
-                variant="outline-light"
-                size="sm"
-                className="ms-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLocationRequest();
-                }}
-                title={t('navigation.requestLocationPermission')}
-              >
-                <FaLocationArrow size={12} />
-              </Button>
-            )}
+              {(!cityName && !locationError) && (
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  className="ms-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLocationRequest();
+                  }}
+                  title={t('navigation.requestLocationPermission')}
+                >
+                  <FaLocationArrow size={12} />
+                </Button>
+              )}
+            </div>
+
+            {/* Language Toggle */}
+            <LanguageToggle />
+
+            {/* Navigation Links */}
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="ms-auto">
+                <Nav.Link as={Link} to="/" className="nav-link">
+                  <FaHome className="me-1" />
+                  <span className="d-none d-sm-inline">{t('navigation.home')}</span>
+                </Nav.Link>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+      )}
+
+      {/* Mobile Navigation */}
+      {isMobile && (
+        <div className="mobile-navigation">
+          <div className="mobile-nav-container">
+            {/* Hamburger Menu Button */}
+            <Button
+              variant="outline-light"
+              className="mobile-nav-btn"
+              onClick={toggleSidebar}
+              aria-label={t('navigation.toggleSidebar')}
+              title="Menu"
+            >
+              <FaBars size={16} />
+            </Button>
+
+            {/* Location Button */}
+            <Button
+              variant="outline-light"
+              className="mobile-nav-btn"
+              onClick={handleLocationClick}
+              title={cityName || t('navigation.setLocation')}
+              aria-label="Set location"
+            >
+              <FaMapMarkerAlt size={16} />
+            </Button>
+
+            {/* Language Toggle */}
+            <div className="mobile-language-toggle">
+              <LanguageToggle hideMobileIcon={true} />
+            </div>
+
+            {/* Home Button */}
+            <Button
+              variant="outline-light"
+              className="mobile-nav-btn"
+              as={Link}
+              to="/"
+              title={t('navigation.home')}
+              aria-label="Go to home"
+            >
+              <FaHome size={16} />
+            </Button>
           </div>
-
-          {/* Language Toggle */}
-          <LanguageToggle />
-
-          {/* Navigation Links */}
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="ms-auto">
-              <Nav.Link as={Link} to="/" className="nav-link">
-                <FaHome className="me-1" />
-                <span className="d-none d-sm-inline">{t('navigation.home')}</span>
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+        </div>
+      )}
 
       {/* Location Modal */}
       <LocationModal
