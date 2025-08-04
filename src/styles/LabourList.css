@@ -1,0 +1,55 @@
+/* LabourList Component Styles */
+.labour-list-modal .modal-dialog {
+  max-width: 90%;
+}
+
+.labour-list-container {
+  padding: 1rem;
+}
+
+.labour-table-container {
+  overflow-x: auto;
+}
+
+.labour-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.labour-row:hover {
+  background-color: #f8f9fa;
+}
+
+.labour-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+.rating-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.no-rating {
+  color: #6c757d;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .labour-list-modal .modal-dialog {
+    max-width: 95%;
+    margin: 0.5rem;
+  }
+  
+  .labour-table-container {
+    font-size: 0.875rem;
+  }
+} 

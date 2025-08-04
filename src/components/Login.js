@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { userService } from '../services/UserService';
-import { FaUser, FaEye, FaEyeSlash, FaLock, FaEnvelope, FaSignInAlt, FaArrowLeft, FaExclamationCircle } from 'react-icons/fa';
+import { useForm } from 'react-hook-form';
+import { userService, loginUser, requestOTP } from '../services/userService';
+import { FaUser, FaEye, FaEyeSlash, FaLock, FaEnvelope, FaSignInAlt, FaArrowLeft, FaExclamationCircle, FaPhone, FaKey, FaArrowRight } from 'react-icons/fa';
 import '../styles/Login.css';
 
 const Login = () => {
