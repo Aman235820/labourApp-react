@@ -10,12 +10,14 @@ import {
   FaUpload, FaImage, FaUserCircle 
 } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { labourService } from '../services/labourService';
 import axios from 'axios';
 import UpdateLabourModal from './UpdateLabourModal';
 import '../styles/LabourDashboard.css';
 
 const LabourDashboard = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [labourDetails, setLabourDetails] = useState(null);
   const [requestedServices, setRequestedServices] = useState([]);
@@ -356,15 +358,15 @@ const LabourDashboard = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+    if (!window.confirm(t('labourDashboard.deleteAccountConfirm'))) return;
     try {
       setIsLoading(true);
       await labourService.deleteLabour(labourDetails.labourId);
       localStorage.removeItem('labour');
-      alert('Your account has been deleted.');
+      alert(t('labourDashboard.accountDeleted'));
       navigate('/labourLogin');
     } catch (err) {
-      alert('Failed to delete account. Please try again.');
+      alert(t('labourDashboard.deleteAccountFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -390,14 +392,14 @@ const LabourDashboard = () => {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      setImageUploadError('Please select a valid image file (JPEG, PNG, or WebP)');
+      setImageUploadError(t('labourDashboard.validImageFile'));
       return;
     }
 
     // Validate file size (max 10MB as per server requirement)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      setImageUploadError('Image size should be less than 10MB');
+      setImageUploadError(t('labourDashboard.imageSizeLimit'));
       return;
     }
 
@@ -425,7 +427,7 @@ const LabourDashboard = () => {
         // Clear success message after 5 seconds
         setTimeout(() => setImageUploadSuccess(false), 5000);
       } else {
-        setImageUploadError('Failed to upload image. Please try again.');
+        setImageUploadError(t('labourDashboard.imageUploadFailed'));
       }
     } catch (error) {
       console.error('Image upload error:', error);
@@ -434,33 +436,33 @@ const LabourDashboard = () => {
       if (error.status) {
         // Error from labourService with status
         if (error.status === 500) {
-          setImageUploadError('Unable to upload the image. Please check the file type or size should be less than 10MB');
+          setImageUploadError(t('labourDashboard.imageUploadFailed'));
         } else if (error.status === 413) {
-          setImageUploadError('File size too large. Please select an image smaller than 10MB');
+          setImageUploadError(t('labourDashboard.imageSizeTooLarge'));
         } else if (error.status === 400) {
-          setImageUploadError('Invalid file format. Please select a valid image file');
+          setImageUploadError(t('labourDashboard.invalidFileFormat'));
         } else if (error.status === 'NETWORK_ERROR') {
-          setImageUploadError('Network error. Please check your internet connection and try again.');
+          setImageUploadError(t('labourDashboard.networkError'));
         } else {
           setImageUploadError(`Upload failed (${error.status}). Please try again.`);
         }
       } else if (error.response) {
         // Direct axios error response
         if (error.response.status === 500) {
-          setImageUploadError('Unable to upload the image. Please check the file type or size should be less than 10MB');
+          setImageUploadError(t('labourDashboard.imageUploadFailed'));
         } else if (error.response.status === 413) {
-          setImageUploadError('File size too large. Please select an image smaller than 10MB');
+          setImageUploadError(t('labourDashboard.imageSizeTooLarge'));
         } else if (error.response.status === 400) {
-          setImageUploadError('Invalid file format. Please select a valid image file');
+          setImageUploadError(t('labourDashboard.invalidFileFormat'));
         } else {
           setImageUploadError(`Upload failed (${error.response.status}). Please try again.`);
         }
       } else if (error.request) {
         // Network error
-        setImageUploadError('Network error. Please check your internet connection and try again.');
+        setImageUploadError(t('labourDashboard.networkError'));
       } else {
         // Other errors
-        setImageUploadError('Unable to upload the image. Please check the file type or size should be less than 10MB');
+        setImageUploadError(t('labourDashboard.imageUploadFailed'));
       }
     } finally {
       setIsUploadingImage(false);
@@ -485,33 +487,33 @@ const LabourDashboard = () => {
       localStorage.setItem('labour', JSON.stringify(updatedLabourDetails));
       
       // Show success message
-      alert('Profile image removed successfully!');
+      alert(t('labourDashboard.imageRemoveSuccess'));
     } catch (error) {
       console.error('Error removing profile image:', error);
       
       // Handle different types of errors
       if (error.status) {
         if (error.status === 500) {
-          alert('Unable to remove the image. Please try again later.');
+          alert(t('labourDashboard.imageRemoveFailed'));
         } else if (error.status === 404) {
-          alert('Image not found. It may have already been removed.');
+          alert(t('labourDashboard.imageNotFound'));
         } else if (error.status === 'NETWORK_ERROR') {
-          alert('Network error. Please check your internet connection and try again.');
+          alert(t('labourDashboard.networkError'));
         } else {
           alert(`Failed to remove image (${error.status}). Please try again.`);
         }
       } else if (error.response) {
         if (error.response.status === 500) {
-          alert('Unable to remove the image. Please try again later.');
+          alert(t('labourDashboard.imageRemoveFailed'));
         } else if (error.response.status === 404) {
-          alert('Image not found. It may have already been removed.');
+          alert(t('labourDashboard.imageNotFound'));
         } else {
           alert(`Failed to remove image (${error.response.status}). Please try again.`);
         }
       } else if (error.request) {
-        alert('Network error. Please check your internet connection and try again.');
+        alert(t('labourDashboard.networkError'));
       } else {
-        alert('Unable to remove the image. Please try again.');
+        alert(t('labourDashboard.imageRemoveFailed'));
       }
     }
   };
@@ -1032,20 +1034,20 @@ const LabourDashboard = () => {
   const getStatusBadge = (statusCode) => {
     switch (statusCode) {
       case -1:
-        return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+        return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> {t('labourDashboard.rejected')}</Badge>;
       case 1:
-        return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> Pending</Badge>;
+        return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> {t('labourDashboard.pending')}</Badge>;
       case 2:
-        return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+        return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> {t('labourDashboard.accepted')}</Badge>;
       case 3:
-        return <Badge bg="success" className="px-3 py-2"><FaClock className="me-1" /> Completed</Badge>;
+        return <Badge bg="success" className="px-3 py-2"><FaClock className="me-1" /> {t('labourDashboard.completed')}</Badge>;
       default:
-        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>;
+        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> {t('labourDashboard.unknown')}</Badge>;
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('labourDashboard.notSpecified');
     
     try {
       let date;
@@ -1066,7 +1068,7 @@ const LabourDashboard = () => {
       
       // Check if date is valid
       if (isNaN(date.getTime())) {
-        return 'Invalid Date';
+        return t('labourDashboard.invalidDate');
       }
       
       // Format: DD MMM YY
@@ -1079,7 +1081,7 @@ const LabourDashboard = () => {
       return `${day} ${month} ${year}`;
     } catch (error) {
       console.error('Error formatting date:', error);
-      return 'Invalid Date';
+      return t('labourDashboard.invalidDate');
     }
   };
 
@@ -1171,7 +1173,7 @@ const LabourDashboard = () => {
     return (
       <div className="text-center py-4">
         <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </Spinner>
       </div>
     );
@@ -1224,7 +1226,7 @@ const LabourDashboard = () => {
                       <label 
                         htmlFor="profile-image-upload" 
                         className="btn btn-primary btn-sm rounded-circle p-1"
-                        title="Upload Profile Image"
+                        title={t('labourDashboard.uploadProfileImage')}
                         style={{ 
                           width: '28px', 
                           height: '28px',
@@ -1266,7 +1268,7 @@ const LabourDashboard = () => {
                     <p className="labour-skill mb-0">{labourDetails.labourSkill}</p>
                     <Badge bg="secondary" className="px-2 py-1">
                       <FaIdCard className="me-1" size={12} />
-                      ID: {labourDetails.labourId}
+                      {t('labourDashboard.id')}: {labourDetails.labourId}
                     </Badge>
                   </div>
                   
@@ -1275,28 +1277,28 @@ const LabourDashboard = () => {
                       {renderStars(overallRating)}
                     </div>
                     <span className="fw-bold">
-                      {overallRating && overallRating > 0 ? overallRating.toFixed(1) : 'No rating'}
+                      {overallRating && overallRating > 0 ? overallRating.toFixed(1) : t('labourDashboard.noRating')}
                     </span>
                     <span className="text-muted">
-                      ({ratingCount} review{ratingCount !== 1 ? 's' : ''})
+                      ({ratingCount} {ratingCount !== 1 ? t('labourDashboard.reviews') : t('labourDashboard.review')})
                     </span>
                     <Badge bg={labourDetails.isAvailable !== false ? 'success' : 'danger'}>
-                      {labourDetails.isAvailable !== false ? 'Available' : 'Busy'}
+                      {labourDetails.isAvailable !== false ? t('labourDashboard.available') : t('labourDashboard.busy')}
                     </Badge>
                   </div>
                   
                   <div className="labour-meta">
                     <span className="me-3">
                       <FaMapMarkerAlt className="me-1" />
-                      {labourDetails.labourLocation || labourDetails.labourAddress || 'Location not specified'}
+                      {labourDetails.labourLocation || labourDetails.labourAddress || t('labourDashboard.locationNotSpecified')}
                     </span>
                     <span className="me-3">
                       <FaClock className="me-1" />
-                      {labourDetails.labourExperience || 'Experience not specified'}
+                      {labourDetails.labourExperience || t('labourDashboard.experienceNotSpecified')}
                     </span>
                     <span>
                       <FaTools className="me-1" />
-                      {labourDetails.priceRange || 'Price on request'}
+                      {labourDetails.priceRange || t('labourDashboard.priceOnRequest')}
                     </span>
                   </div>
                   
@@ -1305,7 +1307,7 @@ const LabourDashboard = () => {
                     <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center mt-2">
                       <div className="d-flex align-items-center mb-1 mb-sm-0">
                         <FaList className="text-muted me-2" size={12} />
-                        <span className="text-muted small me-2">Specializations:</span>
+                        <span className="text-muted small me-2">{t('labourDashboard.specializations')}:</span>
                       </div>
                       <div className="d-flex flex-wrap gap-1">
                         {labourDetails.labourSubSkills.map((subSkill, index) => (
@@ -1335,8 +1337,8 @@ const LabourDashboard = () => {
                   size="sm"
                 >
                   <FaEdit className="me-1 me-md-2" size={14} />
-                  <span className="d-none d-sm-inline">Edit Profile</span>
-                  <span className="d-inline d-sm-none">Edit</span>
+                  <span className="d-none d-sm-inline">{t('labourDashboard.editProfile')}</span>
+                  <span className="d-inline d-sm-none">{t('labourDashboard.edit')}</span>
                 </Button>
                 <Button 
                   variant="outline-danger" 
@@ -1345,8 +1347,8 @@ const LabourDashboard = () => {
                   size="sm"
                 >
                     <FaSignOutAlt className="me-1 me-md-2" size={14} />
-                    <span className="d-none d-sm-inline">Logout</span>
-                    <span className="d-inline d-sm-none">Exit</span>
+                    <span className="d-none d-sm-inline">{t('labourDashboard.logout')}</span>
+                    <span className="d-inline d-sm-none">{t('labourDashboard.exit')}</span>
                   </Button>
                 </div>
             </Col>
@@ -1359,7 +1361,7 @@ const LabourDashboard = () => {
         <Container className="mt-3">
           <Alert variant="success" className="mb-0" onClose={() => setImageUploadSuccess(false)} dismissible>
             <FaCheckCircle className="me-2" />
-            Profile image uploaded successfully! Your new profile picture is now visible.
+            {t('labourDashboard.uploadImageSuccess')}
           </Alert>
         </Container>
       )}
@@ -1382,7 +1384,7 @@ const LabourDashboard = () => {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaChartLine className="me-2 text-primary" />
-                    Performance Analytics
+                    {t('labourDashboard.performanceAnalytics')}
                   </h4>
                   <Button
                     variant="outline-primary"
@@ -1396,12 +1398,12 @@ const LabourDashboard = () => {
                     {(isServicesRefreshing || isRatingsLoading) ? (
                       <>
                         <Spinner animation="border" size="sm" className="me-2" />
-                        Refreshing...
+                        {t('labourDashboard.refreshing')}
                       </>
                     ) : (
                       <>
                         <FaSync className="me-2" />
-                        Refresh Data
+                        {t('labourDashboard.refreshData')}
                       </>
                     )}
                   </Button>
@@ -1410,7 +1412,7 @@ const LabourDashboard = () => {
                 {isRatingsLoading || isServicesRefreshing ? (
                   <div className="text-center py-5">
                     <Spinner animation="border" className="text-primary mb-3" />
-                    <p className="text-muted">Loading analytics...</p>
+                    <p className="text-muted">{t('labourDashboard.loadingAnalytics')}</p>
                   </div>
                 ) : (
                   <Row>
@@ -1428,7 +1430,7 @@ const LabourDashboard = () => {
                                       <div className="metric-value text-primary fw-bold h5 h-md-4 mb-1">
                                         {analytics.total}
                                       </div>
-                                      <div className="metric-label text-muted small">Total Bookings</div>
+                                      <div className="metric-label text-muted small">{t('labourDashboard.totalBookings')}</div>
                                     </div>
                                     <FaBusinessTime className="text-primary opacity-75 d-none d-md-block" size={20} />
                                     <FaBusinessTime className="text-primary opacity-75 d-block d-md-none" size={16} />
@@ -1442,7 +1444,7 @@ const LabourDashboard = () => {
                                       <div className="metric-value text-success fw-bold h5 h-md-4 mb-1">
                                         {analytics.completionRate.toFixed(1)}%
                                       </div>
-                                      <div className="metric-label text-muted small">Completion Rate</div>
+                                      <div className="metric-label text-muted small">{t('labourDashboard.completionRate')}</div>
                                     </div>
                                     <FaCheckCircle className="text-success opacity-75 d-none d-md-block" size={20} />
                                     <FaCheckCircle className="text-success opacity-75 d-block d-md-none" size={16} />
@@ -1462,7 +1464,7 @@ const LabourDashboard = () => {
                                       <div className="metric-value text-info fw-bold h5 h-md-4 mb-1">
                                         {analytics.acceptanceRate.toFixed(1)}%
                                       </div>
-                                      <div className="metric-label text-muted small">Acceptance Rate</div>
+                                      <div className="metric-label text-muted small">{t('labourDashboard.acceptanceRate')}</div>
                                     </div>
                                     <FaHandshake className="text-info opacity-75 d-none d-md-block" size={20} />
                                     <FaHandshake className="text-info opacity-75 d-block d-md-none" size={16} />
@@ -1482,7 +1484,7 @@ const LabourDashboard = () => {
                                       <div className="metric-value text-danger fw-bold h5 h-md-4 mb-1">
                                         {analytics.rejectionRate.toFixed(1)}%
                                       </div>
-                                      <div className="metric-label text-muted small">Rejection Rate</div>
+                                      <div className="metric-label text-muted small">{t('labourDashboard.rejectionRate')}</div>
                                     </div>
                                     <FaTimesCircle className="text-danger opacity-75 d-none d-md-block" size={20} />
                                     <FaTimesCircle className="text-danger opacity-75 d-block d-md-none" size={16} />
@@ -1502,9 +1504,9 @@ const LabourDashboard = () => {
                                       <div className="metric-value text-warning fw-bold h5 h-md-4 mb-1">
                                         {activity.recentBookings}
                                       </div>
-                                      <div className="metric-label text-muted small">Recent Bookings</div>
+                                      <div className="metric-label text-muted small">{t('labourDashboard.recentBookings')}</div>
                                       <div className="metric-sublabel text-muted" style={{ fontSize: '0.7rem' }}>
-                                        Last 30 Days
+                                        {t('labourDashboard.last30Days')}
                                       </div>
                                     </div>
                                     <FaChartBar className="text-warning opacity-75 d-none d-md-block" size={20} />
@@ -1532,7 +1534,7 @@ const LabourDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaClock className="me-2 text-primary" />
-                    Service Requests
+                    {t('labourDashboard.serviceRequests')}
                   </h4>
                   <div className="d-flex align-items-center gap-2 gap-md-3">
                     <Button
@@ -1545,19 +1547,19 @@ const LabourDashboard = () => {
                       {isServicesRefreshing ? (
                         <>
                           <Spinner animation="border" size="sm" className="me-1 me-md-2" />
-                          <span className="d-none d-sm-inline">Refreshing...</span>
+                          <span className="d-none d-sm-inline">{t('labourDashboard.refreshing')}</span>
                           <span className="d-inline d-sm-none">...</span>
                         </>
                       ) : (
                         <>
                           <FaSync className="me-1 me-md-2" />
-                          <span className="d-none d-sm-inline">Refresh</span>
-                          <span className="d-inline d-sm-none">Sync</span>
+                          <span className="d-none d-sm-inline">{t('labourDashboard.refresh')}</span>
+                          <span className="d-inline d-sm-none">{t('labourDashboard.sync')}</span>
                         </>
                       )}
                     </Button>
                     <Badge bg="warning" className="px-2 px-md-3 py-1 py-md-2">
-                      {(requestedServices || []).filter(service => service.bookingStatusCode === 1).length} Pending
+                      {(requestedServices || []).filter(service => service.bookingStatusCode === 1).length} {t('labourDashboard.pending')}
                     </Badge>
                   </div>
                 </div>
@@ -1576,16 +1578,16 @@ const LabourDashboard = () => {
                       <Table className="table-modern">
                         <thead>
                           <tr>
-                            <th className="border-0 bg-light fw-semibold text-dark">Booking</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Client</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Service</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Preferred Date</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Preferred Time</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Work Description</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Urgency</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Date</th>
-                            <th className="border-0 bg-light fw-semibold text-dark">Status</th>
-                            <th className="border-0 bg-light fw-semibold text-dark text-center">Actions</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.booking')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.client')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.service')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.preferredDate')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.preferredTime')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.workDescription')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.urgency')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.date')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark">{t('labourDashboard.status')}</th>
+                            <th className="border-0 bg-light fw-semibold text-dark text-center">{t('labourDashboard.actions')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1593,7 +1595,7 @@ const LabourDashboard = () => {
                             <tr key={service.bookingId} className="border-bottom">
                               <td className="py-3">
                                 <div className="fw-bold text-primary">#{service.bookingId}</div>
-                                <small className="text-muted">ID</small>
+                                <small className="text-muted">{t('labourDashboard.id')}</small>
                               </td>
                               <td className="py-3">
                                 <div className="d-flex align-items-center">
@@ -1601,7 +1603,7 @@ const LabourDashboard = () => {
                                     <FaUser className="text-muted" size={14} />
                                   </div>
                                   <div>
-                                    <div className="fw-semibold">{service.userName || 'Anonymous'}</div>
+                                    <div className="fw-semibold">{service.userName || t('labourDashboard.anonymous')}</div>
                                     <small className="text-muted">{service.userMobileNumber}</small>
                                   </div>
                                 </div>
@@ -1613,33 +1615,36 @@ const LabourDashboard = () => {
                               </td>
                               <td className="py-3">
                                 <div className="fw-semibold">
-                                  {service.preferredDate ? new Date(service.preferredDate).toLocaleDateString() : 'Not specified'}
+                                  {service.preferredDate ? new Date(service.preferredDate).toLocaleDateString() : t('labourDashboard.notSpecified')}
                                 </div>
-                                <small className="text-muted">Preferred</small>
+                                <small className="text-muted">{t('labourDashboard.preferred')}</small>
                               </td>
                               <td className="py-3">
                                 <div className="fw-semibold">
-                                  {service.preferredTime || 'Not specified'}
+                                  {service.preferredTime || t('labourDashboard.notSpecified')}
                                 </div>
-                                <small className="text-muted">Time</small>
+                                <small className="text-muted">{t('labourDashboard.time')}</small>
                               </td>
                               <td className="py-3">
                                 <div className="fw-semibold" style={{maxWidth: '200px', wordWrap: 'break-word'}}>
-                                  {service.workDescription || 'No description'}
+                                  {service.workDescription || t('labourDashboard.noDescription')}
                                 </div>
-                                <small className="text-muted">Description</small>
+                                <small className="text-muted">{t('labourDashboard.description')}</small>
                               </td>
                               <td className="py-3">
                                 <Badge 
                                   bg={service.urgencyLevel === 'high' ? 'danger' : service.urgencyLevel === 'medium' ? 'warning' : 'info'} 
                                   className="px-2 py-1"
                                 >
-                                  {service.urgencyLevel || 'normal'}
+                                  {service.urgencyLevel === 'high' ? t('labourDashboard.high') : 
+                                   service.urgencyLevel === 'medium' ? t('labourDashboard.medium') : 
+                                   service.urgencyLevel === 'low' ? t('labourDashboard.low') : 
+                                   t('labourDashboard.normal')}
                                 </Badge>
                               </td>
                               <td className="py-3">
                                 <div className="fw-semibold">{formatDate(service.bookingTime)}</div>
-                                <small className="text-muted">Requested</small>
+                                <small className="text-muted">{t('labourDashboard.requested')}</small>
                               </td>
                               <td className="py-3">
                                 {getStatusBadge(service.bookingStatusCode)}
@@ -1660,7 +1665,7 @@ const LabourDashboard = () => {
                                         ) : (
                                           <>
                                             <FaCheckCircle className="me-1" size={12} />
-                                            Accept
+                                            {t('labourDashboard.accept')}
                                           </>
                                         )}
                                       </Button>
@@ -1676,7 +1681,7 @@ const LabourDashboard = () => {
                                         ) : (
                                           <>
                                             <FaTimesCircle className="me-1" size={12} />
-                                            Decline
+                                            {t('labourDashboard.decline')}
                                           </>
                                         )}
                                       </Button>
@@ -1695,7 +1700,7 @@ const LabourDashboard = () => {
                                       ) : (
                                         <>
                                           <FaCheckCircle className="me-1" size={12} />
-                                          Complete
+                                          {t('labourDashboard.complete')}
                                         </>
                                       )}
                                     </Button>
@@ -1703,7 +1708,7 @@ const LabourDashboard = () => {
                                   {service.bookingStatusCode === 3 && (
                                     <Badge bg="success" className="px-3 py-2">
                                       <FaCheckCircle className="me-1" size={12} />
-                                      Completed
+                                      {t('labourDashboard.completed')}
                                     </Badge>
                                   )}
                                   {service.bookingStatusCode === -1 && (
@@ -1719,7 +1724,7 @@ const LabourDashboard = () => {
                                       ) : (
                                         <>
                                           <FaCheckCircle className="me-1" size={12} />
-                                          Reconsider
+                                          {t('labourDashboard.reconsider')}
                                         </>
                                       )}
                                     </Button>
@@ -1892,8 +1897,8 @@ const LabourDashboard = () => {
                 ) : (
                   <div className="text-center py-5">
                     <FaClock className="text-muted mb-3" size={48} />
-                    <h5 className="text-muted mb-2">No Service Requests</h5>
-                    <p className="text-muted">You'll see new booking requests here</p>
+                    <h5 className="text-muted mb-2">{t('labourDashboard.noServiceRequests')}</h5>
+                    <p className="text-muted">{t('labourDashboard.noServiceRequestsDesc')}</p>
                   </div>
                 )}
               </Card.Body>
@@ -1909,7 +1914,7 @@ const LabourDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaStar className="me-2 text-warning" />
-                    Customer Reviews
+                    {t('labourDashboard.customerReviews')}
                   </h4>
                   <div className="d-flex gap-2 w-100 w-md-auto">
                     <Form.Select
@@ -1919,8 +1924,8 @@ const LabourDashboard = () => {
                       size="sm"
                       className="border-0 bg-light flex-grow-1"
                     >
-                      <option value="reviewTime">Latest First</option>
-                      <option value="rating">By Rating</option>
+                      <option value="reviewTime">{t('labourDashboard.latestFirst')}</option>
+                      <option value="rating">{t('labourDashboard.byRating')}</option>
                     </Form.Select>
                     <Form.Select
                       name="sortOrder"
@@ -1929,8 +1934,8 @@ const LabourDashboard = () => {
                       size="sm"
                       className="border-0 bg-light flex-grow-1"
                     >
-                      <option value="desc">High to Low</option>
-                      <option value="asc">Low to High</option>
+                      <option value="desc">{t('labourDashboard.highToLow')}</option>
+                      <option value="asc">{t('labourDashboard.lowToHigh')}</option>
                     </Form.Select>
                   </div>
                 </div>
@@ -1938,7 +1943,7 @@ const LabourDashboard = () => {
                 {/* Rating Distribution */}
                 {(reviews || []).length > 0 && (
                   <div className="mb-4 p-3 bg-light rounded">
-                    <h6 className="mb-3 fw-semibold">Rating Distribution</h6>
+                    <h6 className="mb-3 fw-semibold">{t('labourDashboard.ratingDistribution')}</h6>
                     <Row className="g-2">
                       {(() => {
                         const distribution = getRatingDistribution();
@@ -1981,7 +1986,7 @@ const LabourDashboard = () => {
                               </div>
                               <div className="flex-grow-1">
                                 <h6 className="mb-1 fw-semibold small">
-                                  {review.userName || 'Anonymous Customer'}
+                                  {review.userName || t('labourDashboard.anonymousCustomer')}
                                 </h6>
                                 <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-1 gap-sm-2">
                                   <div className="rating-stars">
@@ -2028,13 +2033,13 @@ const LabourDashboard = () => {
                   ) : isReviewsLoading ? (
                     <div className="text-center py-5">
                       <Spinner animation="border" className="text-primary mb-3" />
-                      <p className="text-muted">Loading reviews...</p>
+                      <p className="text-muted">{t('labourDashboard.loadingReviews')}</p>
                     </div>
                   ) : (
                     <div className="text-center py-5">
                       <FaStar className="text-muted mb-3" size={48} />
-                      <h5 className="text-muted mb-2">No Reviews Yet</h5>
-                      <p className="text-muted">Customer reviews will appear here</p>
+                      <h5 className="text-muted mb-2">{t('labourDashboard.noReviewsYet')}</h5>
+                      <p className="text-muted">{t('labourDashboard.noReviewsDesc')}</p>
                     </div>
                   )}
                 </div>
@@ -2048,7 +2053,7 @@ const LabourDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaHistory className="me-2 text-primary" />
-                    Recent Activity
+                    {t('labourDashboard.recentActivity')}
                   </h4>
                   <div className="d-flex gap-2 w-100 w-md-auto">
                     <Form.Select
@@ -2058,8 +2063,8 @@ const LabourDashboard = () => {
                       size="sm"
                       className="border-0 bg-light flex-grow-1"
                     >
-                      <option value="desc">Latest First</option>
-                      <option value="asc">Oldest First</option>
+                      <option value="desc">{t('labourDashboard.latestFirst')}</option>
+                      <option value="asc">{t('labourDashboard.oldestFirst')}</option>
                     </Form.Select>
                     <Button 
                       variant="outline-primary" 
@@ -2099,7 +2104,7 @@ const LabourDashboard = () => {
                               </div>
                               <div className="flex-grow-1">
                                 <div className="fw-semibold small">#{service.bookingId}</div>
-                                <div className="text-muted small">{service.userName || 'Anonymous'}</div>
+                                <div className="text-muted small">{service.userName || t('labourDashboard.anonymous')}</div>
                               </div>
                             </div>
                             {getStatusBadge(service.bookingStatusCode)}
@@ -2121,8 +2126,8 @@ const LabourDashboard = () => {
                   ) : (
                     <div className="text-center py-5">
                       <FaHistory className="text-muted mb-3" size={48} />
-                      <h5 className="text-muted mb-2">No Activity</h5>
-                      <p className="text-muted">Booking history will appear here</p>
+                      <h5 className="text-muted mb-2">{t('labourDashboard.noActivity')}</h5>
+                      <p className="text-muted">{t('labourDashboard.noActivityDesc')}</p>
                     </div>
                   )}
                 </div>
@@ -2140,16 +2145,16 @@ const LabourDashboard = () => {
                   <div>
                     <h6 className="mb-1 text-muted">
                       <FaCog className="me-2" size={14} />
-                      Account Management
+                      {t('labourDashboard.accountManagement')}
                     </h6>
                     <p className="mb-0 small text-muted">
-                      Manage your account settings and preferences
+                      {t('labourDashboard.accountManagementDesc')}
                     </p>
                   </div>
                   <div className="d-flex gap-2">
                     <OverlayTrigger
                       placement="top"
-                      overlay={<Tooltip>This action cannot be undone</Tooltip>}
+                      overlay={<Tooltip>{t('labourDashboard.actionCannotBeUndone')}</Tooltip>}
                     >
                       <Button 
                         variant="outline-danger" 
@@ -2159,8 +2164,8 @@ const LabourDashboard = () => {
                         style={{ fontSize: '0.8rem' }}
                       >
                         <FaTrashAlt className="me-1 me-md-2" size={12} />
-                        <span className="d-none d-sm-inline">Delete Profile</span>
-                        <span className="d-inline d-sm-none">Delete</span>
+                        <span className="d-none d-sm-inline">{t('labourDashboard.deleteProfile')}</span>
+                        <span className="d-inline d-sm-none">{t('labourDashboard.delete')}</span>
                       </Button>
                     </OverlayTrigger>
                   </div>
@@ -2177,9 +2182,9 @@ const LabourDashboard = () => {
               <Card.Header className="bg-info bg-opacity-10 border-0">
                 <h4 className="mb-0 fw-bold">
                   <FaImage className="me-3 text-info" />
-                  Profile Image
+                  {t('labourDashboard.profileImage')}
                 </h4>
-                <p className="text-muted mb-0 mt-2">Upload a professional profile picture to build trust with customers</p>
+                <p className="text-muted mb-0 mt-2">{t('labourDashboard.profileImageDesc')}</p>
               </Card.Header>
               <Card.Body className="p-4">
                 <div className="d-flex align-items-center justify-content-between">
@@ -2219,7 +2224,7 @@ const LabourDashboard = () => {
                       )}
                     </div>
                     <div>
-                      <h6 className="mb-2">Profile Picture</h6>
+                      <h6 className="mb-2">{t('labourDashboard.profilePicture')}</h6>
                       <p className="text-muted mb-3">
                         A professional profile picture helps customers recognize and trust you. 
                         Upload a clear, high-quality image that represents your professional appearance.
