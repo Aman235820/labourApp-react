@@ -3,7 +3,7 @@ import { Form, Button, Container, Row, Col, Card, Spinner, InputGroup } from 're
 import { useForm } from 'react-hook-form';
 import { registerUser, requestOTP } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 
 const Register = () => {
     const { register, handleSubmit, formState: { errors }, getValues } = useForm();

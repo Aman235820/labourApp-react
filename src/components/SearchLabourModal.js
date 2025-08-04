@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Row, Col, Badge } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Modal, Button, Container, Card, Badge, Alert } from 'react-bootstrap';
 import { FaStar, FaPhone, FaTools, FaUser, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import BookingModal from './modals/BookingModal';
+import '../styles/SearchLabourModal.css';
 
 const SearchLabourModal = ({ 
     show, 
@@ -39,19 +40,6 @@ const SearchLabourModal = ({
 
     const handlePageChange = (page) => {
         onPageChange(page - 1, searchResults.pageSize);
-    };
-
-    const handlePerRowsChange = (newPerPage, page) => {
-        onPageChange(page - 1, newPerPage);
-    };
-
-    const handleSort = (column, direction) => {
-        onPageChange(
-            searchResults.pageNumber,
-            searchResults.pageSize,
-            column.selector,
-            direction
-        );
     };
 
     // Navigate to LabourDetailsPage
@@ -95,22 +83,22 @@ const SearchLabourModal = ({
                     </div>
                 </div>
                 
-                        {/* Location and Rating Information */}
-        <div className="contact-info mb-3">
-          <div className="d-flex align-items-start text-muted mb-2">
-            <FaMapMarkerAlt className="me-2 text-primary mt-1" size={14} />
-            <span className="location-detail">{labour.labourLocation || labour.labourAddress || 'Location not specified'}</span>
-          </div>
-          <div className="d-flex align-items-center text-muted">
-            <FaStar className="me-2 text-warning" size={14} />
-            <span className="rating-detail">
-              {labour.rating && parseFloat(labour.rating) > 0 
-                ? `${labour.rating} rating (${labour.ratingCount || 0} reviews)`
-                : 'No ratings yet'
-              }
-            </span>
-          </div>
-        </div>
+                {/* Location and Rating Information */}
+                <div className="contact-info mb-3">
+                    <div className="d-flex align-items-start text-muted mb-2">
+                        <FaMapMarkerAlt className="me-2 text-primary mt-1" size={14} />
+                        <span className="location-detail">{labour.labourLocation || labour.labourAddress || 'Location not specified'}</span>
+                    </div>
+                    <div className="d-flex align-items-center text-muted">
+                        <FaStar className="me-2 text-warning" size={14} />
+                        <span className="rating-detail">
+                            {labour.rating && parseFloat(labour.rating) > 0 
+                                ? `${labour.rating} rating (${labour.ratingCount || 0} reviews)`
+                                : 'No ratings yet'
+                            }
+                        </span>
+                    </div>
+                </div>
                 
                 {/* Action Buttons */}
                 <div className="action-buttons d-grid gap-2">
@@ -146,17 +134,16 @@ const SearchLabourModal = ({
     return (
         <>
             <Modal show={show} onHide={onHide} size="xl">
-                <ModalHeader closeButton>
+                <Modal.Header closeButton>
                     <Modal.Title>Search Results for "{searchCategory}"</Modal.Title>
-                </ModalHeader>
-                <ModalBody>
+                </Modal.Header>
+                <Modal.Body>
                     {error && (
                         <Alert variant="danger" role="alert">
                             {error}
                         </Alert>
                     )}
 
-                    
                     <div className="search-results-content">
                         {searchResults.content && searchResults.content.length > 0 ? (
                             <>
@@ -168,74 +155,31 @@ const SearchLabourModal = ({
                                 <div className="labour-cards-container">
                                     {searchResults.content.map(renderLabourCard)}
                                 </div>
-                                
-                                {/* Pagination */}
-                                {searchResults.totalPages > 1 && (
-                                    <div className="d-flex justify-content-center mt-4">
-                                        <div className="pagination-container">
-                                            <Button
-                                                variant="outline-primary"
-                                                size="sm"
-                                                disabled={searchResults.pageNumber === 0}
-                                                onClick={() => handlePageChange(searchResults.pageNumber)}
-                                            >
-                                                Previous
-                                            </Button>
-                                            <span className="mx-3 align-self-center">
-                                                Page {searchResults.pageNumber + 1} of {searchResults.totalPages}
-                                            </span>
-                                            <Button
-                                                variant="outline-primary"
-                                                size="sm"
-                                                disabled={searchResults.pageNumber >= searchResults.totalPages - 1}
-                                                onClick={() => handlePageChange(searchResults.pageNumber + 2)}
-                                            >
-                                                Next
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
                             </>
                         ) : (
-                            <div className="text-center py-5">
-                                <div className="empty-results-alert">
-                                    <div className="empty-results-icon mb-3">
-                                        <FaTools className="text-muted" size={48} />
-                                    </div>
-                                    <h5 className="text-muted mb-2">
-                                        Requested services for <span className="text-primary fw-bold">"{searchCategory}"</span> not available
-                                    </h5>
-                                    <p className="text-muted mb-3">
-                                        We apologize, but we couldn't find any skilled professionals for this service in your area at the moment.
-                                    </p>
-                                    <div className="empty-results-suggestions">
-                                        <p className="text-muted small mb-2">You can try:</p>
-                                        <ul className="text-muted small text-start">
-                                            <li>Checking back later for new professionals</li>
-                                            <li>Searching for a different service category</li>
-                                            <li>Expanding your search area</li>
-                                        </ul>
-                                    </div>
+                            <div className="empty-results-alert">
+                                <div className="empty-results-icon mb-3">
+                                    <FaTools className="text-muted" size={48} />
                                 </div>
+                                <h5 className="text-muted mb-2">No Results Found</h5>
+                                <p className="text-muted">Try searching with different keywords or check back later.</p>
                             </div>
                         )}
                     </div>
-                </ModalBody>
-                <ModalFooter>
-                    <Button variant="secondary" onClick={onHide}>
-                        Close
-                    </Button>
-                </ModalFooter>
+                </Modal.Body>
             </Modal>
 
             {/* Booking Modal */}
-            <BookingModal
-                show={showBookingModal}
-                onHide={() => setShowBookingModal(false)}
-                labour={selectedLabourForBooking}
-                serviceCategory={searchCategory}
-                onBookingSuccess={handleBookingSuccess}
-            />
+            {showBookingModal && selectedLabourForBooking && (
+                <BookingModal
+                    show={showBookingModal}
+                    onHide={() => setShowBookingModal(false)}
+                    selectedLabour={selectedLabourForBooking}
+                    userId={userId}
+                    userMobileNumber={userMobileNumber}
+                    onBookingSuccess={handleBookingSuccess}
+                />
+            )}
         </>
     );
 };

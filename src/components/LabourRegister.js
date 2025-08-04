@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Card, Alert, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
+import { Container, Form, Button, Card, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import LocationService from '../services/LocationService';
-import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle, FaMapMarkerAlt, FaLocationArrow } from 'react-icons/fa';
+import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaMapMarkerAlt, FaLocationArrow, FaCheckCircle } from 'react-icons/fa';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import '../styles/LabourRegister.css';

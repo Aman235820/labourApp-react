@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Button, Spinner, Card, Badge } from 'react-bootstrap';
+import { Container, Button, Spinner, Card, Badge } from 'react-bootstrap';
 import { FaArrowLeft, FaUser, FaTools, FaPhone, FaStar, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { searchLabourByCategory } from '../services/LabourSearchService';
@@ -187,11 +187,6 @@ function LabourListPage() {
   const handleLabourModalClose = () => {
     setShowLabourModal(false);
     setSelectedLabour(null);
-  };
-
-  const handleLabourModalShow = (labour) => {
-    setSelectedLabour(labour);
-    setShowLabourModal(true);
   };
 
   const handleBackClick = () => {

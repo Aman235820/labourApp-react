@@ -1,4 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import { Modal, Button, Card, Row, Col, Badge, Image } from 'react-bootstrap';
+import { FaStar, FaPhone, FaMapMarkerAlt, FaClock, FaCheckCircle, FaTimes } from 'react-icons/fa';
+import '../styles/LabourDetailsModal.css';
 import { useNavigate } from 'react-router-dom';
 
 const LabourDetailsModal = ({ show, onHide, selectedLabour, service }) => {

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Card, Alert, InputGroup, Spinner } from 'react-bootstrap';
-import { FaUser, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
+import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
+import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaSignInAlt, FaArrowLeft, FaPhone, FaKey, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
+import { useNavigate, Link } from 'react-router-dom';
 import { labourService } from '../services/labourService';
-import { useNavigate } from 'react-router-dom';
 import '../styles/LabourLogin.css';
 
 function LabourLogin() {

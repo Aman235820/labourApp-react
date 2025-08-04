@@ -1,15 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Tab, Tabs, Alert, Form, Modal, Spinner } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Row, Col, Card, Button, Badge, Modal, Image, Spinner, Alert } from 'react-bootstrap';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  FaUserCircle, FaPhone, FaStar, FaMapMarkerAlt, FaCalendarAlt, 
-  FaClock, FaCheckCircle, FaTimesCircle, FaHeart, FaShare, 
-  FaTools, FaUser, FaWhatsapp, FaEnvelope, FaArrowLeft,
-  FaCamera, FaThumbsUp, FaThumbsDown, FaFlag, FaBookmark,
-  FaShieldAlt, FaAward, FaCertificate, FaGraduationCap
+  FaStar, 
+  FaPhone, 
+  FaMapMarkerAlt, 
+  FaClock,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaArrowLeft,
+  FaUser,
+  FaEnvelope,
+  FaIdCard,
+  FaCertificate,
+  FaTools,
+  FaImages,
+  FaVideo,
+  FaMoneyBillWave,
+  FaMedal,
+  FaShieldAlt,
+  FaUserCircle,
+  FaCamera,
+  FaHeart,
+  FaShare,
+  FaWhatsapp,
+  FaTimesCircle
 } from 'react-icons/fa';
 import { labourService } from '../services/labourService';
 import { bookLabour } from '../services/BookingService';
+import BookingModal from './modals/BookingModal';
 import '../styles/LabourDetailsPage.css';
 
 const LabourDetailsPage = () => {
@@ -45,7 +64,7 @@ const LabourDetailsPage = () => {
   };
 
   // Get working hours for a specific date using labour's profile data
-  const getWorkingHoursForDate = (date) => {
+  const getWorkingHoursForDate = useCallback((date) => {
     if (!labour || !date) return;
     
     try {
@@ -72,7 +91,7 @@ const LabourDetailsPage = () => {
     } finally {
       setLoadingTimeSlots(false);
     }
-  };
+  }, [labour]);
 
   // Generate available time slots based on working hours and existing bookings
   const generateTimeSlots = () => {
@@ -236,7 +255,6 @@ const LabourDetailsPage = () => {
             instagram: '',
             facebook: ''
           },
-          certifications: [],
           testimonialVideos: []
         };
         
@@ -353,7 +371,7 @@ const LabourDetailsPage = () => {
     if (bookingData.date && labour) {
       getWorkingHoursForDate(bookingData.date);
     }
-  }, [bookingData.date, labour]);
+  }, [bookingData.date, labour, getWorkingHoursForDate]);
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();

@@ -1,7 +1,11 @@
-import React from 'react';
-import { Modal, Button, Card } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { FaUser, FaTools, FaPhone, FaStar } from 'react-icons/fa';
+import '../styles/LabourList.css';
+import LabourDetailsModal from './LabourDetailsModal';
+import SearchLabourModal from './SearchLabourModal';
 
 function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, isLoading = false, onChangeRowsPerPage, onChangePage }) {
   // DataTable columns (copied from Home.js)

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaHome, FaUserShield, FaMapMarkerAlt, FaBars, FaLocationArrow } from 'react-icons/fa';
+import { FaHome, FaMapMarkerAlt, FaBars, FaLocationArrow } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import LanguageToggle from './LanguageToggle';
 import LocationModal from './LocationModal';
@@ -13,7 +13,7 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
   const [locationError, setLocationError] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
 
-  const updateCity = () => {
+  const updateCity = useCallback(() => {
     try {
       const locationData = JSON.parse(localStorage.getItem('userLocation'));
       console.log('Location data from localStorage:', locationData);
@@ -64,13 +64,13 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
       setCityName('');
       setLocationError('Location error');
     }
-  };
+  }, [requestLocation]);
 
   useEffect(() => {
     updateCity();
     window.addEventListener('locationUpdated', updateCity);
     return () => window.removeEventListener('locationUpdated', updateCity);
-  }, [requestLocation]);
+  }, [updateCity]);
 
   const toggleSidebar = () => {
     setIsOpen(!sidebarOpen);

@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Nav, Container, Button } from 'react-bootstrap';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Nav, Button } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaHome, 
   FaUserPlus, 
   FaSignInAlt, 
   FaUserCog, 
   FaBars, 
-  FaTimes,
   FaUsers,
   FaTools,
   FaUserTie,
   FaClipboardList,
   FaUserShield,
-  FaChevronLeft,
-  FaChevronRight,
   FaSignOutAlt,
   FaMapMarkerAlt
 } from 'react-icons/fa';
