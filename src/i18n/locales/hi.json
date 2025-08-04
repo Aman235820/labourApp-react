@@ -1,0 +1,82 @@
+{
+  "common": {
+    "home": "होम",
+    "search": "खोजें",
+    "loading": "लोड हो रहा है...",
+    "callNow": "अभी कॉल करें",
+    "rating": "रेटिंग",
+    "noRatingsYet": "अभी तक कोई रेटिंग नहीं",
+    "popular": "लोकप्रिय",
+    "verified": "सत्यापित",
+    "available24x7": "24/7 उपलब्ध",
+    "joinAsProfessional": "Professional के रूप में जुड़ें",
+    "joinAsCustomer": "Customer के रूप में जुड़ें",
+    "topRated": "सबसे बेहतरीन",
+    "emergency": "Emergency",
+    "licensed": "Licensed",
+    "clickToClose": "बंद करने के लिए click करें",
+    "trusted": "भरोसेमंद",
+    "expert": "Expert",
+    "backgroundChecked": "Background Check किया गया",
+    "experienced": "अनुभवी",
+    "mobileService": "Mobile Service",
+    "warranty": "Warranty"
+  },
+  "navigation": {
+    "brand": "InstaHelp",
+    "home": "होम",
+    "toggleSidebar": "Sidebar toggle करें",
+    "showingServicesIn": "Services दिखाई जा रही हैं:",
+    "setLocation": "Location सेट करें",
+    "requestLocationPermission": "Location की permission लें"
+  },
+  "search": {
+    "placeholder": "Skilled professionals को खोजें...",
+    "button": "खोजें"
+  },
+  "home": {
+    "headerTitle": "InstaHelp",
+    "headerTagline": "Skilled labourers से जुड़ें और घर पर services पाएं",
+    "explorePopularServices": "Popular Services देखें",
+    "explorePopularServicesSubtitle": "अपनी जरूरतों के लिए trusted professionals खोजें",
+    "skilledProfessional": "Skilled Professional हैं?",
+    "skilledProfessionalDescription": "अपना business बढ़ाने के लिए हमसे जुड़ें।\nService provider के रूप में register करें और ज्यादा customers तक पहुंचें।",
+    "wantHelpForHousehold": "Household tasks के लिए help चाहिए?",
+    "wantHelpForHouseholdDescription": "आज ही अपनी service book करें।\nAccount बनाएं और trusted professionals तक instant access पाएं।",
+    "electricianTitle": "Electrician",
+    "electricianDescription": "आपके घर और office के लिए professional electrical services",
+    "plumberTitle": "Plumber",
+    "plumberDescription": "सभी water और drainage जरूरतों के लिए expert plumbing solutions",
+    "cleaningTitle": "सफाई सेवा",
+    "cleaningDescription": "आपके घर और office के लिए professional cleaning services",
+    "houseHelpTitle": "घर-गृहस्थी के काम",
+    "houseHelpDescription": "आपकी daily जरूरतों के लिए reliable domestic assistance",
+    "mechanicTitle": "Mechanic",
+    "mechanicDescription": "Vehicle maintenance और repair के लिए skilled services",
+    "servicesText": "Services",
+    "chooseSpecialized": "हमारी specialized {service} services में से choose करें"
+  },
+  "services": {
+    "cleaningServices": "सफाई सेवा",
+    "electrician": "Electrician",
+    "plumber": "Plumber",
+    "painter": "Painter",
+    "pestControl": "Pest Control",
+    "logistics": "सामान पार्सल",
+    "personalCare": "Personal Care",
+    "carpenter": "Carpenter",
+    "homeApplianceRepair": "Home Appliance Repair",
+    "constructionCivilWork": "Construction और Civil Work",
+    "vehicleServices": "गाड़ी सेवा",
+    "farmRuralServices": "खेती और Rural सेवा",
+    "houseHelp": "घर-गृहस्थी के काम",
+    "mechanic": "Mechanic",
+    "driver": "Driver"
+  },
+  "table": {
+    "name": "नाम",
+    "services": "Services",
+    "phone": "Phone",
+    "rating": "Rating"
+  }
+} 

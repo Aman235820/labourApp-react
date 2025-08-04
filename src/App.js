@@ -7,6 +7,7 @@ import LocationService from './services/LocationService';
 import { StatsProvider } from './context/StatsContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import './i18n/i18n'; // Initialize i18n
 
 // Lazy load all components
 const Register = lazy(() => import('./components/Register'));

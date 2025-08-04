@@ -9,9 +9,11 @@ import '../styles/SearchLabourModal.css';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
 import LabourList from './LabourList';
+import { useTranslation } from 'react-i18next';
 
 function Home() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [labourers, setLabourers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +30,7 @@ function Home() {
 
   const columns = [
     {
-      name: 'Name',
+      name: t('table.name'),
       selector: row => row.labourName,
       sortable: true,
       cell: row => (
@@ -41,7 +43,7 @@ function Home() {
       ),
     },
     {
-      name: 'Services',
+      name: t('table.services'),
       selector: row => row.labourSkill,
       sortable: true,
       cell: row => (
@@ -52,7 +54,7 @@ function Home() {
       ),
     },
     {
-      name: 'Phone',
+      name: t('table.phone'),
       selector: row => row.labourMobileNo,
       cell: row => (
         <div className="d-flex align-items-center">
@@ -63,19 +65,19 @@ function Home() {
             className="d-flex align-items-center"
           >
             <FaPhone className="me-2" />
-            Call Now
+            {t('common.callNow')}
           </Button>
         </div>
       ),
     },
     {
-      name: 'Rating',
+      name: t('table.rating'),
       selector: row => row.rating,
       sortable: true,
       cell: row => (
         <div className="d-flex align-items-center">
           <FaStar className="text-warning me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.rating || 'No ratings yet'}</span>
+          <span className="fw-medium">{row.rating || t('common.noRatingsYet')}</span>
         </div>
       ),
     },
@@ -372,6 +374,30 @@ function Home() {
     }
   };
 
+  // Helper function to get translated service name
+  const getTranslatedServiceName = (serviceName) => {
+    const serviceKeyMap = {
+      'Cleaning Services': 'services.cleaningServices',
+      'Electrician': 'services.electrician',
+      'Plumber': 'services.plumber',
+      'Painter': 'services.painter',
+      'Pest Control': 'services.pestControl',
+      'Logistics': 'services.logistics',
+      'Personal Care': 'services.personalCare',
+      'Carpenter': 'services.carpenter',
+      'Home Appliance Repair': 'services.homeApplianceRepair',
+      'Construction & Civil Work': 'services.constructionCivilWork',
+      'Vehicle Services': 'services.vehicleServices',
+      'Farm & Rural Services': 'services.farmRuralServices',
+      'House Help': 'services.houseHelp',
+      'Mechanic': 'services.mechanic',
+      'Driver': 'services.driver'
+    };
+    
+    const key = serviceKeyMap[serviceName];
+    return key ? t(key) : serviceName;
+  };
+
   return (
     <Container fluid className="home-container">
       {/* Search Section */}
@@ -387,7 +413,7 @@ function Home() {
                     </InputGroup.Text>
                     <Form.Control
                       type="text"
-                      placeholder="Search for skilled professionals..."
+                      placeholder={t('search.placeholder')}
                       value={searchTerm}
                       onChange={(e) => {
                         setSearchTerm(e.target.value);
@@ -416,8 +442,8 @@ function Home() {
                         />
                       ) : (
                         <>
-                      <span className="d-none d-sm-inline">Search</span>
-                      <span className="d-inline d-sm-none">Go</span>
+                      <span className="d-none d-sm-inline">{t('search.button')}</span>
+                      <span className="d-inline d-sm-none">{t('search.button')}</span>
                         </>
                       )}
                     </Button>
@@ -489,10 +515,10 @@ function Home() {
           />
           <div className="header-text">
             <h1 className="header-title">
-              InstaHelp
+              {t('home.headerTitle')}
             </h1>
             <div className="header-tagline">
-              Connect with skilled labourers and get services at your doorstep
+              {t('home.headerTagline')}
               <span className="wave-emoji">✨</span>
             </div>
           </div>
@@ -542,11 +568,11 @@ function Home() {
                   className="service-image"
                 />
                 <div className={`service-name ${isSelected ? 'service-name-selected' : ''}`}>
-                  {service.name}
+                  {getTranslatedServiceName(service.name)}
                 </div>
                 {isSelected && (
                   <div className="service-close-indicator">
-                    <span>Click to close</span>
+                    <span>{t('common.clickToClose')}</span>
                     <span className="close-arrow">▲</span>
                   </div>
                 )}
@@ -561,10 +587,10 @@ function Home() {
                   <div className="subservices-header">
                     <h3 className="subservices-title">
                       <span className="subservice-icon">{selectedService.icon}</span>
-                      {selectedService.name} Services
+                      {getTranslatedServiceName(selectedService.name)} {t('home.servicesText')}
                     </h3>
                     <p className="subservices-description">
-                      Choose from our specialized {selectedService.name.toLowerCase()} services
+                      {t('home.chooseSpecialized', { service: getTranslatedServiceName(selectedService.name).toLowerCase() })}
                     </p>
                   </div>
                   <div className="subservices-grid">
@@ -590,8 +616,8 @@ function Home() {
       <div className="popular-services-section">
         <Container>
           <div className="section-header text-center mb-5">
-            <h2 className="section-title">Explore Popular Services</h2>
-            <p className="section-subtitle">Find trusted professionals for your most common needs</p>
+            <h2 className="section-title">{t('home.explorePopularServices')}</h2>
+            <p className="section-subtitle">{t('home.explorePopularServicesSubtitle')}</p>
           </div>
           
           <Row className="justify-content-center">
@@ -613,15 +639,15 @@ function Home() {
                     </div>
                   </div>
                   <div className="service-badge">
-                    <span>Popular</span>
+                    <span>{t('common.popular')}</span>
                   </div>
                 </div>
                 <div className="service-content">
-                  <h4 className="service-title">Electrician</h4>
-                  <p className="service-description">Professional electrical services for your home and office</p>
+                  <h4 className="service-title">{t('home.electricianTitle')}</h4>
+                  <p className="service-description">{t('home.electricianDescription')}</p>
                   <div className="service-features">
-                    <span className="feature-tag">24/7 Available</span>
-                    <span className="feature-tag">Verified</span>
+                    <span className="feature-tag">{t('common.available24x7')}</span>
+                    <span className="feature-tag">{t('common.verified')}</span>
                   </div>
                 </div>
               </div>
@@ -645,15 +671,15 @@ function Home() {
                     </div>
                   </div>
                   <div className="service-badge">
-                    <span>Top Rated</span>
+                    <span>{t('common.topRated')}</span>
                   </div>
                 </div>
                 <div className="service-content">
-                  <h4 className="service-title">Plumber</h4>
-                  <p className="service-description">Expert plumbing solutions for all your needs</p>
+                  <h4 className="service-title">{t('home.plumberTitle')}</h4>
+                  <p className="service-description">{t('home.plumberDescription')}</p>
                   <div className="service-features">
-                    <span className="feature-tag">Emergency</span>
-                    <span className="feature-tag">Licensed</span>
+                    <span className="feature-tag">{t('common.emergency')}</span>
+                    <span className="feature-tag">{t('common.licensed')}</span>
                   </div>
                 </div>
               </div>
@@ -677,15 +703,15 @@ function Home() {
                     </div>
                   </div>
                   <div className="service-badge">
-                    <span>Trusted</span>
+                    <span>{t('common.trusted')}</span>
                   </div>
                 </div>
                 <div className="service-content">
-                  <h4 className="service-title">House Help</h4>
-                  <p className="service-description">Reliable domestic assistance for your daily needs</p>
+                  <h4 className="service-title">{t('home.houseHelpTitle')}</h4>
+                  <p className="service-description">{t('home.houseHelpDescription')}</p>
                   <div className="service-features">
-                    <span className="feature-tag">Background Checked</span>
-                    <span className="feature-tag">Experienced</span>
+                    <span className="feature-tag">{t('common.backgroundChecked')}</span>
+                    <span className="feature-tag">{t('common.experienced')}</span>
                   </div>
                 </div>
               </div>
@@ -709,15 +735,15 @@ function Home() {
                     </div>
                   </div>
                   <div className="service-badge">
-                    <span>Expert</span>
+                    <span>{t('common.expert')}</span>
                   </div>
                 </div>
                 <div className="service-content">
-                  <h4 className="service-title">Mechanic</h4>
-                  <p className="service-description">Skilled vehicle maintenance and repair services</p>
+                  <h4 className="service-title">{t('home.mechanicTitle')}</h4>
+                  <p className="service-description">{t('home.mechanicDescription')}</p>
                   <div className="service-features">
-                    <span className="feature-tag">Mobile Service</span>
-                    <span className="feature-tag">Warranty</span>
+                    <span className="feature-tag">{t('common.mobileService')}</span>
+                    <span className="feature-tag">{t('common.warranty')}</span>
                   </div>
                 </div>
               </div>
@@ -739,13 +765,18 @@ function Home() {
               <div className="cta-overlay" />
             </div>
             <Card.Body className="cta-body">
-              <h2 className="cta-title">Skilled Professional?</h2>
-              <p className="cta-description">Join us to grow your business.<br />Register as a service provider and reach more customers.</p>
+              <h2 className="cta-title">{t('home.skilledProfessional')}</h2>
+              <p className="cta-description">{t('home.skilledProfessionalDescription').split('\n').map((line, index) => (
+                <span key={index}>
+                  {line}
+                  {index === 0 && <br />}
+                </span>
+              ))}</p>
               <Button
                 className="cta-button cta-button-professional"
                 onClick={() => navigate('/labourRegister')}
               >
-                Join as Professional
+                {t('common.joinAsProfessional')}
               </Button>
             </Card.Body>
           </Card>
@@ -761,13 +792,18 @@ function Home() {
               <div className="cta-overlay" />
             </div>
             <Card.Body className="cta-body">
-              <h2 className="cta-title">Want help for household tasks?</h2>
-              <p className="cta-description">Book your service today.<br />Create your account and get instant access to trusted professionals.</p>
+              <h2 className="cta-title">{t('home.wantHelpForHousehold')}</h2>
+              <p className="cta-description">{t('home.wantHelpForHouseholdDescription').split('\n').map((line, index) => (
+                <span key={index}>
+                  {line}
+                  {index === 0 && <br />}
+                </span>
+              ))}</p>
               <Button
                 className="cta-button cta-button-customer"
                 onClick={() => navigate('/register')}
               >
-                Join as Customer
+                {t('common.joinAsCustomer')}
               </Button>
             </Card.Body>
           </Card>

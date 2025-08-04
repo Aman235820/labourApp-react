@@ -1,0 +1,82 @@
+{
+  "common": {
+    "home": "Home",
+    "search": "Search",
+    "loading": "Loading...",
+    "callNow": "Call Now",
+    "rating": "Rating",
+    "noRatingsYet": "No ratings yet",
+    "popular": "Popular",
+    "verified": "Verified",
+    "available24x7": "24/7 Available",
+    "joinAsProfessional": "Join as Professional",
+    "joinAsCustomer": "Join as Customer",
+    "topRated": "Top Rated",
+    "emergency": "Emergency",
+    "licensed": "Licensed",
+    "clickToClose": "Click to close",
+    "trusted": "Trusted",
+    "expert": "Expert",
+    "backgroundChecked": "Background Checked",
+    "experienced": "Experienced",
+    "mobileService": "Mobile Service",
+    "warranty": "Warranty"
+  },
+  "navigation": {
+    "brand": "InstaHelp",
+    "home": "Home",
+    "toggleSidebar": "Toggle sidebar",
+    "showingServicesIn": "Showing services in:",
+    "setLocation": "Set Location",
+    "requestLocationPermission": "Request location permission"
+  },
+  "search": {
+    "placeholder": "Search for skilled professionals...",
+    "button": "Search"
+  },
+  "home": {
+    "headerTitle": "InstaHelp",
+    "headerTagline": "Connect with skilled labourers and get services at your doorstep",
+    "explorePopularServices": "Explore Popular Services",
+    "explorePopularServicesSubtitle": "Find trusted professionals for your most common needs",
+    "skilledProfessional": "Skilled Professional?",
+    "skilledProfessionalDescription": "Join us to grow your business.\nRegister as a service provider and reach more customers.",
+    "wantHelpForHousehold": "Want help for household tasks?",
+    "wantHelpForHouseholdDescription": "Book your service today.\nCreate your account and get instant access to trusted professionals.",
+    "electricianTitle": "Electrician",
+    "electricianDescription": "Professional electrical services for your home and office",
+    "plumberTitle": "Plumber", 
+    "plumberDescription": "Expert plumbing solutions for all your water and drainage needs",
+    "cleaningTitle": "Cleaning Services",
+    "cleaningDescription": "Professional cleaning services for your home and office",
+    "houseHelpTitle": "House Help",
+    "houseHelpDescription": "Reliable domestic assistance for your daily needs",
+    "mechanicTitle": "Mechanic",
+    "mechanicDescription": "Skilled vehicle maintenance and repair services",
+    "servicesText": "Services",
+    "chooseSpecialized": "Choose from our specialized {service} services"
+  },
+  "services": {
+    "cleaningServices": "Cleaning Services",
+    "electrician": "Electrician",
+    "plumber": "Plumber",
+    "painter": "Painter",
+    "pestControl": "Pest Control",
+    "logistics": "Logistics",
+    "personalCare": "Personal Care",
+    "carpenter": "Carpenter",
+    "homeApplianceRepair": "Home Appliance Repair",
+    "constructionCivilWork": "Construction & Civil Work",
+    "vehicleServices": "Vehicle Services",
+    "farmRuralServices": "Farm & Rural Services",
+    "houseHelp": "House Help",
+    "mechanic": "Mechanic",
+    "driver": "Driver"
+  },
+  "table": {
+    "name": "Name",
+    "services": "Services",
+    "phone": "Phone",
+    "rating": "Rating"
+  }
+} 

@@ -1,0 +1,64 @@
+.language-toggle-container {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.language-toggle-container .btn-group {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.language-toggle-container .btn {
+  border-radius: 0 !important;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.language-toggle-container .btn:first-child {
+  border-top-left-radius: 20px !important;
+  border-bottom-left-radius: 20px !important;
+}
+
+.language-toggle-container .btn:last-child {
+  border-top-right-radius: 20px !important;
+  border-bottom-right-radius: 20px !important;
+}
+
+.language-toggle-container .btn-light {
+  background-color: #fff;
+  color: #212529;
+  border-color: #fff;
+}
+
+.language-toggle-container .btn-outline-light {
+  background-color: transparent;
+  color: #fff;
+  border-color: rgba(255,255,255,0.5);
+}
+
+.language-toggle-container .btn-outline-light:hover {
+  background-color: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.7);
+  color: #fff;
+}
+
+.language-toggle-icon {
+  margin-right: 8px;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .language-toggle-container {
+    margin-right: 0.5rem;
+  }
+  
+  .language-toggle-container .btn {
+    font-size: 0.75rem;
+    min-width: 28px;
+    padding: 0.25rem 0.4rem;
+  }
+} 

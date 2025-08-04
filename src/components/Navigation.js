@@ -2,67 +2,71 @@ import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaHome, FaUserShield, FaMapMarkerAlt, FaBars, FaLocationArrow } from 'react-icons/fa';
-import '../styles/Navigation.css';
+import { useTranslation } from 'react-i18next';
+import LanguageToggle from './LanguageToggle';
 import LocationModal from './LocationModal';
+import '../styles/Navigation.css';
 
 function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
+  const { t } = useTranslation();
   const [cityName, setCityName] = useState('');
   const [locationError, setLocationError] = useState('');
   const [showLocationModal, setShowLocationModal] = useState(false);
 
-  useEffect(() => {
-    const updateCity = () => {
-      try {
-        const locationData = JSON.parse(localStorage.getItem('userLocation'));
-        console.log('Location data from localStorage:', locationData);
-        
-        if (!locationData || !locationData.address) {
-          if (requestLocation) {
-            requestLocation().catch(error => {
-              console.error('Location request failed:', error);
-              setLocationError('Location access denied');
-            });
-          }
-          setCityName('');
-          return;
+  const updateCity = () => {
+    try {
+      const locationData = JSON.parse(localStorage.getItem('userLocation'));
+      console.log('Location data from localStorage:', locationData);
+      
+      if (!locationData || !locationData.address) {
+        if (requestLocation) {
+          requestLocation().catch(error => {
+            console.error('Location request failed:', error);
+            setLocationError('Location access denied');
+          });
         }
-        
-        
-        // Check different possible address structures
-        let city = '';
-        if (locationData.address.address) {
-          // Structure: locationData.address.address.city
-          city = locationData.address.address.city || 
-                 locationData.address.address.town || 
-                 locationData.address.address.village || 
-                 locationData.address.address.suburb ||
-                 locationData.address.address.hamlet || '';
-        } else if (locationData.address.display_name) {
-          // Structure from search results
-          const parts = locationData.address.display_name.split(',');
-          city = parts[0] || '';
-        } else {
-          // Structure: locationData.address.city (direct)
-          city = locationData.address.city || 
-                 locationData.address.town || 
-                 locationData.address.village || 
-                 locationData.address.suburb ||
-                 locationData.address.hamlet || '';
-        }
-        
-        // Handle manual address format
-        if (!city && locationData.displayName) {
-          city = locationData.displayName;
-        }
-        
-        setCityName(city);
-        setLocationError(''); // Clear any previous error
-      } catch (error) {
-        console.error('Error parsing location data:', error);
         setCityName('');
-        setLocationError('Location error');
+        return;
       }
-    };
+      
+      
+      // Check different possible address structures
+      let city = '';
+      if (locationData.address.address) {
+        // Structure: locationData.address.address.city
+        city = locationData.address.address.city || 
+               locationData.address.address.town || 
+               locationData.address.address.village || 
+               locationData.address.address.suburb ||
+               locationData.address.address.hamlet || '';
+      } else if (locationData.address.display_name) {
+        // Structure from search results
+        const parts = locationData.address.display_name.split(',');
+        city = parts[0] || '';
+      } else {
+        // Structure: locationData.address.city (direct)
+        city = locationData.address.city || 
+               locationData.address.town || 
+               locationData.address.village || 
+               locationData.address.suburb ||
+               locationData.address.hamlet || '';
+      }
+      
+      // Handle manual address format
+      if (!city && locationData.displayName) {
+        city = locationData.displayName;
+      }
+      
+      setCityName(city);
+      setLocationError(''); // Clear any previous error
+    } catch (error) {
+      console.error('Error parsing location data:', error);
+      setCityName('');
+      setLocationError('Location error');
+    }
+  };
+
+  useEffect(() => {
     updateCity();
     window.addEventListener('locationUpdated', updateCity);
     return () => window.removeEventListener('locationUpdated', updateCity);
@@ -76,9 +80,15 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
     setShowLocationModal(true);
   };
 
-  const handleLocationSelect = (location) => {
-    // The location is already saved in the modal, just close it
+  const handleLocationSelect = (selectedLocation) => {
     setShowLocationModal(false);
+    if (selectedLocation && selectedLocation.display_name) {
+      const locationToStore = {
+        address: selectedLocation
+      };
+      localStorage.setItem('userLocation', JSON.stringify(locationToStore));
+      updateCity();
+    }
   };
 
   const handleLocationRequest = () => {
@@ -105,7 +115,7 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
             variant="outline-light"
             className="sidebar-toggle-btn me-2 d-lg-none"
             onClick={toggleSidebar}
-            aria-label="Toggle sidebar"
+            aria-label={t('navigation.toggleSidebar')}
           >
             <FaBars size={14} />
           </Button>
@@ -117,16 +127,16 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
               className="navbar-logo me-2"
               alt="InstaHelp Logo"
             />
-            <span className="brand-text">InstaHelp</span>
+            <span className="brand-text">{t('navigation.brand')}</span>
           </Navbar.Brand>
           
           {/* Location Display - Left side */}
           <div className="location-display d-none d-md-flex align-items-center me-3" onClick={handleLocationClick}>
             <FaMapMarkerAlt className="me-2 text-info" />
             <span className="location-text">
-              <span className="text-muted">Showing services in: </span>
+              <span className="text-muted">{t('navigation.showingServicesIn')} </span>
               <span className="fw-bold text-white">
-                {cityName || locationError || 'Set Location'}
+                {cityName || locationError || t('navigation.setLocation')}
               </span>
             </span>
             {(!cityName && !locationError) && (
@@ -138,12 +148,15 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
                   e.stopPropagation();
                   handleLocationRequest();
                 }}
-                title="Request location permission"
+                title={t('navigation.requestLocationPermission')}
               >
                 <FaLocationArrow size={12} />
               </Button>
             )}
           </div>
+
+          {/* Language Toggle */}
+          <LanguageToggle />
 
           {/* Navigation Links */}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -151,7 +164,7 @@ function Navigation({ sidebarOpen, setIsOpen, isMobile, requestLocation }) {
             <Nav className="ms-auto">
               <Nav.Link as={Link} to="/" className="nav-link">
                 <FaHome className="me-1" />
-                <span className="d-none d-sm-inline">Home</span>
+                <span className="d-none d-sm-inline">{t('navigation.home')}</span>
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
