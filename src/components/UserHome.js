@@ -6,10 +6,12 @@ import { searchLabourByCategory } from '../services/LabourSearchService';
 import { getUserBookings, rateLabour } from '../services/BookingService';
 import SearchLabourModal from './SearchLabourModal';
 import { deleteUser } from '../services/userService';
+import { useTranslation } from 'react-i18next';
 import '../styles/UserHome.css';
 
 // Reusable Rating Modal Component
 const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview = '' }) => {
+    const { t } = useTranslation();
     const [rating, setRating] = useState(initialRating);
     const [review, setReview] = useState(initialReview);
 
@@ -23,12 +25,12 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
     return (
         <Modal show={show} onHide={onHide} backdrop="static" keyboard={false} centered>
             <Modal.Header closeButton>
-                <Modal.Title>Rate Service</Modal.Title>
+                <Modal.Title>{t('userHome.rateService')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
-                        <Form.Label>Rating</Form.Label>
+                        <Form.Label>{t('userHome.rating')}</Form.Label>
                         <div className="d-flex align-items-center">
                             {[1.0, 2.0, 3.0, 4.0, 5.0].map((star) => (
                                 <FaStar
@@ -42,20 +44,20 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
                         </div>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Review</Form.Label>
+                        <Form.Label>{t('userHome.review')}</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={3}
                             value={review}
                             onChange={(e) => setReview(e.target.value)}
-                            placeholder="Write your review here..."
+                            placeholder={t('userHome.writeReviewHere')}
                         />
                     </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onHide}>Cancel</Button>
-                <Button variant="primary" onClick={handleSubmit}>Submit Review</Button>
+                <Button variant="secondary" onClick={onHide}>{t('userHome.cancel')}</Button>
+                <Button variant="primary" onClick={handleSubmit}>{t('userHome.submitReview')}</Button>
             </Modal.Footer>
         </Modal>
     );
@@ -63,8 +65,10 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
 
 // Reusable Booking Card Component
 const BookingCard = ({ booking, onRate, onCall }) => {
+    const { t } = useTranslation();
+    
     const formatDate = (dateString) => {
-        if (!dateString) return 'Invalid Date';
+        if (!dateString) return t('userHome.bookingCard.invalidDate');
         
         const parts = dateString.match(/(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})/);
         if (parts) {
@@ -85,21 +89,21 @@ const BookingCard = ({ booking, onRate, onCall }) => {
                 });
             }
         }
-        return 'Invalid Date';
+        return t('userHome.bookingCard.invalidDate');
     };
 
     const getStatusBadge = (statusCode) => {
         switch (statusCode) {
             case -1:
-                return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+                return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> {t('userHome.bookingStats.rejected')}</Badge>;
             case 1:
-                return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> Pending</Badge>;
+                return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> {t('userHome.bookingStats.pending')}</Badge>;
             case 2:
-                return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+                return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> {t('userHome.bookingStats.accepted')}</Badge>;
             case 3:
-                return <Badge bg="success" className="px-3 py-2"><FaCheckCircle className="me-1" /> Completed</Badge>;
+                return <Badge bg="success" className="px-3 py-2"><FaCheckCircle className="me-1" /> {t('userHome.bookingStats.completed')}</Badge>;
             default:
-                return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>;
+                return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> {t('userHome.bookingStats.unknown')}</Badge>;
         }
     };
 
@@ -113,8 +117,8 @@ const BookingCard = ({ booking, onRate, onCall }) => {
                                 <FaTools className="text-primary" size={20} />
                             </div>
                             <div>
-                                <h5 className="mb-1 fw-semibold">{booking.labourName || 'Unknown Labour'}</h5>
-                                <p className="text-muted mb-0">{booking.labourSkill || 'Service'}</p>
+                                <h5 className="mb-1 fw-semibold">{booking.labourName || t('userHome.bookingCard.unknownLabour')}</h5>
+                                <p className="text-muted mb-0">{booking.labourSkill || t('userHome.bookingCard.service')}</p>
                             </div>
                         </div>
                         <div className="d-flex align-items-center text-muted mb-2">
@@ -123,7 +127,7 @@ const BookingCard = ({ booking, onRate, onCall }) => {
                         </div>
                         <div className="d-flex align-items-center text-muted">
                             <FaIdCard className="me-2" size={14} />
-                            <span className="small">Booking ID: {booking.bookingId}</span>
+                            <span className="small">{t('userHome.bookingCard.bookingId')}: {booking.bookingId}</span>
                         </div>
                     </Col>
                     <Col md={6}>
@@ -138,7 +142,7 @@ const BookingCard = ({ booking, onRate, onCall }) => {
                                         className="d-flex align-items-center"
                                     >
                                         <FaPhone className="me-1" size={12} />
-                                        Call
+                                        {t('userHome.bookingCard.call')}
                                     </Button>
                                 )}
                                 {booking.bookingStatusCode === 3 && (
@@ -149,7 +153,7 @@ const BookingCard = ({ booking, onRate, onCall }) => {
                                         className="d-flex align-items-center"
                                     >
                                         <FaEdit className="me-1" size={12} />
-                                        Review
+                                        {t('userHome.bookingCard.review')}
                                     </Button>
                                 )}
                             </div>
@@ -163,6 +167,7 @@ const BookingCard = ({ booking, onRate, onCall }) => {
 
 const UserHome = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [userData, setUserData] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [searchResults, setSearchResults] = useState({
@@ -221,7 +226,7 @@ const UserHome = () => {
             setBookings(response.returnValue || []);
         } catch (error) {
             console.error('Error fetching bookings:', error);
-            setBookingsError('Failed to load bookings. Please try again.');
+            setBookingsError(t('userHome.failedToLoadBookings'));
         } finally {
             setIsBookingsLoading(false);
         }
@@ -245,7 +250,7 @@ const UserHome = () => {
             fetchBookings(userId);
         } catch (error) {
             console.error('Error submitting rating:', error);
-            alert('Failed to submit rating. Please try again.');
+            alert(t('userHome.ratingSubmitFailed'));
         }
     };
 
@@ -313,7 +318,7 @@ const UserHome = () => {
 
     const handleSearch = async (page = 0, perPage = 10, sortBy = "rating", sortOrder = "desc") => {
         if (!searchCategory.trim()) {
-            setError('Please enter a category to search');
+            setError(t('userHome.pleaseEnterCategoryToSearch'));
             return;
         }
 
@@ -325,7 +330,7 @@ const UserHome = () => {
             setSearchResults(results);
             setShowModal(true);
         } catch (err) {
-            setError(err.message || 'Failed to fetch search results. Please try again.');
+            setError(err.message || t('userHome.failedToFetchSearchResults'));
             console.error('Search error:', err);
         } finally {
             setIsLoading(false);
@@ -354,17 +359,17 @@ const UserHome = () => {
     };
 
     const handleDeleteAccount = async () => {
-        if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+        if (!window.confirm(t('userHome.deleteAccountConfirm'))) return;
         try {
             setIsLoading(true);
             await deleteUser(userData.userId);
             localStorage.removeItem('user');
             localStorage.removeItem('userData');
             localStorage.removeItem('rememberedEmail');
-            alert('Your account has been deleted.');
+            alert(t('userHome.accountDeleted'));
             navigate('/login');
         } catch (err) {
-            alert('Failed to delete account. Please try again.');
+            alert(t('userHome.deleteAccountFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -385,7 +390,7 @@ const UserHome = () => {
                                         </div>
                                     </div>
                                     <div className="user-info">
-                                        <h1 className="h3 mb-2 fw-bold text-white">Welcome back, {userData?.name || 'User'}!</h1>
+                                        <h1 className="h3 mb-2 fw-bold text-white">{t('userHome.welcomeBack')}, {userData?.name || 'User'}!</h1>
                                         <div className="d-flex flex-wrap align-items-center text-white-50 mb-2">
                                             <div className="d-flex align-items-center me-4 mb-1">
                                                 <FaIdCard className="me-2" size={14} />
@@ -397,12 +402,12 @@ const UserHome = () => {
                                             </div>
                                             <Badge bg="success" className="mb-1 px-3 py-1">
                                                 <FaCheckCircle className="me-1" size={12} />
-                                                Active User
+                                                {t('userHome.activeUser')}
                                             </Badge>
                                         </div>
                                         <div className="d-flex align-items-center text-white-50">
                                             <FaCalendarAlt className="me-2" size={12} />
-                                            <span className="small">Member since {new Date().getFullYear()}</span>
+                                            <span className="small">{t('userHome.memberSince')} {new Date().getFullYear()}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -421,7 +426,7 @@ const UserHome = () => {
                                         }}
                                     >
                                         <FaHistory className="me-2" size={14} />
-                                        My Bookings
+                                        {t('userHome.myBookings')}
                                     </Button>
                                     <Button 
                                         variant="outline-light" 
@@ -429,7 +434,7 @@ const UserHome = () => {
                                         className="d-flex align-items-center"
                                     >
                                         <FaSignOutAlt className="me-2" size={14} />
-                                        Logout
+                                        {t('userHome.logout')}
                                     </Button>
                                 </div>
                             </div>
@@ -447,11 +452,11 @@ const UserHome = () => {
                                 <div className="d-flex justify-content-between align-items-center mb-4">
                                     <h4 className="mb-0 fw-bold text-dark">
                                         <FaSearch className="me-2 text-primary" />
-                                        Find Services
+                                        {t('userHome.findServices')}
                                     </h4>
                                     <Badge bg="primary" className="px-3 py-2">
                                         <FaTools className="me-1" size={12} />
-                                        Quick Search
+                                        {t('userHome.quickSearch')}
                                     </Badge>
                                 </div>
                                 
@@ -459,14 +464,14 @@ const UserHome = () => {
                                     <Col lg={8}>
                                         <Form.Group className="mb-3 mb-lg-0">
                                             <Form.Label className="fw-semibold text-dark mb-2">
-                                                What service do you need?
+                                                {t('userHome.whatServiceDoYouNeed')}
                                             </Form.Label>
                                             <InputGroup size="lg">
                                                 <InputGroup.Text className="bg-light border-end-0">
                                                     <FaSearch className="text-muted" />
                                                 </InputGroup.Text>
                                                 <Form.Control
-                                                    placeholder="Enter category (e.g., plumber, electrician, cleaner)"
+                                                    placeholder={t('userHome.enterCategory')}
                                                     value={searchCategory}
                                                     onChange={(e) => setSearchCategory(e.target.value)}
                                                     onKeyDown={(e) => {
@@ -493,12 +498,12 @@ const UserHome = () => {
                                                                 aria-hidden="true"
                                                                 className="me-2"
                                                             />
-                                                            Searching...
+                                                            {t('userHome.searching')}
                                                         </>
                                                     ) : (
                                                         <>
                                                             <FaSearch className="me-2" />
-                                                            Search Now
+                                                            {t('userHome.searchNow')}
                                                         </>
                                                     )}
                                                 </Button>
@@ -514,7 +519,7 @@ const UserHome = () => {
                                     <Col lg={4}>
                                         <div className="text-center text-lg-start">
                                             <div className="d-flex flex-column align-items-center align-items-lg-start">
-                                                <div className="text-muted small mb-2">Popular Categories</div>
+                                                <div className="text-muted small mb-2">{t('userHome.popularCategories')}</div>
                                                 <div className="d-flex flex-wrap gap-2">
                                                     {['Plumber', 'Electrician', 'Cleaner', 'Carpenter'].map((category) => (
                                                         <Badge 
@@ -549,8 +554,8 @@ const UserHome = () => {
                                 <div className="action-icon bg-success bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }}>
                                     <FaCalendarAlt className="text-success" size={24} />
                                 </div>
-                                <h5 className="fw-semibold mb-2">Track Bookings</h5>
-                                <p className="text-muted small mb-3">Monitor your service requests and appointments</p>
+                                <h5 className="fw-semibold mb-2">{t('userHome.trackBookings')}</h5>
+                                <p className="text-muted small mb-3">{t('userHome.monitorServiceRequests')}</p>
                                 <Button 
                                     variant="success" 
                                     className="w-100"
@@ -565,7 +570,7 @@ const UserHome = () => {
                                     }}
                                 >
                                     <FaCalendarAlt className="me-2" />
-                                    View Bookings
+                                    {t('userHome.viewBookings')}
                                 </Button>
                             </Card.Body>
                         </Card>
@@ -576,15 +581,15 @@ const UserHome = () => {
                                 <div className="action-icon bg-warning bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }}>
                                     <FaBell className="text-warning" size={24} />
                                 </div>
-                                <h5 className="fw-semibold mb-2">Notifications</h5>
-                                <p className="text-muted small mb-3">Stay updated with service alerts and messages</p>
+                                <h5 className="fw-semibold mb-2">{t('userHome.notifications')}</h5>
+                                <p className="text-muted small mb-3">{t('userHome.stayUpdatedWithAlerts')}</p>
                                 <Button 
                                     variant="outline-warning" 
                                     className="w-100"
                                     disabled
                                 >
                                     <FaBell className="me-2" />
-                                    Coming Soon
+                                    {t('userHome.comingSoon')}
                                 </Button>
                             </Card.Body>
                         </Card>
@@ -600,7 +605,7 @@ const UserHome = () => {
                                     <Col>
                                         <h5 className="mb-0 fw-semibold d-flex align-items-center">
                                             <FaHistory className="me-2 text-primary" />
-                                            My Bookings
+                                            {t('userHome.myBookingsTitle')}
                                             {bookings.length > 0 && (
                                                 <Badge bg="primary" className="ms-2">{getBookingStats().total}</Badge>
                                             )}
@@ -616,37 +621,37 @@ const UserHome = () => {
                                                 className="d-flex align-items-center"
                                             >
                                                 <FaSync className={`me-1 ${isBookingsLoading ? 'fa-spin' : ''}`} size={12} />
-                                                Refresh
+                                                {t('userHome.refresh')}
                                             </Button>
                                             <Dropdown>
                                                 <Dropdown.Toggle variant="outline-secondary" size="sm" className="d-flex align-items-center">
                                                     <FaFilter className="me-1" size={12} />
-                                                    Filter
+                                                    {t('userHome.filter')}
                                                 </Dropdown.Toggle>
                                                 <Dropdown.Menu>
                                                     <Dropdown.Item 
                                                         active={bookingFilter === 'all'} 
                                                         onClick={() => setBookingFilter('all')}
                                                     >
-                                                        All Bookings ({getBookingStats().total})
+                                                        {t('userHome.allBookings')} ({getBookingStats().total})
                                                     </Dropdown.Item>
                                                     <Dropdown.Item 
                                                         active={bookingFilter === 'pending'} 
                                                         onClick={() => setBookingFilter('pending')}
                                                     >
-                                                        Pending ({getBookingStats().pending})
+                                                        {t('userHome.pending')} ({getBookingStats().pending})
                                                     </Dropdown.Item>
                                                     <Dropdown.Item 
                                                         active={bookingFilter === 'completed'} 
                                                         onClick={() => setBookingFilter('completed')}
                                                     >
-                                                        Completed ({getBookingStats().completed})
+                                                        {t('userHome.completed')} ({getBookingStats().completed})
                                                     </Dropdown.Item>
                                                     <Dropdown.Item 
                                                         active={bookingFilter === 'rejected'} 
                                                         onClick={() => setBookingFilter('rejected')}
                                                     >
-                                                        Rejected ({getBookingStats().rejected})
+                                                        {t('userHome.rejected')} ({getBookingStats().rejected})
                                                     </Dropdown.Item>
                                                 </Dropdown.Menu>
                                             </Dropdown>
@@ -658,12 +663,12 @@ const UserHome = () => {
                                 {isBookingsLoading ? (
                                     <div className="text-center py-5">
                                         <Spinner animation="border" variant="primary" />
-                                        <p className="mt-3 text-muted">Loading your bookings...</p>
+                                        <p className="mt-3 text-muted">{t('userHome.loadingBookings')}</p>
                                     </div>
                                 ) : bookingsError ? (
                                     <Alert variant="danger" className="d-flex align-items-center">
                                         <FaExclamationTriangle className="me-2" />
-                                        {bookingsError}
+                                        {t('userHome.failedToLoadBookings')}
                                     </Alert>
                                 ) : getFilteredBookings().length === 0 ? (
                                     <div className="text-center py-5">
@@ -671,12 +676,12 @@ const UserHome = () => {
                                             <FaCalendarAlt className="text-muted" size={32} />
                                         </div>
                                         <h6 className="text-muted mb-2">
-                                            {bookingFilter === 'all' ? 'No bookings yet' : `No ${bookingFilter} bookings`}
+                                            {bookingFilter === 'all' ? t('userHome.noBookingsYet') : t('userHome.noFilteredBookings')}
                                         </h6>
                                         <p className="text-muted small mb-3">
                                             {bookingFilter === 'all' 
-                                                ? 'Start by searching for services in your area' 
-                                                : `You don't have any ${bookingFilter} bookings at the moment`
+                                                ? t('userHome.noBookingsDesc') 
+                                                : t('userHome.noFilteredBookingsDesc')
                                             }
                                         </p>
                                         {bookingFilter === 'all' && (
@@ -687,7 +692,7 @@ const UserHome = () => {
                                                 className="d-flex align-items-center mx-auto"
                                             >
                                                 <FaSearch className="me-2" size={12} />
-                                                Find Services
+                                                {t('userHome.findServicesBtn')}
                                             </Button>
                                         )}
                                     </div>
@@ -713,24 +718,24 @@ const UserHome = () => {
                     <Col>
                         <Card className="account-management-card border-0 shadow-sm">
                             <Card.Body className="p-4">
-                                <h6 className="text-muted mb-3">Account Management</h6>
-                                <p className="text-muted small mb-3">Manage your account settings and preferences</p>
+                                <h6 className="text-muted mb-3">{t('userHome.accountManagement')}</h6>
+                                <p className="text-muted small mb-3">{t('userHome.accountManagementDesc')}</p>
                                 <OverlayTrigger
                                     placement="top"
-                                    overlay={<Tooltip>This action cannot be undone</Tooltip>}
+                                    overlay={<Tooltip>{t('userHome.actionCannotBeUndone')}</Tooltip>}
                                 >
                                     <Button 
                                         variant="outline-danger" 
                                         size="sm"
                                         className="delete-profile-btn"
                                         onClick={() => {
-                                            if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                                            if (window.confirm(t('userHome.deleteAccountConfirm'))) {
                                                 handleDeleteAccount();
                                             }
                                         }}
                                     >
                                         <FaTrashAlt className="me-2" size={12} />
-                                        Delete Account
+                                        {t('userHome.deleteAccount')}
                                     </Button>
                                 </OverlayTrigger>
                             </Card.Body>

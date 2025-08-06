@@ -16,37 +16,40 @@ import {
   FaCog,
   FaCheck
 } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
+  const { t } = useTranslation();
+  
   const getStatusBadge = (statusCode) => {
     switch (statusCode) {
       case -1:
-        return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+        return <Badge bg="danger" className="px-3 py-2"><FaTimesCircle className="me-1" /> {t('bookingDetailsModal.rejected')}</Badge>;
       case 0:
-        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>;
+        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> {t('bookingDetailsModal.unknown')}</Badge>;
       case 1:
-        return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> Pending</Badge>;
+        return <Badge bg="warning" className="px-3 py-2"><FaClock className="me-1" /> {t('bookingDetailsModal.pending')}</Badge>;
       case 2:
-        return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+        return <Badge bg="primary" className="px-3 py-2"><FaCheckCircle className="me-1" /> {t('bookingDetailsModal.accepted')}</Badge>;
       case 3:
-        return <Badge bg="success" className="px-3 py-2"><FaCheck className="me-1" /> Completed</Badge>;
+        return <Badge bg="success" className="px-3 py-2"><FaCheck className="me-1" /> {t('bookingDetailsModal.completed')}</Badge>;
       default:
-        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> Unknown</Badge>;
+        return <Badge bg="secondary" className="px-3 py-2"><FaClock className="me-1" /> {t('bookingDetailsModal.unknown')}</Badge>;
     }
   };
 
   const getUrgencyBadge = (urgencyLevel) => {
     switch (urgencyLevel?.toLowerCase()) {
       case 'urgent':
-        return <Badge bg="danger" className="px-2 py-1"><FaExclamationTriangle className="me-1" /> Urgent</Badge>;
+        return <Badge bg="danger" className="px-2 py-1"><FaExclamationTriangle className="me-1" /> {t('bookingDetailsModal.urgent')}</Badge>;
       case 'high':
-        return <Badge bg="warning" className="px-2 py-1"><FaExclamationTriangle className="me-1" /> High</Badge>;
+        return <Badge bg="warning" className="px-2 py-1"><FaExclamationTriangle className="me-1" /> {t('bookingDetailsModal.high')}</Badge>;
       case 'normal':
-        return <Badge bg="info" className="px-2 py-1"><FaCog className="me-1" /> Normal</Badge>;
+        return <Badge bg="info" className="px-2 py-1"><FaCog className="me-1" /> {t('bookingDetailsModal.normal')}</Badge>;
       case 'low':
-        return <Badge bg="secondary" className="px-2 py-1"><FaClock className="me-1" /> Low</Badge>;
+        return <Badge bg="secondary" className="px-2 py-1"><FaClock className="me-1" /> {t('bookingDetailsModal.low')}</Badge>;
       default:
-        return <Badge bg="secondary" className="px-2 py-1"><FaCog className="me-1" /> Not Specified</Badge>;
+        return <Badge bg="secondary" className="px-2 py-1"><FaCog className="me-1" /> {t('bookingDetailsModal.notSpecified')}</Badge>;
     }
   };
 
@@ -60,7 +63,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
             <FaClipboardList className="text-primary" size={24} />
           </div>
           <div>
-            <Modal.Title className="mb-0">Booking Details</Modal.Title>
+            <Modal.Title className="mb-0">{t('bookingDetailsModal.bookingDetails')}</Modal.Title>
             <small className="text-muted">ID: #{booking.bookingId}</small>
           </div>
         </div>
@@ -72,7 +75,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="mb-0 text-primary">
                 <FaClipboardList className="me-2" />
-                Booking Overview
+                {t('bookingDetailsModal.bookingOverview')}
               </h5>
               <div className="d-flex gap-2">
                 {getStatusBadge(booking.bookingStatusCode)}
@@ -84,7 +87,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                 <div className="detail-item">
                   <label className="detail-label text-muted">
                     <FaCalendarAlt className="me-2" />
-                    Booking Time
+                    {t('bookingDetailsModal.bookingTime')}
                   </label>
                   <div className="detail-value fw-medium">
                     {booking.bookingTime ? new Date(booking.bookingTime).toLocaleString() : 'N/A'}
@@ -95,7 +98,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                 <div className="detail-item">
                   <label className="detail-label text-muted">
                     <FaTools className="me-2" />
-                    Service Type
+                    {t('bookingDetailsModal.serviceType')}
                   </label>
                   <div className="detail-value">
                     <Badge bg="info" className="fs-6 px-3 py-2">
@@ -107,10 +110,10 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
               {booking.preferredDate && (
                 <Col md={6}>
                   <div className="detail-item">
-                    <label className="detail-label text-muted">
-                      <FaCalendarAlt className="me-2" />
-                      Preferred Date
-                    </label>
+                                      <label className="detail-label text-muted">
+                    <FaCalendarAlt className="me-2" />
+                    {t('bookingDetailsModal.preferredDate')}
+                  </label>
                     <div className="detail-value fw-medium">{booking.preferredDate}</div>
                   </div>
                 </Col>
@@ -118,10 +121,10 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
               {booking.preferredTime && (
                 <Col md={6}>
                   <div className="detail-item">
-                    <label className="detail-label text-muted">
-                      <FaClock className="me-2" />
-                      Preferred Time
-                    </label>
+                                      <label className="detail-label text-muted">
+                    <FaClock className="me-2" />
+                    {t('bookingDetailsModal.preferredTime')}
+                  </label>
                     <div className="detail-value fw-medium">{booking.preferredTime}</div>
                   </div>
                 </Col>
@@ -137,16 +140,16 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
               <Card.Body>
                 <h5 className="mb-3 text-primary border-bottom pb-2">
                   <FaUser className="me-2" />
-                  Customer Information
+                  {t('bookingDetailsModal.customerInformation')}
                 </h5>
                 <div className="detail-item mb-3">
-                  <label className="detail-label text-muted">Customer Name</label>
+                  <label className="detail-label text-muted">{t('bookingDetailsModal.customerName')}</label>
                   <div className="detail-value fw-bold">{booking.userName || 'N/A'}</div>
                 </div>
                 <div className="detail-item mb-3">
                   <label className="detail-label text-muted">
                     <FaPhone className="me-2" />
-                    Mobile Number
+                    {t('bookingDetailsModal.mobileNumber')}
                   </label>
                   <div className="detail-value">
                     <Badge bg="info" className="px-3 py-2">
@@ -155,7 +158,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                   </div>
                 </div>
                 <div className="detail-item mb-3">
-                  <label className="detail-label text-muted">Customer ID</label>
+                  <label className="detail-label text-muted">{t('bookingDetailsModal.customerId')}</label>
                   <div className="detail-value">
                     <Badge bg="secondary" className="px-3 py-2">
                       #{booking.userId || 'N/A'}
@@ -172,16 +175,16 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
               <Card.Body>
                 <h5 className="mb-3 text-primary border-bottom pb-2">
                   <FaUserTie className="me-2" />
-                  Service Provider Information
+                  {t('bookingDetailsModal.serviceProviderInformation')}
                 </h5>
                 <div className="detail-item mb-3">
-                  <label className="detail-label text-muted">Provider Name</label>
+                  <label className="detail-label text-muted">{t('bookingDetailsModal.providerName')}</label>
                   <div className="detail-value fw-bold">{booking.labourName || 'N/A'}</div>
                 </div>
                 <div className="detail-item mb-3">
                   <label className="detail-label text-muted">
                     <FaPhone className="me-2" />
-                    Mobile Number
+                    {t('bookingDetailsModal.mobileNumber')}
                   </label>
                   <div className="detail-value">
                     <Badge bg="info" className="px-3 py-2">
@@ -190,7 +193,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                   </div>
                 </div>
                 <div className="detail-item mb-3">
-                  <label className="detail-label text-muted">Provider ID</label>
+                  <label className="detail-label text-muted">{t('bookingDetailsModal.providerId')}</label>
                   <div className="detail-value">
                     <Badge bg="secondary" className="px-3 py-2">
                       #{booking.labourId || 'N/A'}
@@ -200,7 +203,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                 <div className="detail-item mb-3">
                   <label className="detail-label text-muted">
                     <FaTools className="me-2" />
-                    Skill Category
+                    {t('bookingDetailsModal.skillCategory')}
                   </label>
                   <div className="detail-value">
                     <Badge bg="success" className="px-3 py-2">
@@ -217,15 +220,15 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
         {(booking.workDescription || booking.urgencyLevel) && (
           <Card className="mt-4 border-0 shadow-sm">
             <Card.Body>
-              <h5 className="mb-3 text-primary border-bottom pb-2">
-                <FaFileAlt className="me-2" />
-                Additional Details
-              </h5>
+                              <h5 className="mb-3 text-primary border-bottom pb-2">
+                  <FaFileAlt className="me-2" />
+                  {t('bookingDetailsModal.additionalDetails')}
+                </h5>
               <Row className="g-3">
                 {booking.workDescription && (
                   <Col md={12}>
                     <div className="detail-item">
-                      <label className="detail-label text-muted">Work Description</label>
+                      <label className="detail-label text-muted">{t('bookingDetailsModal.workDescription')}</label>
                       <div className="detail-value bg-light p-3 rounded border">
                         {booking.workDescription}
                       </div>
@@ -235,7 +238,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                 {booking.urgencyLevel && (
                   <Col md={6}>
                     <div className="detail-item">
-                      <label className="detail-label text-muted">Urgency Level</label>
+                      <label className="detail-label text-muted">{t('bookingDetailsModal.urgencyLevel')}</label>
                       <div className="detail-value">
                         {getUrgencyBadge(booking.urgencyLevel)}
                       </div>
@@ -245,7 +248,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
                 {booking.amount && (
                   <Col md={6}>
                     <div className="detail-item">
-                      <label className="detail-label text-muted">Amount</label>
+                      <label className="detail-label text-muted">{t('bookingDetailsModal.amount')}</label>
                       <div className="detail-value fw-bold text-success">
                         ₹{booking.amount}
                       </div>
@@ -259,7 +262,7 @@ const BookingDetailsModal = ({ isOpen, toggle, booking }) => {
       </Modal.Body>
       <Modal.Footer className="bg-light border-top">
         <Button variant="secondary" onClick={toggle} className="px-4">
-          Close
+          {t('bookingDetailsModal.close')}
         </Button>
       </Modal.Footer>
       <style>{`

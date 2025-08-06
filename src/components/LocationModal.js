@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Button, Form, InputGroup, ListGroup, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import { FaMapMarkerAlt, FaSearch, FaLocationArrow, FaTimes, FaMapPin, FaEdit } from 'react-icons/fa';
 import LocationService from '../services/LocationService';
+import { useTranslation } from 'react-i18next';
 import '../styles/LocationModal.css';
 
 const LocationModal = ({ show, onHide, onLocationSelect }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('detect'); // 'detect', 'search', 'manual'
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -210,8 +212,8 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
     <div className="location-tab-content">
       <div className="text-center mb-4">
         <FaLocationArrow className="location-icon mb-3" />
-        <h5>Auto-detect your location</h5>
-        <p className="text-muted">We'll use your device's location to find nearby services</p>
+        <h5>{t('locationModal.autoDetectYourLocation')}</h5>
+        <p className="text-muted">{t('locationModal.useDeviceLocation')}</p>
       </div>
       
       {detectedLocation && (
@@ -219,7 +221,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
           <div className="d-flex align-items-center">
             <FaMapPin className="text-success me-2" />
             <div>
-              <strong>Current Location:</strong>
+              <strong>{t('locationModal.currentLocation')}</strong>
               <div className="text-muted">{getDisplayName(detectedLocation.address)}</div>
             </div>
           </div>
@@ -236,12 +238,12 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
           {isDetecting ? (
             <>
               <Spinner animation="border" size="sm" className="me-2" />
-              Detecting...
+              {t('locationModal.detecting')}
             </>
           ) : (
             <>
               <FaLocationArrow className="me-2" />
-              Detect My Location
+              {t('locationModal.detectMyLocation')}
             </>
           )}
         </Button>
@@ -253,7 +255,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
             className="use-location-btn"
           >
             <FaMapPin className="me-2" />
-            Use This Location
+            {t('locationModal.useThisLocation')}
           </Button>
         )}
       </div>
@@ -266,7 +268,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
         <InputGroup className="search-input-group">
           <Form.Control
             type="text"
-            placeholder="Search for area, city, or landmark..."
+            placeholder={t('locationModal.searchForArea')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -280,13 +282,13 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
       {isSearching && (
         <div className="text-center mb-3">
           <Spinner animation="border" size="sm" className="me-2" />
-          Searching...
+          {t('locationModal.searching')}
         </div>
       )}
 
       {searchResults.length > 0 && (
         <div className="search-results">
-          <h6 className="mb-3">Search Results</h6>
+          <h6 className="mb-3">{t('locationModal.searchResults')}</h6>
           <ListGroup className="search-results-list">
             {searchResults.map((result, index) => {
               const formatted = formatSearchResult(result);
@@ -340,16 +342,16 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
   const renderManualTab = () => (
     <div className="location-tab-content">
       <div className="manual-form">
-        <h6 className="mb-3">Enter Address Manually</h6>
+        <h6 className="mb-3">{t('locationModal.enterAddressManually')}</h6>
         
         <Form>
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Street/Building</Form.Label>
+                <Form.Label>{t('locationModal.streetBuilding')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter street or building name"
+                  placeholder={t('locationModal.enterStreetBuilding')}
                   value={manualAddress.street}
                   onChange={(e) => setManualAddress({...manualAddress, street: e.target.value})}
                 />
@@ -357,10 +359,10 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Area/Locality *</Form.Label>
+                <Form.Label>{t('locationModal.areaLocality')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter area or locality"
+                  placeholder={t('locationModal.enterAreaLocality')}
                   value={manualAddress.area}
                   onChange={(e) => setManualAddress({...manualAddress, area: e.target.value})}
                   required
@@ -372,10 +374,10 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group>
-                <Form.Label>City *</Form.Label>
+                <Form.Label>{t('locationModal.city')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter city name"
+                  placeholder={t('locationModal.enterCityName')}
                   value={manualAddress.city}
                   onChange={(e) => setManualAddress({...manualAddress, city: e.target.value})}
                   required
@@ -384,10 +386,10 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>State</Form.Label>
+                <Form.Label>{t('locationModal.state')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter state name"
+                  placeholder={t('locationModal.enterStateName')}
                   value={manualAddress.state}
                   onChange={(e) => setManualAddress({...manualAddress, state: e.target.value})}
                 />
@@ -398,10 +400,10 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group>
-                <Form.Label>PIN Code</Form.Label>
+                <Form.Label>{t('locationModal.pinCode')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter PIN code"
+                  placeholder={t('locationModal.enterPinCode')}
                   value={manualAddress.pincode}
                   onChange={(e) => setManualAddress({...manualAddress, pincode: e.target.value})}
                 />
@@ -418,7 +420,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
             className="submit-manual-btn"
           >
             <FaEdit className="me-2" />
-            Use This Address
+            {t('locationModal.useThisAddress')}
           </Button>
         </div>
       </div>
@@ -436,7 +438,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
       <Modal.Header closeButton className="location-modal-header">
         <Modal.Title>
           <FaMapMarkerAlt className="me-2" />
-          Select Your Location
+          {t('locationModal.selectYourLocation')}
         </Modal.Title>
       </Modal.Header>
       
@@ -455,7 +457,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
               className="tab-btn"
             >
               <FaLocationArrow className="me-2" />
-              Auto-detect
+              {t('locationModal.autoDetect')}
             </Button>
             <Button
               variant={activeTab === 'search' ? 'primary' : 'outline-primary'}
@@ -463,7 +465,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
               className="tab-btn"
             >
               <FaSearch className="me-2" />
-              Search
+              {t('locationModal.search')}
             </Button>
             <Button
               variant={activeTab === 'manual' ? 'primary' : 'outline-primary'}
@@ -471,7 +473,7 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
               className="tab-btn"
             >
               <FaEdit className="me-2" />
-              Manual
+              {t('locationModal.manual')}
             </Button>
           </div>
           

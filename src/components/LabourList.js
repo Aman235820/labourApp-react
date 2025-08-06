@@ -3,15 +3,18 @@ import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { FaUser, FaTools, FaPhone, FaStar } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import '../styles/LabourList.css';
 import LabourDetailsModal from './LabourDetailsModal';
 import SearchLabourModal from './SearchLabourModal';
 
 function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, isLoading = false, onChangeRowsPerPage, onChangePage }) {
+  const { t } = useTranslation();
+  
   // DataTable columns (copied from Home.js)
   const columns = [
     {
-      name: 'Name',
+      name: t('labourList.name'),
       selector: row => row.labourName,
       sortable: true,
       cell: row => (
@@ -24,7 +27,7 @@ function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, is
       ),
     },
     {
-      name: 'Services',
+      name: t('labourList.services'),
       selector: row => row.labourSkill,
       sortable: true,
       cell: row => (
@@ -35,7 +38,7 @@ function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, is
       ),
     },
     {
-      name: 'Phone',
+      name: t('labourList.phone'),
       selector: row => row.labourMobileNo,
       cell: row => (
         <div className="d-flex align-items-center">
@@ -46,19 +49,19 @@ function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, is
             className="d-flex align-items-center"
           >
             <FaPhone className="me-2" />
-            Call Now
+            {t('labourList.callNow')}
           </Button>
         </div>
       ),
     },
     {
-      name: 'Rating',
+      name: t('labourList.rating'),
       selector: row => row.rating,
       sortable: true,
       cell: row => (
         <div className="d-flex align-items-center">
           <FaStar className="text-warning me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.rating || 'No ratings yet'}</span>
+          <span className="fw-medium">{row.rating || t('labourList.noRatingsYet')}</span>
         </div>
       ),
     },
@@ -130,7 +133,7 @@ function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, is
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Labourers List</Modal.Title>
+        <Modal.Title>{t('labourList.labourersList')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div style={{ overflow: 'auto', flex: 1 }}>
@@ -147,12 +150,12 @@ function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, is
                 onRowClicked={onRowClick}
                 pointerOnHover
                 noHeader
-                noDataComponent={<div className="text-center py-4">No labourers found for this subservice.</div>}
+                noDataComponent={<div className="text-center py-4">{t('labourList.noLabourersFound')}</div>}
               />
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>Close</Button>
+        <Button variant="secondary" onClick={onHide}>{t('labourList.close')}</Button>
       </Modal.Footer>
     </Modal>
   );

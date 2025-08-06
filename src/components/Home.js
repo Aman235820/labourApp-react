@@ -592,7 +592,7 @@ function Home() {
                       {getTranslatedServiceName(selectedService.name)} {t('home.servicesText')}
                     </h3>
                     <p className="subservices-description">
-                      {t('home.chooseSpecialized', { service: getTranslatedServiceName(selectedService.name).toLowerCase() })}
+                      {t('home.chooseSpecialized', { serviceName: getTranslatedServiceName(selectedService.name) })}
                     </p>
                   </div>
                   <div className="subservices-grid">

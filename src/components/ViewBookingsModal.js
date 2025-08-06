@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Card, Alert, Spinner, Form, Badge } from 'react-bootstrap';
 import DataTable from "react-data-table-component";
 import { FaTools, FaCalendar, FaPhone, FaUser, FaStar, FaTimesCircle, FaClock, FaCheckCircle, FaClipboardList, FaEdit } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { getUserBookings, rateLabour } from '../services/BookingService';
 import axios from 'axios';
 
 const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview = '' }) => {
+    const { t } = useTranslation();
     const [rating, setRating] = useState(initialRating);
     const [review, setReview] = useState(initialReview);
 
@@ -25,12 +27,12 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
             centered
         >
             <ModalHeader closeButton>
-                <Modal.Title>Rate Service</Modal.Title>
+                <Modal.Title>{t('viewBookingsModal.rateService')}</Modal.Title>
             </ModalHeader>
             <ModalBody>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
-                        <Form.Label>Rating</Form.Label>
+                        <Form.Label>{t('viewBookingsModal.rating')}</Form.Label>
                         <div className="d-flex align-items-center">
                             {[1.0, 2.0, 3.0, 4.0, 5.0].map((star) => (
                                 <FaStar
@@ -44,23 +46,23 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
                         </div>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Review</Form.Label>
+                        <Form.Label>{t('viewBookingsModal.review')}</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={3}
                             value={review}
                             onChange={(e) => setReview(e.target.value)}
-                            placeholder="Write your review here..."
+                            placeholder={t('viewBookingsModal.writeReviewHere')}
                         />
                     </Form.Group>
                 </Form>
             </ModalBody>
             <ModalFooter>
                 <Button variant="secondary" onClick={onHide}>
-                    Cancel
+                    {t('viewBookingsModal.cancel')}
                 </Button>
                 <Button variant="primary" onClick={handleSubmit}>
-                    Submit Review
+                    {t('viewBookingsModal.submitReview')}
                 </Button>
             </ModalFooter>
         </Modal>
@@ -68,6 +70,7 @@ const RatingModal = ({ show, onHide, onSubmit, initialRating = 0, initialReview 
 };
 
 const ViewBookingsModal = ({ show, onHide, userId }) => {
+    const { t } = useTranslation();
     const [bookings, setBookings] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -88,7 +91,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             console.log('Bookings API Response:', response);
             setBookings(response.returnValue || []);
         } catch (err) {
-            setError(err.message || 'Failed to fetch bookings');
+            setError(err.message || t('viewBookingsModal.failedToFetchBookings'));
         } finally {
             setIsLoading(false);
         }
@@ -98,18 +101,18 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
         try {
             const userDetailsStr = localStorage.getItem('user');
             if (!userDetailsStr) {
-                alert('User details not found. Please login again.');
+                alert(t('viewBookingsModal.userDetailsNotFound'));
                 return;
             }
 
             const userDetails = JSON.parse(userDetailsStr);
             if (!userDetails || !userDetails.userId) {
-                alert('Invalid user details. Please login again.');
+                alert(t('viewBookingsModal.invalidUserDetails'));
                 return;
             }
 
             if (!selectedBooking || !selectedBooking.labourId || !selectedBooking.bookingId) {
-                alert('Booking information is missing. Please try again.');
+                alert(t('viewBookingsModal.bookingInformationMissing'));
                 return;
             }
 
@@ -139,35 +142,35 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
 
             // Check the actual API response structure
             if (response && !response.hasError) {
-                alert('Review submitted successfully!');
+                alert(t('viewBookingsModal.reviewSubmittedSuccessfully'));
                 fetchBookings(); // Refresh the bookings list
             } else {
-                throw new Error(response?.message || 'Failed to submit review');
+                throw new Error(response?.message || t('viewBookingsModal.failedToSubmitReview'));
             }
         } catch (error) {
             console.error('Error submitting review:', error);
-            alert(error.response?.data?.message || error.message || 'Failed to submit review. Please try again.');
+            alert(error.response?.data?.message || error.message || t('viewBookingsModal.failedToSubmitReview'));
         }
     };
 
     const getStatusBadge = (statusCode) => {
         switch (statusCode) {
             case -1:
-                return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+                return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> {t('viewBookingsModal.rejected')}</Badge>;
             case 1:
-                return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> Pending</Badge>;
+                return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> {t('viewBookingsModal.pending')}</Badge>;
             case 2:
-                return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+                return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> {t('viewBookingsModal.accepted')}</Badge>;
             case 3:
-                return <Badge bg="success" className="status-badge"><FaClock className="me-1" /> Completed</Badge>;
+                return <Badge bg="success" className="status-badge"><FaClock className="me-1" /> {t('viewBookingsModal.completed')}</Badge>;
             default:
-                return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> Unknown</Badge>;
+                return <Badge bg="secondary" className="status-badge"><FaClock className="me-1" /> {t('viewBookingsModal.unknown')}</Badge>;
         }
     };
 
     const columns = [
         {
-            name: 'Labour Name',
+            name: t('viewBookingsModal.labourName'),
             selector: row => row.labourName,
             sortable: true,
             cell: row => (
@@ -178,7 +181,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             ),
         },
         {
-            name: 'Service',
+            name: t('viewBookingsModal.service'),
             selector: row => row.labourSkill,
             sortable: true,
             cell: row => (
@@ -189,7 +192,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             ),
         },
         {
-            name: 'Phone',
+            name: t('viewBookingsModal.phone'),
             selector: row => row.labourMobileNo,
             cell: row => (
                 <div className="d-flex align-items-center">
@@ -200,18 +203,18 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                         className="d-flex align-items-center"
                     >
                         <FaPhone className="me-2" />
-                        Call Now
+                        {t('viewBookingsModal.callNow')}
                     </Button>
                 </div>
             ),
         },
         {
-            name: 'Booking Date',
+            name: t('viewBookingsModal.bookingDate'),
             selector: row => row.bookingTime,
             sortable: true,
             cell: row => {
                 const dateString = row.bookingTime;
-                let formattedDate = 'Invalid Date';
+                let formattedDate = t('viewBookingsModal.invalidDate');
 
                 if (dateString) {
                     // Assuming format is "DD-MM-YYYY HH:mm:ss"
@@ -251,7 +254,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
             },
         },
         {
-            name: 'Status',
+            name: t('viewBookingsModal.status'),
             selector: row => row.bookingStatusCode,
             sortable: true,
             cell: row => {
@@ -260,23 +263,23 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
 
                 switch (row.bookingStatusCode) {
                     case 1:
-                        statusText = 'Confirmation Pending';
+                        statusText = t('viewBookingsModal.confirmationPending');
                         statusColor = 'warning';
                         break;
                     case 2:
-                        statusText = 'Booking Accepted';
+                        statusText = t('viewBookingsModal.bookingAccepted');
                         statusColor = 'success';
                         break;
                     case 3:
-                        statusText = 'Task Completed';
+                        statusText = t('viewBookingsModal.taskCompleted');
                         statusColor = 'info';
                         break;
                     case -1:
-                        statusText = 'Booking Rejected';
+                        statusText = t('viewBookingsModal.bookingRejected');
                         statusColor = 'danger';
                         break;
                     default:
-                        statusText = 'Unknown Status';
+                        statusText = t('viewBookingsModal.unknownStatus');
                         statusColor = 'secondary';
                 }
 
@@ -296,7 +299,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                                 }}
                             >
                                 <FaEdit className="me-1" />
-                                Review Service
+                                {t('viewBookingsModal.reviewService')}
                             </Button>
                         )}
                     </div>
@@ -328,8 +331,8 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                             <FaClipboardList className="text-white" size={24} />
                         </div>
                         <div>
-                            <Modal.Title as="h3" className="fw-bold mb-0 text-primary">My Bookings</Modal.Title>
-                            <div className="text-muted small">All your service requests and history</div>
+                            <Modal.Title as="h3" className="fw-bold mb-0 text-primary">{t('viewBookingsModal.myBookings')}</Modal.Title>
+                            <div className="text-muted small">{t('viewBookingsModal.allServiceRequestsAndHistory')}</div>
                         </div>
                     </div>
                 </ModalHeader>
@@ -361,7 +364,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                                 pointerOnHover
                                 noDataComponent={
                                     <div className="text-center py-4">
-                                        <p className="text-muted mb-0">No bookings found</p>
+                                        <p className="text-muted mb-0">{t('viewBookingsModal.noBookingsFound')}</p>
                                     </div>
                                 }
                             />
@@ -371,7 +374,7 @@ const ViewBookingsModal = ({ show, onHide, userId }) => {
                 <div className="w-100" style={{ borderTop: '1.5px solid #e5e7eb' }}></div>
                 <ModalFooter className="bg-light border-0 pt-3 pb-4 px-4">
                     <Button variant="secondary" onClick={onHide} className="px-4 py-2 rounded-3 fw-semibold">
-                        Close
+                        {t('viewBookingsModal.close')}
                     </Button>
                 </ModalFooter>
             </Modal>

@@ -3,6 +3,7 @@ import { Modal, Button, Container, Card, Badge, Alert } from 'react-bootstrap';
 import { FaStar, FaPhone, FaTools, FaUser, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import BookingModal from './modals/BookingModal';
+import { useTranslation } from 'react-i18next';
 import '../styles/SearchLabourModal.css';
 
 const SearchLabourModal = ({ 
@@ -16,6 +17,7 @@ const SearchLabourModal = ({
     userMobileNumber
 }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [selectedLabourForBooking, setSelectedLabourForBooking] = useState(null);
 
@@ -23,7 +25,7 @@ const SearchLabourModal = ({
         // Check if user is logged in
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
-            alert('Please login to book a service. Redirecting to registration page.');
+            alert(t('searchLabourModal.pleaseLoginToBookService'));
             navigate('/register');
             return;
         }
@@ -69,7 +71,7 @@ const SearchLabourModal = ({
                                 <small className="text-muted ms-1">({labour.ratingCount || 0})</small>
                             </div>
                         ) : (
-                            <Badge bg="secondary">No Ratings</Badge>
+                            <Badge bg="secondary">{t('common.noRatingsYet')}</Badge>
                         )}
                     </div>
                 </div>
@@ -87,14 +89,14 @@ const SearchLabourModal = ({
                 <div className="contact-info mb-3">
                     <div className="d-flex align-items-start text-muted mb-2">
                         <FaMapMarkerAlt className="me-2 text-primary mt-1" size={14} />
-                        <span className="location-detail">{labour.labourLocation || labour.labourAddress || 'Location not specified'}</span>
+                        <span className="location-detail">{labour.labourLocation || labour.labourAddress || t('common.locationNotSpecified')}</span>
                     </div>
                     <div className="d-flex align-items-center text-muted">
                         <FaStar className="me-2 text-warning" size={14} />
                         <span className="rating-detail">
                             {labour.rating && parseFloat(labour.rating) > 0 
                                 ? `${labour.rating} rating (${labour.ratingCount || 0} reviews)`
-                                : 'No ratings yet'
+                                : t('common.noRatingsYet')
                             }
                         </span>
                     </div>
@@ -112,7 +114,7 @@ const SearchLabourModal = ({
                             }}
                         >
                             <FaPhone className="me-2" />
-                            Call Now
+                            {t('searchLabourModal.callNow')}
                         </Button>
                         <Button 
                             variant="success" 
@@ -123,7 +125,7 @@ const SearchLabourModal = ({
                             }}
                         >
                             <FaCalendarAlt className="me-2" />
-                            Book for Later
+                            {t('searchLabourModal.bookForLater')}
                         </Button>
                     </div>
                 </div>
@@ -135,7 +137,7 @@ const SearchLabourModal = ({
         <>
             <Modal show={show} onHide={onHide} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title>Search Results for "{searchCategory}"</Modal.Title>
+                    <Modal.Title>{t('searchLabourModal.searchResultsFor', { searchCategory: searchCategory })}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {error && (
@@ -149,7 +151,7 @@ const SearchLabourModal = ({
                             <>
                                 <div className="mb-3">
                                     <small className="text-muted">
-                                        Showing {searchResults.content.length} of {searchResults.totalElements} results
+                                        {t('searchLabourModal.showingResults', { count: searchResults.content.length, total: searchResults.totalElements })}
                                     </small>
                                 </div>
                                 <div className="labour-cards-container">
@@ -161,8 +163,8 @@ const SearchLabourModal = ({
                                 <div className="empty-results-icon mb-3">
                                     <FaTools className="text-muted" size={48} />
                                 </div>
-                                <h5 className="text-muted mb-2">No Results Found</h5>
-                                <p className="text-muted">Try searching with different keywords or check back later.</p>
+                                <h5 className="text-muted mb-2">{t('searchLabourModal.noResultsFound')}</h5>
+                                <p className="text-muted">{t('searchLabourModal.trySearchingWithDifferentKeywords')}</p>
                             </div>
                         )}
                     </div>

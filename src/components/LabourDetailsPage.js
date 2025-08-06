@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Modal, Image, Spinner, Alert, Form } from 'react-bootstrap';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   FaStar, 
   FaPhone, 
@@ -32,6 +33,7 @@ import BookingModal from './modals/BookingModal';
 import '../styles/LabourDetailsPage.css';
 
 const LabourDetailsPage = () => {
+  const { t } = useTranslation();
   const { labourId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -378,12 +380,12 @@ const LabourDetailsPage = () => {
     
     // Validate form data
     if (!bookingData.date) {
-      alert('Please select a preferred date.');
+              alert(t('labourDetails.pleaseSelectPreferredDate'));
       return;
     }
 
     if (!bookingData.time) {
-      alert('Please select a preferred time slot.');
+              alert(t('labourDetails.pleaseSelectPreferredTimeSlot'));
       return;
     }
 
@@ -461,13 +463,13 @@ const LabourDetailsPage = () => {
 
   const getDayName = (day) => {
     const days = {
-      monday: 'Monday',
-      tuesday: 'Tuesday',
-      wednesday: 'Wednesday',
-      thursday: 'Thursday',
-      friday: 'Friday',
-      saturday: 'Saturday',
-      sunday: 'Sunday'
+      monday: t('labourDetails.monday'),
+      tuesday: t('labourDetails.tuesday'),
+      wednesday: t('labourDetails.wednesday'),
+      thursday: t('labourDetails.thursday'),
+      friday: t('labourDetails.friday'),
+      saturday: t('labourDetails.saturday'),
+      sunday: t('labourDetails.sunday')
     };
     return days[day] || day;
   };
@@ -477,9 +479,9 @@ const LabourDetailsPage = () => {
       <Container className="labour-details-page py-5">
         <div className="text-center">
           <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden">{t('common.loading')}</span>
           </div>
-          <p className="mt-3">Loading labour details...</p>
+          <p className="mt-3">{t('labourDetails.loadingLabourDetails')}</p>
         </div>
       </Container>
     );
@@ -489,10 +491,10 @@ const LabourDetailsPage = () => {
     return (
       <Container className="labour-details-page py-5">
         <Alert variant="danger">
-          <h5>Labour not found</h5>
-          <p>The requested labour profile could not be found.</p>
+          <h5>{t('labourDetails.labourNotFound')}</h5>
+          <p>{t('labourDetails.labourNotFoundDesc')}</p>
           <Button variant="primary" onClick={() => navigate('/')}>
-            Go Back Home
+            {t('labourDetails.goBackHome')}
           </Button>
         </Alert>
       </Container>
@@ -511,7 +513,7 @@ const LabourDetailsPage = () => {
               onClick={() => navigate(-1)}
             >
               <FaArrowLeft className="me-2" />
-              Back to Search
+              {t('labourDetails.backToSearch')}
             </Button>
             
             <div className="d-flex align-items-center">
@@ -563,10 +565,10 @@ const LabourDetailsPage = () => {
                     {labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : 'No rating'}
                   </span>
                   <span className="text-muted">
-                    ({labour.reviewCount} review{labour.reviewCount !== 1 ? 's' : ''})
+                    ({labour.reviewCount} {labour.reviewCount !== 1 ? t('labourDetails.reviews') : t('labourDetails.review')})
                   </span>
                   <Badge bg={labour.isAvailable ? 'success' : 'danger'}>
-                    {labour.isAvailable ? 'Available' : 'Busy'}
+                    {labour.isAvailable ? t('labourDetails.available') : t('labourDetails.busy')}
                   </Badge>
                 </div>
                 
@@ -619,7 +621,7 @@ const LabourDetailsPage = () => {
                     onClick={() => {
                       const storedUser = localStorage.getItem('user');
                       if (!storedUser) {
-                        alert('Please login to book a service. Redirecting to registration page.');
+                        alert(t('labourDetails.pleaseLoginToBook'));
                         navigate('/register');
                         return;
                       }
@@ -629,7 +631,7 @@ const LabourDetailsPage = () => {
                     className="action-btn-primary"
                   >
                     <FaCalendarAlt className="me-2" />
-                    Book for Later
+                    {t('labourDetails.bookForLater')}
                   </Button>
                   
                   <Button 
@@ -645,7 +647,7 @@ const LabourDetailsPage = () => {
                     className="action-btn-secondary"
                   >
                     <FaStar className="me-2" />
-                    View Reviews ({labour.reviewCount || 0})
+                    {t('labourDetails.viewReviews')} ({labour.reviewCount || 0})
                   </Button>
                   
                   <Button 
@@ -655,7 +657,7 @@ const LabourDetailsPage = () => {
                     className="action-btn-call"
                   >
                     <FaPhone className="me-2" />
-                    Call Now
+                    {t('labourDetails.callNow')}
                   </Button>
                   
                   <Button 
@@ -665,7 +667,7 @@ const LabourDetailsPage = () => {
                     className="action-btn-whatsapp"
                   >
                     <FaWhatsapp className="me-2" />
-                    WhatsApp
+                    {t('labourDetails.whatsapp')}
                   </Button>
                 </div>
               </Card.Body>
@@ -680,7 +682,7 @@ const LabourDetailsPage = () => {
           {/* Description */}
           <Card className="mb-4">
             <Card.Body>
-              <h5>About {labour.labourName}</h5>
+              <h5>{t('labourDetails.about')} {labour.labourName}</h5>
               <p className={`labour-description ${showFullDescription ? 'expanded' : ''}`}>
                 {labour.description}
               </p>
@@ -690,7 +692,7 @@ const LabourDetailsPage = () => {
                   className="p-0"
                   onClick={() => setShowFullDescription(!showFullDescription)}
                 >
-                  {showFullDescription ? 'Show Less' : 'Read More'}
+                  {showFullDescription ? t('labourDetails.showLess') : t('labourDetails.readMore')}
                 </Button>
               )}
             </Card.Body>
@@ -699,7 +701,7 @@ const LabourDetailsPage = () => {
           {/* Skills */}
           <Card className="mb-4">
             <Card.Body>
-              <h5>Skills & Specializations</h5>
+              <h5>{t('labourDetails.skillsAndSpecializations')}</h5>
               <div className="skills-grid">
                 {labour.skills && labour.skills.length > 0 ? (
                   labour.skills.map((skill, index) => (
@@ -708,7 +710,7 @@ const LabourDetailsPage = () => {
                     </Badge>
                   ))
                 ) : (
-                  <p className="text-muted">No specific skills listed. Contact for more information about services offered.</p>
+                  <p className="text-muted">{t('labourDetails.noSpecificSkillsListed')}</p>
                 )}
               </div>
             </Card.Body>
@@ -718,14 +720,14 @@ const LabourDetailsPage = () => {
           {labour.hourlyRates && Object.keys(labour.hourlyRates).length > 0 && (
             <Card className="mb-4">
               <Card.Body>
-                <h5>Service Pricing</h5>
+                <h5>{t('labourDetails.servicePricing')}</h5>
                 <div className="pricing-grid">
                   {Object.entries(labour.hourlyRates).map(([service, rates]) => (
                     <div key={service} className="pricing-item">
                       <div className="service-name">{service}</div>
                       <div className="price-range">
                         ₹{rates.min || '0'} - ₹{rates.max || '0'}
-                        <small className="text-muted d-block">per hour</small>
+                        <small className="text-muted d-block">{t('labourDetails.perHour')}</small>
                       </div>
                     </div>
                   ))}
@@ -733,21 +735,21 @@ const LabourDetailsPage = () => {
                 {labour.satisfactionGuarantee && (
                   <Alert variant="success" className="mt-3">
                     <FaShieldAlt className="me-2" />
-                    <strong>Satisfaction Guarantee:</strong> We guarantee your satisfaction with our work quality and service.
+                    <strong>{t('labourDetails.satisfactionGuarantee')}</strong> {t('labourDetails.satisfactionGuaranteeDesc')}
                   </Alert>
                 )}
                 
                 {labour.followUpService && (
                   <Alert variant="info" className="mt-3">
                     <FaCheckCircle className="me-2" />
-                    <strong>Follow-up Service:</strong> We provide follow-up service to ensure your complete satisfaction.
+                    <strong>{t('labourDetails.followUpService')}</strong> {t('labourDetails.followUpServiceDesc')}
                   </Alert>
                 )}
                 
                 {labour.emergencyContact && (
                   <Alert variant="warning" className="mt-3">
                     <FaPhone className="me-2" />
-                    <strong>Emergency Contact:</strong> {labour.emergencyContact} (Available 24/7 for urgent requirements)
+                    <strong>{t('labourDetails.emergencyContact')}</strong> {labour.emergencyContact} ({t('labourDetails.emergencyContactDesc')})
                   </Alert>
                 )}
               </Card.Body>
@@ -757,7 +759,7 @@ const LabourDetailsPage = () => {
           {/* Work Gallery */}
           <Card className="mb-4">
             <Card.Body>
-              <h5>Work Gallery</h5>
+              <h5>{t('labourDetails.workGallery')}</h5>
               <div className="work-gallery">
                 {labour.workImages && labour.workImages.length > 0 ? (
                   labour.workImages.map((image, index) => (
@@ -775,7 +777,7 @@ const LabourDetailsPage = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-muted">No work samples available yet.</p>
+                  <p className="text-muted">{t('labourDetails.noWorkSamplesAvailable')}</p>
                 )}
               </div>
             </Card.Body>
@@ -785,7 +787,7 @@ const LabourDetailsPage = () => {
           {labour.testimonialVideos && labour.testimonialVideos.length > 0 && (
             <Card className="mb-4">
               <Card.Body>
-                <h5>Testimonial Videos</h5>
+                <h5>{t('labourDetails.testimonialVideos')}</h5>
                 <div className="testimonial-videos">
                   {labour.testimonialVideos.map((video, index) => (
                     <div key={video.id || index} className="video-item">
@@ -800,7 +802,7 @@ const LabourDetailsPage = () => {
                           rel="noopener noreferrer"
                           className="video-link"
                         >
-                          Watch Video
+                          {t('labourDetails.watchVideo')}
                         </a>
                       </div>
                     </div>
@@ -813,7 +815,7 @@ const LabourDetailsPage = () => {
           {/* Availability */}
           <Card className="mb-4">
             <Card.Body>
-              <h5>Weekly Schedule</h5>
+              <h5>{t('labourDetails.weeklySchedule')}</h5>
               <div className="availability-grid">
                 {Object.entries(labour.workingHours).map(([day, schedule]) => (
                   <div key={day} className="availability-item">
@@ -822,12 +824,12 @@ const LabourDetailsPage = () => {
                       {schedule.available ? (
                         <>
                           <FaCheckCircle className="text-success me-2" />
-                          {schedule.start && schedule.end ? `${schedule.start} - ${schedule.end}` : 'Available'}
+                          {schedule.start && schedule.end ? `${schedule.start} - ${schedule.end}` : t('labourDetails.available')}
                         </>
                       ) : (
                         <>
                           <FaTimesCircle className="text-danger me-2" />
-                          Closed
+                          {t('labourDetails.closed')}
                         </>
                       )}
                     </div>
@@ -836,8 +838,7 @@ const LabourDetailsPage = () => {
               </div>
               
               <Alert variant="info" className="mt-4">
-                <strong>Note:</strong> Schedule may vary based on workload and emergency requests. 
-                Contact directly for urgent requirements.
+                <strong>{t('labourDetails.scheduleNote')}</strong> {t('labourDetails.scheduleNoteDesc')}
               </Alert>
             </Card.Body>
           </Card>
@@ -847,12 +848,12 @@ const LabourDetailsPage = () => {
           {/* Contact Card */}
           <Card className="mb-4 contact-card">
             <Card.Body>
-              <h5>Contact Information</h5>
+              <h5>{t('labourDetails.contactInformation')}</h5>
               
               <div className="contact-item">
                 <FaPhone className="contact-icon" />
                 <div>
-                  <p className="mb-1">Phone</p>
+                  <p className="mb-1">{t('labourDetails.phone')}</p>
                   <a href={`tel:${labour.labourMobileNo}`} className="contact-link">
                     {labour.labourMobileNo}
                   </a>
@@ -862,9 +863,9 @@ const LabourDetailsPage = () => {
               <div className="contact-item">
                 <FaWhatsapp className="contact-icon text-success" />
                 <div>
-                  <p className="mb-1">WhatsApp</p>
+                  <p className="mb-1">{t('labourDetails.whatsapp')}</p>
                   <a href={`https://wa.me/${labour.labourMobileNo ? labour.labourMobileNo.replace(/\D/g, '') : ''}`} className="contact-link">
-                    Chat on WhatsApp
+                    {t('labourDetails.chatOnWhatsapp')}
                   </a>
                 </div>
               </div>
@@ -872,7 +873,7 @@ const LabourDetailsPage = () => {
               <div className="contact-item">
                 <FaEnvelope className="contact-icon" />
                 <div>
-                  <p className="mb-1">Email</p>
+                  <p className="mb-1">{t('labourDetails.email')}</p>
                   <a href={`mailto:${labour.email}`} className="contact-link">
                     {labour.email}
                   </a>
@@ -882,13 +883,13 @@ const LabourDetailsPage = () => {
               <hr />
               
               <div className="mb-3">
-                <p className="mb-1"><strong>Service Radius:</strong></p>
+                <p className="mb-1"><strong>{t('labourDetails.serviceRadius')}</strong></p>
                 <p>{labour.serviceRadius}</p>
               </div>
               
               <div className="mb-3">
-                <p className="mb-1"><strong>Languages:</strong></p>
-                <p>{labour.languages && labour.languages.length > 0 ? labour.languages.join(', ') : 'Not specified'}</p>
+                <p className="mb-1"><strong>{t('labourDetails.languages')}</strong></p>
+                <p>{labour.languages && labour.languages.length > 0 ? labour.languages.join(', ') : t('labourDetails.notSpecified')}</p>
               </div>
             </Card.Body>
           </Card>
@@ -896,26 +897,26 @@ const LabourDetailsPage = () => {
           {/* Stats Card */}
           <Card className="mb-4">
             <Card.Body>
-              <h5>Performance Stats</h5>
+              <h5>{t('labourDetails.performanceStats')}</h5>
               
               <div className="stat-item">
                 <div className="stat-number">{labour.stats.totalJobs}</div>
-                <div className="stat-label">Total Jobs</div>
+                <div className="stat-label">{t('labourDetails.totalJobs')}</div>
               </div>
               
               <div className="stat-item">
                 <div className="stat-number">{labour.stats.repeatCustomers}%</div>
-                <div className="stat-label">Repeat Customers</div>
+                <div className="stat-label">{t('labourDetails.repeatCustomers')}</div>
               </div>
               
               <div className="stat-item">
                 <div className="stat-number">{labour.stats.onTimeCompletion}%</div>
-                <div className="stat-label">On-Time Completion</div>
+                <div className="stat-label">{t('labourDetails.onTimeCompletion')}</div>
               </div>
               
               <div className="stat-item">
                 <div className="stat-number">{labour.stats.responseTime}</div>
-                <div className="stat-label">Response Time</div>
+                <div className="stat-label">{t('labourDetails.responseTime')}</div>
               </div>
             </Card.Body>
           </Card>
@@ -924,24 +925,24 @@ const LabourDetailsPage = () => {
           {labour.socialMedia && (labour.socialMedia.youtube || labour.socialMedia.instagram || labour.socialMedia.facebook) && (
             <Card className="mb-4">
               <Card.Body>
-                <h5>Social Media</h5>
+                <h5>{t('labourDetails.socialMedia')}</h5>
                 <div className="social-media-links">
                   {labour.socialMedia.youtube && (
                     <a href={labour.socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="social-link youtube">
                       <FaShare className="me-2" />
-                      YouTube
+                      {t('labourDetails.youtube')}
                     </a>
                   )}
                   {labour.socialMedia.instagram && (
                     <a href={labour.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="social-link instagram">
                       <FaShare className="me-2" />
-                      Instagram
+                      {t('labourDetails.instagram')}
                     </a>
                   )}
                   {labour.socialMedia.facebook && (
                     <a href={labour.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="social-link facebook">
                       <FaShare className="me-2" />
-                      Facebook
+                      {t('labourDetails.facebook')}
                     </a>
                   )}
                 </div>
@@ -952,7 +953,7 @@ const LabourDetailsPage = () => {
           {/* Certifications */}
           <Card className="mb-4">
             <Card.Body>
-              <h5>Certifications</h5>
+              <h5>{t('labourDetails.certifications')}</h5>
               {labour.certifications && labour.certifications.length > 0 ? (
                 labour.certifications.map((cert, index) => (
                   <div key={cert.id || index} className="certification-item">
@@ -960,18 +961,18 @@ const LabourDetailsPage = () => {
                     <div>
                       <div className="cert-name">{cert.name}</div>
                       {cert.issueDate && (
-                        <small className="text-muted">Issued: {new Date(cert.issueDate).toLocaleDateString()}</small>
+                        <small className="text-muted">{t('labourDetails.issued')} {new Date(cert.issueDate).toLocaleDateString()}</small>
                       )}
                       {cert.link && (
                         <a href={cert.link} target="_blank" rel="noopener noreferrer" className="cert-link">
-                          View Certificate
+                          {t('labourDetails.viewCertificate')}
                         </a>
                       )}
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-muted">No certifications listed.</p>
+                <p className="text-muted">{t('labourDetails.noCertificationsListed')}</p>
               )}
             </Card.Body>
           </Card>
@@ -982,7 +983,7 @@ const LabourDetailsPage = () => {
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
                   <FaStar className="me-2 text-warning" />
-                  Reviews ({labour.reviewCount || 0})
+                  {t('labourDetails.reviews')} ({labour.reviewCount || 0})
                 </h5>
               </div>
               
@@ -991,17 +992,17 @@ const LabourDetailsPage = () => {
                 <div className="d-flex align-items-center justify-content-between">
                   <div className="d-flex align-items-center">
                     <div className="rating-number-compact me-3">
-                      {labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : 'No rating'}
+                      {labour.rating && typeof labour.rating === 'number' && labour.rating > 0 ? labour.rating.toFixed(1) : t('labourDetails.noRating')}
                     </div>
                     <div>
                       <div className="rating-stars-compact mb-1">
                         {renderStars(labour.rating)}
                       </div>
-                      <small className="text-muted">{labour.reviewCount} review{labour.reviewCount !== 1 ? 's' : ''}</small>
+                      <small className="text-muted">{labour.reviewCount} {labour.reviewCount !== 1 ? t('labourDetails.reviews') : t('labourDetails.review')}</small>
                     </div>
                   </div>
                   <div className="text-end">
-                    <small className="text-muted">Overall Rating</small>
+                    <small className="text-muted">{t('labourDetails.overallRating')}</small>
                   </div>
                 </div>
               </div>
@@ -1036,7 +1037,7 @@ const LabourDetailsPage = () => {
                 ) : (
                   <div className="no-reviews-compact text-center py-3">
                     <FaStar className="text-muted mb-2" size={24} />
-                    <p className="text-muted small mb-0">No reviews yet</p>
+                    <p className="text-muted small mb-0">{t('labourDetails.noReviewsYet')}</p>
                   </div>
                 )}
               </div>
@@ -1048,7 +1049,7 @@ const LabourDetailsPage = () => {
       {/* Booking Modal */}
       <Modal show={showBookingModal} onHide={() => setShowBookingModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Book {labour.labourName}</Modal.Title>
+          <Modal.Title>{t('labourDetails.bookLabour')} {labour.labourName}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {bookingStatus && (
@@ -1060,23 +1061,23 @@ const LabourDetailsPage = () => {
           <div className="booking-confirmation mb-4">
             <div className="text-center">
               <FaCalendarAlt className="text-primary mb-3" size={48} />
-              <h5>Confirm Your Booking</h5>
+              <h5>{t('labourDetails.confirmYourBooking')}</h5>
               <p className="text-muted">
-                Are you sure you want to book <strong>{labour.labourName}</strong> for <strong>{serviceCategory}</strong>?
+                {t('labourDetails.areYouSureToBook')} <strong>{labour.labourName}</strong> {t('labourDetails.for')} <strong>{serviceCategory}</strong>?
               </p>
               <div className="booking-details bg-light p-3 rounded">
                 <div className="row text-start">
                   <div className="col-6">
-                    <strong>Labour:</strong> {labour.labourName}
+                    <strong>{t('labourDetails.labour')}:</strong> {labour.labourName}
                   </div>
                   <div className="col-6">
-                    <strong>Service:</strong> {serviceCategory}
+                    <strong>{t('labourDetails.service')}:</strong> {serviceCategory}
                   </div>
                   <div className="col-6">
-                    <strong>Contact:</strong> {labour.labourMobileNo}
+                    <strong>{t('labourDetails.contact')}:</strong> {labour.labourMobileNo}
                   </div>
                   <div className="col-6">
-                    <strong>Rating:</strong> {labour.rating ? `${labour.rating}/5` : 'No rating'}
+                    <strong>{t('labourDetails.rating')}:</strong> {labour.rating ? `${labour.rating}/5` : t('labourDetails.noRating')}
                   </div>
                 </div>
               </div>
@@ -1087,7 +1088,7 @@ const LabourDetailsPage = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Preferred Date</Form.Label>
+                  <Form.Label>{t('labourDetails.preferredDate')}</Form.Label>
                   <Form.Control
                     type="date"
                     value={bookingData.date}
@@ -1105,7 +1106,7 @@ const LabourDetailsPage = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Preferred Time Slot</Form.Label>
+                  <Form.Label>{t('labourDetails.preferredTimeSlot')}</Form.Label>
                   <Form.Select
                     value={bookingData.time}
                     onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
@@ -1145,7 +1146,7 @@ const LabourDetailsPage = () => {
             </Row>
             
             <Form.Group className="mb-3">
-              <Form.Label>Work Description <span className="text-muted">(Optional)</span></Form.Label>
+                              <Form.Label>{t('labourDetails.workDescription')} <span className="text-muted">{t('labourDetails.optional')}</span></Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
@@ -1156,15 +1157,15 @@ const LabourDetailsPage = () => {
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>Urgency Level</Form.Label>
+              <Form.Label>{t('labourDetails.urgencyLevel')}</Form.Label>
               <Form.Select
                 value={bookingData.urgency}
                 onChange={(e) => setBookingData({...bookingData, urgency: e.target.value})}
               >
-                <option value="low">Low - Within a week</option>
-                <option value="normal">Normal - Within 2-3 days</option>
-                <option value="high">High - Within 24 hours</option>
-                <option value="urgent">Urgent - ASAP</option>
+                <option value="low">{t('labourDetails.lowWithinWeek')}</option>
+                <option value="normal">{t('labourDetails.normalWithin2To3Days')}</option>
+                <option value="high">{t('labourDetails.highWithin24Hours')}</option>
+                <option value="urgent">{t('labourDetails.urgentAsap')}</option>
               </Form.Select>
             </Form.Group>
             
@@ -1173,17 +1174,17 @@ const LabourDetailsPage = () => {
                 {isBooking ? (
                   <>
                     <Spinner animation="border" size="sm" className="me-2" />
-                    Sending Booking Request...
+                    {t('labourDetails.sendingBookingRequest')}
                   </>
                 ) : (
                   <>
                     <FaCalendarAlt className="me-2" />
-                    Confirm Booking
+                    {t('labourDetails.confirmBooking')}
                   </>
                 )}
               </Button>
               <Button variant="outline-secondary" onClick={() => setShowBookingModal(false)}>
-                Cancel
+                {t('labourDetails.cancel')}
               </Button>
             </div>
           </Form>
@@ -1193,27 +1194,27 @@ const LabourDetailsPage = () => {
       {/* Report Modal */}
       <Modal show={showReportModal} onHide={() => setShowReportModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Report Review</Modal.Title>
+          <Modal.Title>{t('labourDetails.reportReview')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>Why are you reporting this review?</p>
           <Form>
-            <Form.Check type="radio" label="Inappropriate content" name="reportReason" />
-            <Form.Check type="radio" label="Fake review" name="reportReason" />
-            <Form.Check type="radio" label="Spam" name="reportReason" />
-            <Form.Check type="radio" label="Other" name="reportReason" />
+            <Form.Check type="radio" label={t('labourDetails.inappropriateContent')} name="reportReason" />
+            <Form.Check type="radio" label={t('labourDetails.fakeReview')} name="reportReason" />
+            <Form.Check type="radio" label={t('labourDetails.spam')} name="reportReason" />
+            <Form.Check type="radio" label={t('labourDetails.other')} name="reportReason" />
             <Form.Group className="mt-3">
-              <Form.Label>Additional Comments</Form.Label>
+              <Form.Label>{t('labourDetails.additionalComments')}</Form.Label>
               <Form.Control as="textarea" rows={3} />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowReportModal(false)}>
-            Cancel
+            {t('labourDetails.cancel')}
           </Button>
           <Button variant="danger" onClick={() => setShowReportModal(false)}>
-            Submit Report
+            {t('labourDetails.submitReport')}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1247,7 +1248,7 @@ const LabourDetailsPage = () => {
           <button 
             className="modal-close-overlay"
             onClick={() => setShowImageModal(false)}
-            aria-label="Close modal"
+            aria-label={t('labourDetails.closeModal')}
           >
             <FaTimesCircle size={24} />
           </button>
