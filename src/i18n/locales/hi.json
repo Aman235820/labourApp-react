@@ -20,7 +20,8 @@
     "backgroundChecked": "Background Check किया गया",
     "experienced": "अनुभवी",
     "mobileService": "Mobile Service",
-    "warranty": "Warranty"
+    "warranty": "Warranty",
+    "locationNotSpecified": "स्थान निर्दिष्ट नहीं किया गया"
   },
   "navigation": {
     "brand": "InstaHelp",
@@ -182,30 +183,30 @@
   },
   "userHome": {
     "welcomeBack": "वापसी पर स्वागत है",
-    "activeUser": "Active User",
-    "memberSince": "Member since",
+    "activeUser": "सक्रिय उपयोगकर्ता",
+    "memberSince": "सदस्यता से",
     "myBookings": "मेरी Bookings",
-    "logout": "Logout",
+    "logout": "लॉगआउट",
     "findServices": "Services ढूंढें",
-    "quickSearch": "Quick Search",
+    "quickSearch": "त्वरित खोज",
     "whatServiceDoYouNeed": "आपको क्या service चाहिए?",
     "enterCategory": "Category enter करें (जैसे plumber, electrician, cleaner)",
     "searchNow": "अभी Search करें",
     "searching": "Search हो रहा है...",
-    "popularCategories": "Popular Categories",
+    "popularCategories": "लोकप्रिय श्रेणियां",
     "trackBookings": "Bookings Track करें",
     "monitorServiceRequests": "अपने service requests और appointments monitor करें",
     "viewBookings": "Bookings देखें",
-    "notifications": "Notifications",
+    "notifications": "सूचनाएं",
     "stayUpdatedWithAlerts": "Service alerts और messages के साथ updated रहें",
-    "comingSoon": "Coming Soon",
+    "comingSoon": "जल्द आ रहा है",
     "myBookingsTitle": "मेरी Bookings",
-    "refresh": "Refresh",
-    "filter": "Filter",
-    "allBookings": "सभी Bookings",
-    "pending": "Pending",
-    "completed": "Completed",
-    "rejected": "Rejected",
+    "refresh": "रिफ्रेश",
+    "filter": "फ़िल्टर",
+    "allBookings": "सभी बुकिंग",
+    "pending": "लंबित",
+    "completed": "पूर्ण",
+    "rejected": "अस्वीकृत",
     "loadingBookings": "आपकी bookings लोड हो रही हैं...",
     "failedToLoadBookings": "Bookings लोड नहीं हो सकीं। फिर से try करें।",
     "noBookingsYet": "अभी तक कोई bookings नहीं",
@@ -230,27 +231,20 @@
     "pleaseEnterCategoryToSearch": "कृपया search करने के लिए category enter करें",
     "failedToFetchSearchResults": "Search results fetch नहीं हो सके। फिर से try करें।",
     "bookingCard": {
-      "unknownLabour": "Unknown Labour",
-      "service": "Service",
-      "bookingId": "Booking ID",
-      "call": "Call",
-      "review": "Review"
+      "unknownLabour": "अज्ञात श्रमिक",
+      "service": "सेवा",
+      "bookingId": "बुकिंग आईडी",
+      "call": "कॉल करें",
+      "review": "समीक्षा",
+      "invalidDate": "अमान्य तिथि"
     },
     "bookingStats": {
-      "total": "Total",
-      "pending": "Pending",
-      "completed": "Completed",
-      "rejected": "Rejected",
-      "accepted": "Accepted",
-      "unknown": "Unknown"
-    },
-    "bookingCard": {
-      "unknownLabour": "Unknown Labour",
-      "service": "Service",
-      "bookingId": "Booking ID",
-      "call": "Call",
-      "review": "Review",
-      "invalidDate": "Invalid Date"
+      "total": "कुल",
+      "pending": "लंबित",
+      "completed": "पूर्ण",
+      "rejected": "अस्वीकृत",
+      "accepted": "स्वीकृत",
+      "unknown": "अज्ञात"
     }
   },
   "bookingModal": {
@@ -301,14 +295,14 @@
     "cancel": "Cancel"
   },
   "searchLabourModal": {
-    "searchResultsFor": "Search Results for \"{searchCategory}\"",
-    "showingResults": "Showing {count} of {total} results",
-    "noResultsFound": "No Results Found",
-    "trySearchingWithDifferentKeywords": "Try searching with different keywords या check back later।",
-    "callNow": "Call Now",
-    "bookForLater": "Book for Later",
-    "pleaseLoginToBookService": "Service book करने के लिए कृपया login करें। Registration page पर redirect हो रहा है।",
-    "locationNotSpecified": "Location नहीं दी गई"
+    "searchResultsFor": "\"{searchCategory}\" के लिए खोज परिणाम",
+    "showingResults": "{total} में से {count} परिणाम दिखा रहा है",
+    "noResultsFound": "कोई परिणाम नहीं मिला",
+    "trySearchingWithDifferentKeywords": "अलग-अलग कीवर्ड से खोज करें या बाद में फिर से देखें।",
+    "callNow": "अभी कॉल करें",
+    "bookForLater": "बाद के लिए बुक करें",
+    "pleaseLoginToBookService": "सेवा बुक करने के लिए कृपया लॉगिन करें। पंजीकरण पेज पर पुनर्निर्देशित हो रहा है।",
+    "locationNotSpecified": "स्थान निर्दिष्ट नहीं किया गया"
   },
   "locationModal": {
     "selectYourLocation": "अपना Location Select करें",

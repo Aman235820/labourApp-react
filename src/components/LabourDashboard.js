@@ -1192,10 +1192,10 @@ const LabourDashboard = () => {
       {/* Professional Header */}
       <div className="labour-header">
         <Container>
-          <Row className="align-items-center mb-4">
-            <Col md={8} xs={12}>
-              <div className="d-flex align-items-center">
-                <div className="labour-avatar">
+          <Row className="align-items-center mb-3 mb-md-4">
+            <Col lg={8} md={12} xs={12} className="mb-3 mb-lg-0">
+              <div className="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-3">
+                <div className="labour-avatar flex-shrink-0">
                   <div className="profile-image-container">
                     {profileImageUrl || labourDetails.profileImageUrl ? (
                       <img 
@@ -1262,17 +1262,19 @@ const LabourDashboard = () => {
                   </div>
                 </div>
                 
-                <div className="labour-info">
-                  <h1 className="labour-name">{labourDetails.labourName}</h1>
-                  <div className="d-flex align-items-center gap-3 mb-2">
+                <div className="labour-info text-center text-md-start flex-grow-1">
+                  <h1 className="labour-name mb-2">{labourDetails.labourName}</h1>
+                  <div className="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-2 mb-3">
                     <p className="labour-skill mb-0">{labourDetails.labourSkill}</p>
-                    <Badge bg="secondary" className="px-2 py-1">
+                    <Badge bg="secondary" className="px-2 py-1 labour-id-badge">
                       <FaIdCard className="me-1" size={12} />
-                      {t('labourDashboard.id')}: {labourDetails.labourId}
+                      <span className="d-none d-sm-inline">{t('labourDashboard.id')}:</span>
+                      <span className="d-inline d-sm-none">ID:</span>
+                      {labourDetails.labourId}
                     </Badge>
                   </div>
                   
-                  <div className="rating-section">
+                  <div className="rating-section mb-3">
                     <div className="rating-stars">
                       {renderStars(overallRating)}
                     </div>
@@ -1287,29 +1289,32 @@ const LabourDashboard = () => {
                     </Badge>
                   </div>
                   
-                  <div className="labour-meta">
-                    <span className="me-3">
+                  <div className="labour-meta d-flex flex-column flex-sm-row flex-wrap gap-2 justify-content-center justify-content-md-start">
+                    <span className="d-flex align-items-center justify-content-center justify-content-md-start">
                       <FaMapMarkerAlt className="me-1" />
-                      {labourDetails.labourLocation || labourDetails.labourAddress || t('labourDashboard.locationNotSpecified')}
+                      <span className="d-none d-sm-inline">{labourDetails.labourLocation || labourDetails.labourAddress || t('labourDashboard.locationNotSpecified')}</span>
+                      <span className="d-inline d-sm-none">{labourDetails.labourLocation || labourDetails.labourAddress || t('labourDashboard.locationNotSpecified')}</span>
                     </span>
-                    <span className="me-3">
+                    <span className="d-flex align-items-center justify-content-center justify-content-md-start">
                       <FaClock className="me-1" />
-                      {labourDetails.labourExperience || t('labourDashboard.experienceNotSpecified')}
+                      <span className="d-none d-sm-inline">{labourDetails.labourExperience || t('labourDashboard.experienceNotSpecified')}</span>
+                      <span className="d-inline d-sm-none">{labourDetails.labourExperience || t('labourDashboard.experienceNotSpecified')}</span>
                     </span>
-                    <span>
+                    <span className="d-flex align-items-center justify-content-center justify-content-md-start">
                       <FaTools className="me-1" />
-                      {labourDetails.priceRange || t('labourDashboard.priceOnRequest')}
+                      <span className="d-none d-sm-inline">{labourDetails.priceRange || t('labourDashboard.priceOnRequest')}</span>
+                      <span className="d-inline d-sm-none">{labourDetails.priceRange || t('labourDashboard.priceOnRequest')}</span>
                     </span>
                   </div>
                   
                   {/* Subskills Section */}
                   {labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0 && (
-                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center mt-2">
-                      <div className="d-flex align-items-center mb-1 mb-sm-0">
+                    <div className="d-flex flex-column align-items-center align-items-md-start mt-3">
+                      <div className="d-flex align-items-center mb-2">
                         <FaList className="text-muted me-2" size={12} />
-                        <span className="text-muted small me-2">{t('labourDashboard.specializations')}:</span>
+                        <span className="text-muted small">{t('labourDashboard.specializations')}:</span>
                       </div>
-                      <div className="d-flex flex-wrap gap-1">
+                      <div className="d-flex flex-wrap gap-1 justify-content-center justify-content-md-start">
                         {labourDetails.labourSubSkills.map((subSkill, index) => (
                           <Badge 
                             key={index} 
@@ -1328,12 +1333,12 @@ const LabourDashboard = () => {
               </div>
             </Col>
             
-            <Col md={4} xs={12} className="text-md-end">
-              <div className="action-buttons">
+            <Col lg={4} md={12} xs={12} className="text-center text-lg-end">
+              <div className="action-buttons d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-end">
                 <Button 
                   variant="outline-primary" 
                   onClick={handleUpdateDetails}
-                  className="me-2"
+                  className="d-flex align-items-center justify-content-center"
                   size="sm"
                 >
                   <FaEdit className="me-1 me-md-2" size={14} />
@@ -1343,7 +1348,7 @@ const LabourDashboard = () => {
                 <Button 
                   variant="outline-danger" 
                   onClick={handleLogout}
-                  className="me-2"
+                  className="d-flex align-items-center justify-content-center"
                   size="sm"
                 >
                     <FaSignOutAlt className="me-1 me-md-2" size={14} />
@@ -1381,10 +1386,11 @@ const LabourDashboard = () => {
           <Col>
             <Card className="border-0 shadow-sm">
               <Card.Body className="p-3 p-md-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaChartLine className="me-2 text-primary" />
-                    {t('labourDashboard.performanceAnalytics')}
+                    <span className="d-none d-sm-inline">{t('labourDashboard.performanceAnalytics')}</span>
+                    <span className="d-inline d-sm-none">Analytics</span>
                   </h4>
                   <Button
                     variant="outline-primary"
@@ -1394,16 +1400,19 @@ const LabourDashboard = () => {
                       fetchOverallRatings();
                     }}
                     disabled={isServicesRefreshing || isRatingsLoading}
+                    className="d-flex align-items-center justify-content-center"
                   >
                     {(isServicesRefreshing || isRatingsLoading) ? (
                       <>
                         <Spinner animation="border" size="sm" className="me-2" />
-                        {t('labourDashboard.refreshing')}
+                        <span className="d-none d-sm-inline">{t('labourDashboard.refreshing')}</span>
+                        <span className="d-inline d-sm-none">...</span>
                       </>
                     ) : (
                       <>
                         <FaSync className="me-2" />
-                        {t('labourDashboard.refreshData')}
+                        <span className="d-none d-sm-inline">{t('labourDashboard.refreshData')}</span>
+                        <span className="d-inline d-sm-none">Refresh</span>
                       </>
                     )}
                   </Button>
@@ -1417,34 +1426,40 @@ const LabourDashboard = () => {
                 ) : (
                   <Row>
                     <Col lg={12}>
-                      <Row className="g-3">
+                      <Row className="g-2 g-md-3">
                         {(() => {
                           const analytics = getAnalytics();
                           const activity = getRecentActivityData();
                           return (
                             <>
-                              <Col xs={6} md={2}>
+                              <Col xs={6} sm={4} md={2}>
                                 <div className="metric-card h-100 p-2 p-md-3 bg-primary bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
                                       <div className="metric-value text-primary fw-bold h5 h-md-4 mb-1">
                                         {analytics.total}
                                       </div>
-                                      <div className="metric-label text-muted small">{t('labourDashboard.totalBookings')}</div>
+                                      <div className="metric-label text-muted small">
+                                        <span className="d-none d-sm-inline">{t('labourDashboard.totalBookings')}</span>
+                                        <span className="d-inline d-sm-none">Total</span>
+                                      </div>
                                     </div>
                                     <FaBusinessTime className="text-primary opacity-75 d-none d-md-block" size={20} />
                                     <FaBusinessTime className="text-primary opacity-75 d-block d-md-none" size={16} />
                                   </div>
                                 </div>
                               </Col>
-                              <Col xs={6} md={2}>
+                              <Col xs={6} sm={4} md={2}>
                                 <div className="metric-card h-100 p-2 p-md-3 bg-success bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
                                       <div className="metric-value text-success fw-bold h5 h-md-4 mb-1">
                                         {analytics.completionRate.toFixed(1)}%
                                       </div>
-                                      <div className="metric-label text-muted small">{t('labourDashboard.completionRate')}</div>
+                                      <div className="metric-label text-muted small">
+                                        <span className="d-none d-sm-inline">{t('labourDashboard.completionRate')}</span>
+                                        <span className="d-inline d-sm-none">Complete</span>
+                                      </div>
                                     </div>
                                     <FaCheckCircle className="text-success opacity-75 d-none d-md-block" size={20} />
                                     <FaCheckCircle className="text-success opacity-75 d-block d-md-none" size={16} />
@@ -1457,14 +1472,17 @@ const LabourDashboard = () => {
                                   />
                                 </div>
                               </Col>
-                              <Col xs={6} md={2}>
+                              <Col xs={6} sm={4} md={2}>
                                 <div className="metric-card h-100 p-2 p-md-3 bg-info bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
                                       <div className="metric-value text-info fw-bold h5 h-md-4 mb-1">
                                         {analytics.acceptanceRate.toFixed(1)}%
                                       </div>
-                                      <div className="metric-label text-muted small">{t('labourDashboard.acceptanceRate')}</div>
+                                      <div className="metric-label text-muted small">
+                                        <span className="d-none d-sm-inline">{t('labourDashboard.acceptanceRate')}</span>
+                                        <span className="d-inline d-sm-none">Accept</span>
+                                      </div>
                                     </div>
                                     <FaHandshake className="text-info opacity-75 d-none d-md-block" size={20} />
                                     <FaHandshake className="text-info opacity-75 d-block d-md-none" size={16} />
@@ -1477,14 +1495,17 @@ const LabourDashboard = () => {
                                   />
                                 </div>
                               </Col>
-                              <Col xs={6} md={3}>
+                              <Col xs={6} sm={4} md={3}>
                                 <div className="metric-card h-100 p-2 p-md-3 bg-danger bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
                                       <div className="metric-value text-danger fw-bold h5 h-md-4 mb-1">
                                         {analytics.rejectionRate.toFixed(1)}%
                                       </div>
-                                      <div className="metric-label text-muted small">{t('labourDashboard.rejectionRate')}</div>
+                                      <div className="metric-label text-muted small">
+                                        <span className="d-none d-sm-inline">{t('labourDashboard.rejectionRate')}</span>
+                                        <span className="d-inline d-sm-none">Reject</span>
+                                      </div>
                                     </div>
                                     <FaTimesCircle className="text-danger opacity-75 d-none d-md-block" size={20} />
                                     <FaTimesCircle className="text-danger opacity-75 d-block d-md-none" size={16} />
@@ -1497,16 +1518,20 @@ const LabourDashboard = () => {
                                   />
                                 </div>
                               </Col>
-                              <Col xs={12} md={3}>
+                              <Col xs={12} sm={4} md={3}>
                                 <div className="metric-card h-100 p-2 p-md-3 bg-warning bg-opacity-10 rounded">
                                   <div className="d-flex align-items-center justify-content-between">
                                     <div>
                                       <div className="metric-value text-warning fw-bold h5 h-md-4 mb-1">
                                         {activity.recentBookings}
                                       </div>
-                                      <div className="metric-label text-muted small">{t('labourDashboard.recentBookings')}</div>
+                                      <div className="metric-label text-muted small">
+                                        <span className="d-none d-sm-inline">{t('labourDashboard.recentBookings')}</span>
+                                        <span className="d-inline d-sm-none">Recent</span>
+                                      </div>
                                       <div className="metric-sublabel text-muted" style={{ fontSize: '0.7rem' }}>
-                                        {t('labourDashboard.last30Days')}
+                                        <span className="d-none d-sm-inline">{t('labourDashboard.last30Days')}</span>
+                                        <span className="d-inline d-sm-none">30 days</span>
                                       </div>
                                     </div>
                                     <FaChartBar className="text-warning opacity-75 d-none d-md-block" size={20} />
@@ -1534,15 +1559,16 @@ const LabourDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaClock className="me-2 text-primary" />
-                    {t('labourDashboard.serviceRequests')}
+                    <span className="d-none d-sm-inline">{t('labourDashboard.serviceRequests')}</span>
+                    <span className="d-inline d-sm-none">Requests</span>
                   </h4>
-                  <div className="d-flex align-items-center gap-2 gap-md-3">
+                  <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 gap-md-3">
                     <Button
                       variant="outline-primary"
                       size="sm"
                       onClick={() => fetchRequestedServices(false)}
                       disabled={isServicesRefreshing}
-                      className="d-flex align-items-center"
+                      className="d-flex align-items-center justify-content-center"
                     >
                       {isServicesRefreshing ? (
                         <>
@@ -1558,8 +1584,9 @@ const LabourDashboard = () => {
                         </>
                       )}
                     </Button>
-                    <Badge bg="warning" className="px-2 px-md-3 py-1 py-md-2">
-                      {(requestedServices || []).filter(service => service.bookingStatusCode === 1).length} {t('labourDashboard.pending')}
+                    <Badge bg="warning" className="px-2 px-md-3 py-1 py-md-2 d-flex align-items-center justify-content-center">
+                      <span className="d-none d-sm-inline">{(requestedServices || []).filter(service => service.bookingStatusCode === 1).length} {t('labourDashboard.pending')}</span>
+                      <span className="d-inline d-sm-none">{(requestedServices || []).filter(service => service.bookingStatusCode === 1).length} Pending</span>
                     </Badge>
                   </div>
                 </div>
@@ -1742,27 +1769,29 @@ const LabourDashboard = () => {
                       <div className="mobile-services-list">
                         {(requestedServices || []).map((service) => (
                           <div key={service.bookingId} className="mobile-service-card p-3 mb-3 border rounded bg-white">
-                            <div className="d-flex justify-content-between align-items-start mb-3">
+                            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start mb-3 gap-2">
                               <div className="d-flex align-items-center">
                                 <div className="avatar-sm bg-light rounded-circle me-3 d-flex align-items-center justify-content-center">
                                   <FaUser className="text-muted" size={14} />
                                 </div>
                                 <div>
                                   <div className="fw-bold text-primary small">#{service.bookingId}</div>
-                                  <div className="fw-semibold small">{service.userName || 'Anonymous'}</div>
+                                  <div className="fw-semibold small">{service.userName || t('labourDashboard.anonymous')}</div>
                                   <small className="text-muted">{service.userMobileNumber}</small>
                                 </div>
                               </div>
-                              {getStatusBadge(service.bookingStatusCode)}
+                              <div className="d-flex justify-content-center justify-content-sm-end">
+                                {getStatusBadge(service.bookingStatusCode)}
+                              </div>
                             </div>
                             
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                              <Badge bg="primary" className="px-2 py-1">
+                            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+                              <Badge bg="primary" className="px-2 py-1 align-self-start align-self-sm-center">
                                 {service.labourSkill}
                               </Badge>
-                              <div className="text-end">
+                              <div className="text-center text-sm-end">
                                 <div className="fw-semibold small">{formatDate(service.bookingTime)}</div>
-                                <small className="text-muted">Requested</small>
+                                <small className="text-muted">{t('labourDashboard.requested')}</small>
                               </div>
                             </div>
                             
@@ -1771,31 +1800,31 @@ const LabourDashboard = () => {
                               <div className="row g-2">
                                 <div className="col-6">
                                   <div className="p-2 bg-light rounded">
-                                    <small className="text-muted d-block">Preferred Date</small>
+                                    <small className="text-muted d-block">{t('labourDashboard.preferredDate')}</small>
                                     <div className="fw-semibold small">
-                                      {service.preferredDate ? new Date(service.preferredDate).toLocaleDateString() : 'Not specified'}
+                                      {service.preferredDate ? new Date(service.preferredDate).toLocaleDateString() : t('labourDashboard.notSpecified')}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="col-6">
                                   <div className="p-2 bg-light rounded">
-                                    <small className="text-muted d-block">Preferred Time</small>
+                                    <small className="text-muted d-block">{t('labourDashboard.preferredTime')}</small>
                                     <div className="fw-semibold small">
-                                      {service.preferredTime || 'Not specified'}
+                                      {service.preferredTime || t('labourDashboard.notSpecified')}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="col-12">
                                   <div className="p-2 bg-light rounded">
-                                    <small className="text-muted d-block">Work Description</small>
+                                    <small className="text-muted d-block">{t('labourDashboard.workDescription')}</small>
                                     <div className="fw-semibold small" style={{wordWrap: 'break-word'}}>
-                                      {service.workDescription || 'No description'}
+                                      {service.workDescription || t('labourDashboard.noDescription')}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="col-12">
                                   <div className="d-flex align-items-center justify-content-between">
-                                    <small className="text-muted">Urgency Level</small>
+                                    <small className="text-muted">{t('labourDashboard.urgency')}</small>
                                     <Badge 
                                       bg={service.urgencyLevel === 'high' ? 'danger' : service.urgencyLevel === 'medium' ? 'warning' : 'info'} 
                                       className="px-2 py-1"
@@ -1914,9 +1943,10 @@ const LabourDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaStar className="me-2 text-warning" />
-                    {t('labourDashboard.customerReviews')}
+                    <span className="d-none d-sm-inline">{t('labourDashboard.customerReviews')}</span>
+                    <span className="d-inline d-sm-none">Reviews</span>
                   </h4>
-                  <div className="d-flex gap-2 w-100 w-md-auto">
+                  <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
                     <Form.Select
                       name="sortBy"
                       value={sortConfig.sortBy}
@@ -2053,9 +2083,10 @@ const LabourDashboard = () => {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                   <h4 className="mb-0 fw-bold text-dark">
                     <FaHistory className="me-2 text-primary" />
-                    {t('labourDashboard.recentActivity')}
+                    <span className="d-none d-sm-inline">{t('labourDashboard.recentActivity')}</span>
+                    <span className="d-inline d-sm-none">Activity</span>
                   </h4>
-                  <div className="d-flex gap-2 w-100 w-md-auto">
+                  <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
                     <Form.Select
                       name="sortOrder"
                       value={bookingSortConfig.sortOrder}
@@ -2071,7 +2102,7 @@ const LabourDashboard = () => {
                       size="sm"
                       onClick={() => fetchRequestedServices(false)}
                       disabled={isServicesRefreshing}
-                      className="flex-shrink-0"
+                      className="d-flex align-items-center justify-content-center"
                     >
                       {isServicesRefreshing ? (
                         <Spinner animation="border" size="sm" />
@@ -2145,9 +2176,10 @@ const LabourDashboard = () => {
                   <div>
                     <h6 className="mb-1 text-muted">
                       <FaCog className="me-2" size={14} />
-                      {t('labourDashboard.accountManagement')}
+                      <span className="d-none d-sm-inline">{t('labourDashboard.accountManagement')}</span>
+                      <span className="d-inline d-sm-none">Account</span>
                     </h6>
-                    <p className="mb-0 small text-muted">
+                    <p className="mb-0 small text-muted d-none d-md-block">
                       {t('labourDashboard.accountManagementDesc')}
                     </p>
                   </div>
@@ -2160,7 +2192,7 @@ const LabourDashboard = () => {
                         variant="outline-danger" 
                         size="sm"
                         onClick={handleDeleteAccount}
-                        className="d-flex align-items-center opacity-75"
+                        className="d-flex align-items-center justify-content-center opacity-75"
                         style={{ fontSize: '0.8rem' }}
                       >
                         <FaTrashAlt className="me-1 me-md-2" size={12} />
@@ -2182,14 +2214,15 @@ const LabourDashboard = () => {
               <Card.Header className="bg-info bg-opacity-10 border-0">
                 <h4 className="mb-0 fw-bold">
                   <FaImage className="me-3 text-info" />
-                  {t('labourDashboard.profileImage')}
+                  <span className="d-none d-sm-inline">{t('labourDashboard.profileImage')}</span>
+                  <span className="d-inline d-sm-none">Profile Image</span>
                 </h4>
-                <p className="text-muted mb-0 mt-2">{t('labourDashboard.profileImageDesc')}</p>
+                <p className="text-muted mb-0 mt-2 d-none d-md-block">{t('labourDashboard.profileImageDesc')}</p>
               </Card.Header>
-              <Card.Body className="p-4">
-                <div className="d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center">
-                    <div className="me-4">
+              <Card.Body className="p-3 p-md-4">
+                <div className="d-flex flex-column flex-md-row align-items-center align-items-md-start justify-content-between gap-3">
+                  <div className="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-3">
+                    <div className="text-center text-sm-start">
                       {profileImageUrl || labourDetails.profileImageUrl ? (
                         <div className="profile-image-container">
                           <img 
@@ -2198,8 +2231,8 @@ const LabourDashboard = () => {
                             className="rounded-circle clickable"
                             onClick={() => setShowImageModal(true)}
                             style={{ 
-                              width: '150px', 
-                              height: '150px', 
+                              width: '120px', 
+                              height: '120px', 
                               objectFit: 'cover',
                               border: '3px solid #dee2e6',
                               cursor: 'pointer',
@@ -2214,22 +2247,22 @@ const LabourDashboard = () => {
                         <div 
                           className="rounded-circle bg-light d-flex align-items-center justify-content-center"
                           style={{ 
-                            width: '150px', 
-                            height: '150px',
+                            width: '120px', 
+                            height: '120px',
                             border: '3px solid #dee2e6'
                           }}
                         >
-                          <FaUser size={72} className="text-muted" />
+                          <FaUser size={60} className="text-muted" />
                         </div>
                       )}
                     </div>
-                    <div>
+                    <div className="text-center text-sm-start">
                       <h6 className="mb-2">{t('labourDashboard.profilePicture')}</h6>
-                      <p className="text-muted mb-3">
+                      <p className="text-muted mb-3 d-none d-md-block">
                         A professional profile picture helps customers recognize and trust you. 
                         Upload a clear, high-quality image that represents your professional appearance.
                       </p>
-                      <div className="d-flex gap-2">
+                      <div className="d-flex flex-column flex-sm-row gap-2">
                         <label 
                           htmlFor="profile-image-upload-standalone" 
                           className="btn btn-primary"

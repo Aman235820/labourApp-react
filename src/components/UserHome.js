@@ -109,40 +109,43 @@ const BookingCard = ({ booking, onRate, onCall }) => {
 
     return (
         <Card className="booking-card border-0 shadow-sm mb-3">
-            <Card.Body className="p-4">
+            <Card.Body className="p-3 p-md-4">
                 <Row className="align-items-center">
-                    <Col md={6}>
+                    <Col md={6} className="mb-3 mb-md-0">
                         <div className="d-flex align-items-center mb-3">
-                            <div className="service-icon bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                                <FaTools className="text-primary" size={20} />
+                            <div className="service-icon bg-primary bg-opacity-10 rounded-circle p-2 p-md-3 me-2 me-md-3">
+                                <FaTools className="text-primary" size={16} />
                             </div>
                             <div>
-                                <h5 className="mb-1 fw-semibold">{booking.labourName || t('userHome.bookingCard.unknownLabour')}</h5>
-                                <p className="text-muted mb-0">{booking.labourSkill || t('userHome.bookingCard.service')}</p>
+                                <h5 className="mb-1 fw-semibold small">{booking.labourName || t('userHome.bookingCard.unknownLabour')}</h5>
+                                <p className="text-muted mb-0 small">{booking.labourSkill || t('userHome.bookingCard.service')}</p>
                             </div>
                         </div>
                         <div className="d-flex align-items-center text-muted mb-2">
-                            <FaCalendarAlt className="me-2" size={14} />
+                            <FaCalendarAlt className="me-2" size={12} />
                             <span className="small">{formatDate(booking.bookingTime)}</span>
                         </div>
                         <div className="d-flex align-items-center text-muted">
-                            <FaIdCard className="me-2" size={14} />
+                            <FaIdCard className="me-2" size={12} />
                             <span className="small">{t('userHome.bookingCard.bookingId')}: {booking.bookingId}</span>
                         </div>
                     </Col>
                     <Col md={6}>
-                        <div className="d-flex justify-content-end align-items-center flex-wrap gap-2">
-                            {getStatusBadge(booking.bookingStatusCode)}
-                            <div className="d-flex gap-2">
+                        <div className="d-flex flex-column flex-md-row justify-content-end align-items-start align-items-md-center gap-2">
+                            <div className="mb-2 mb-md-0">
+                                {getStatusBadge(booking.bookingStatusCode)}
+                            </div>
+                            <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
                                 {booking.labourMobileNo && (
                                     <Button
                                         variant="outline-primary"
                                         size="sm"
                                         onClick={() => onCall(booking.labourMobileNo)}
-                                        className="d-flex align-items-center"
+                                        className="d-flex align-items-center justify-content-center"
                                     >
-                                        <FaPhone className="me-1" size={12} />
-                                        {t('userHome.bookingCard.call')}
+                                        <FaPhone className="me-1" size={10} />
+                                        <span className="d-none d-md-inline">{t('userHome.bookingCard.call')}</span>
+                                        <span className="d-md-none">{t('userHome.bookingCard.call')}</span>
                                     </Button>
                                 )}
                                 {booking.bookingStatusCode === 3 && (
@@ -150,10 +153,11 @@ const BookingCard = ({ booking, onRate, onCall }) => {
                                         variant="outline-success"
                                         size="sm"
                                         onClick={() => onRate(booking)}
-                                        className="d-flex align-items-center"
+                                        className="d-flex align-items-center justify-content-center"
                                     >
-                                        <FaEdit className="me-1" size={12} />
-                                        {t('userHome.bookingCard.review')}
+                                        <FaEdit className="me-1" size={10} />
+                                        <span className="d-none d-md-inline">{t('userHome.bookingCard.review')}</span>
+                                        <span className="d-md-none">{t('userHome.bookingCard.review')}</span>
                                     </Button>
                                 )}
                             </div>
@@ -380,11 +384,11 @@ const UserHome = () => {
             {/* Professional Header */}
             <div className="dashboard-header bg-gradient-primary shadow-lg border-0">
                 <Container>
-                    <Row className="py-4">
+                    <Row className="py-3 py-md-4">
                         <Col>
-                            <div className="d-flex justify-content-between align-items-center">
-                                <div className="d-flex align-items-center">
-                                    <div className="profile-badge me-4">
+                            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                                <div className="d-flex align-items-center mb-3 mb-md-0">
+                                    <div className="profile-badge me-3 me-md-4">
                                         <div className="avatar-professional bg-white shadow-sm">
                                             <FaUserTie className="text-primary" size={28} />
                                         </div>
@@ -392,15 +396,15 @@ const UserHome = () => {
                                     <div className="user-info">
                                         <h1 className="h3 mb-2 fw-bold text-white">{t('userHome.welcomeBack')}, {userData?.name || 'User'}!</h1>
                                         <div className="d-flex flex-wrap align-items-center text-white-50 mb-2">
-                                            <div className="d-flex align-items-center me-4 mb-1">
+                                            <div className="d-flex align-items-center me-3 me-md-4 mb-1">
                                                 <FaIdCard className="me-2" size={14} />
                                                 <span className="small">ID: {userData?.userId}</span>
                                             </div>
-                                            <div className="d-flex align-items-center me-4 mb-1">
+                                            <div className="d-flex align-items-center me-3 me-md-4 mb-1">
                                                 <FaEnvelope className="me-2" size={14} />
                                                 <span className="small">{userData?.email || 'user@example.com'}</span>
                                             </div>
-                                            <Badge bg="success" className="mb-1 px-3 py-1">
+                                            <Badge bg="success" className="mb-1 px-2 px-md-3 py-1">
                                                 <FaCheckCircle className="me-1" size={12} />
                                                 {t('userHome.activeUser')}
                                             </Badge>
@@ -411,10 +415,10 @@ const UserHome = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="d-flex gap-2 flex-wrap">
+                                <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
                                     <Button 
                                         variant="light" 
-                                        className="d-flex align-items-center shadow-sm"
+                                        className="d-flex align-items-center justify-content-center shadow-sm mb-2 mb-md-0"
                                         onClick={() => {
                                             const bookingsSection = document.querySelector('.my-bookings-section');
                                             if (bookingsSection) {
@@ -431,7 +435,7 @@ const UserHome = () => {
                                     <Button 
                                         variant="outline-light" 
                                         onClick={handleLogout}
-                                        className="d-flex align-items-center"
+                                        className="d-flex align-items-center justify-content-center"
                                     >
                                         <FaSignOutAlt className="me-2" size={14} />
                                         {t('userHome.logout')}
@@ -461,8 +465,8 @@ const UserHome = () => {
                                 </div>
                                 
                                 <Row className="align-items-center">
-                                    <Col lg={8}>
-                                        <Form.Group className="mb-3 mb-lg-0">
+                                    <Col lg={8} className="mb-3 mb-lg-0">
+                                        <Form.Group>
                                             <Form.Label className="fw-semibold text-dark mb-2">
                                                 {t('userHome.whatServiceDoYouNeed')}
                                             </Form.Label>
@@ -486,7 +490,7 @@ const UserHome = () => {
                                                     variant="primary"
                                                     onClick={() => handleSearch()}
                                                     disabled={isLoading}
-                                                    className="px-4"
+                                                    className="px-3 px-md-4"
                                                 >
                                                     {isLoading ? (
                                                         <>
@@ -498,12 +502,14 @@ const UserHome = () => {
                                                                 aria-hidden="true"
                                                                 className="me-2"
                                                             />
-                                                            {t('userHome.searching')}
+                                                            <span className="d-none d-md-inline">{t('userHome.searching')}</span>
+                                                            <span className="d-md-none">{t('userHome.searching')}</span>
                                                         </>
                                                     ) : (
                                                         <>
                                                             <FaSearch className="me-2" />
-                                                            {t('userHome.searchNow')}
+                                                            <span className="d-none d-md-inline">{t('userHome.searchNow')}</span>
+                                                            <span className="d-md-none">{t('userHome.searchNow')}</span>
                                                         </>
                                                     )}
                                                 </Button>
@@ -520,13 +526,13 @@ const UserHome = () => {
                                         <div className="text-center text-lg-start">
                                             <div className="d-flex flex-column align-items-center align-items-lg-start">
                                                 <div className="text-muted small mb-2">{t('userHome.popularCategories')}</div>
-                                                <div className="d-flex flex-wrap gap-2">
+                                                <div className="d-flex flex-wrap gap-1 gap-md-2 justify-content-center justify-content-lg-start">
                                                     {['Plumber', 'Electrician', 'Cleaner', 'Carpenter'].map((category) => (
                                                         <Badge 
                                                             key={category}
                                                             bg="light" 
                                                             text="dark" 
-                                                            className="px-3 py-2 cursor-pointer"
+                                                            className="px-2 px-md-3 py-1 py-md-2 cursor-pointer"
                                                             style={{ cursor: 'pointer' }}
                                                             onClick={() => {
                                                                 setSearchCategory(category);
@@ -548,17 +554,18 @@ const UserHome = () => {
 
                 {/* Quick Actions */}
                 <Row className="mb-4">
-                    <Col md={6} className="mb-3">
+                    <Col sm={6} className="mb-3">
                         <Card className="action-card border-0 shadow-sm h-100">
-                            <Card.Body className="p-4 text-center">
-                                <div className="action-icon bg-success bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }}>
-                                    <FaCalendarAlt className="text-success" size={24} />
+                            <Card.Body className="p-3 p-md-4 text-center">
+                                <div className="action-icon bg-success bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '50px', height: '50px' }}>
+                                    <FaCalendarAlt className="text-success" size={20} />
                                 </div>
-                                <h5 className="fw-semibold mb-2">{t('userHome.trackBookings')}</h5>
-                                <p className="text-muted small mb-3">{t('userHome.monitorServiceRequests')}</p>
+                                <h5 className="fw-semibold mb-2 small">{t('userHome.trackBookings')}</h5>
+                                <p className="text-muted small mb-3 d-none d-md-block">{t('userHome.monitorServiceRequests')}</p>
                                 <Button 
                                     variant="success" 
                                     className="w-100"
+                                    size="sm"
                                     onClick={() => {
                                         const bookingsSection = document.querySelector('.my-bookings-section');
                                         if (bookingsSection) {
@@ -570,26 +577,29 @@ const UserHome = () => {
                                     }}
                                 >
                                     <FaCalendarAlt className="me-2" />
-                                    {t('userHome.viewBookings')}
+                                    <span className="d-none d-md-inline">{t('userHome.viewBookings')}</span>
+                                    <span className="d-md-none">{t('userHome.viewBookings')}</span>
                                 </Button>
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col md={6} className="mb-3">
+                    <Col sm={6} className="mb-3">
                         <Card className="action-card border-0 shadow-sm h-100">
-                            <Card.Body className="p-4 text-center">
-                                <div className="action-icon bg-warning bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }}>
-                                    <FaBell className="text-warning" size={24} />
+                            <Card.Body className="p-3 p-md-4 text-center">
+                                <div className="action-icon bg-warning bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '50px', height: '50px' }}>
+                                    <FaBell className="text-warning" size={20} />
                                 </div>
-                                <h5 className="fw-semibold mb-2">{t('userHome.notifications')}</h5>
-                                <p className="text-muted small mb-3">{t('userHome.stayUpdatedWithAlerts')}</p>
+                                <h5 className="fw-semibold mb-2 small">{t('userHome.notifications')}</h5>
+                                <p className="text-muted small mb-3 d-none d-md-block">{t('userHome.stayUpdatedWithAlerts')}</p>
                                 <Button 
                                     variant="outline-warning" 
                                     className="w-100"
+                                    size="sm"
                                     disabled
                                 >
                                     <FaBell className="me-2" />
-                                    {t('userHome.comingSoon')}
+                                    <span className="d-none d-md-inline">{t('userHome.comingSoon')}</span>
+                                    <span className="d-md-none">{t('userHome.comingSoon')}</span>
                                 </Button>
                             </Card.Body>
                         </Card>
@@ -600,33 +610,35 @@ const UserHome = () => {
                 <Row className="mb-4">
                     <Col>
                         <Card className="border-0 shadow-sm my-bookings-section">
-                            <Card.Header className="bg-white border-0 py-4">
+                            <Card.Header className="bg-white border-0 py-3 py-md-4">
                                 <Row className="align-items-center">
-                                    <Col>
+                                    <Col xs={12} md={6} className="mb-3 mb-md-0">
                                         <h5 className="mb-0 fw-semibold d-flex align-items-center">
                                             <FaHistory className="me-2 text-primary" />
-                                            {t('userHome.myBookingsTitle')}
+                                            <span className="small">{t('userHome.myBookingsTitle')}</span>
                                             {bookings.length > 0 && (
                                                 <Badge bg="primary" className="ms-2">{getBookingStats().total}</Badge>
                                             )}
                                         </h5>
                                     </Col>
-                                    <Col xs="auto">
-                                        <div className="d-flex gap-2 align-items-center">
+                                    <Col xs={12} md={6}>
+                                        <div className="d-flex flex-column flex-md-row gap-2 align-items-stretch align-items-md-center">
                                             <Button
                                                 variant="outline-primary"
                                                 size="sm"
                                                 onClick={() => fetchBookings(userId)}
                                                 disabled={isBookingsLoading}
-                                                className="d-flex align-items-center"
+                                                className="d-flex align-items-center justify-content-center"
                                             >
-                                                <FaSync className={`me-1 ${isBookingsLoading ? 'fa-spin' : ''}`} size={12} />
-                                                {t('userHome.refresh')}
+                                                <FaSync className={`me-1 ${isBookingsLoading ? 'fa-spin' : ''}`} size={10} />
+                                                <span className="d-none d-md-inline">{t('userHome.refresh')}</span>
+                                                <span className="d-md-none">{t('userHome.refresh')}</span>
                                             </Button>
                                             <Dropdown>
-                                                <Dropdown.Toggle variant="outline-secondary" size="sm" className="d-flex align-items-center">
-                                                    <FaFilter className="me-1" size={12} />
-                                                    {t('userHome.filter')}
+                                                <Dropdown.Toggle variant="outline-secondary" size="sm" className="d-flex align-items-center justify-content-center w-100 w-md-auto">
+                                                    <FaFilter className="me-1" size={10} />
+                                                    <span className="d-none d-md-inline">{t('userHome.filter')}</span>
+                                                    <span className="d-md-none">{t('userHome.filter')}</span>
                                                 </Dropdown.Toggle>
                                                 <Dropdown.Menu>
                                                     <Dropdown.Item 
@@ -671,14 +683,14 @@ const UserHome = () => {
                                         {t('userHome.failedToLoadBookings')}
                                     </Alert>
                                 ) : getFilteredBookings().length === 0 ? (
-                                    <div className="text-center py-5">
-                                        <div className="empty-state-icon bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
-                                            <FaCalendarAlt className="text-muted" size={32} />
+                                    <div className="text-center py-4 py-md-5">
+                                        <div className="empty-state-icon bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }}>
+                                            <FaCalendarAlt className="text-muted" size={24} />
                                         </div>
-                                        <h6 className="text-muted mb-2">
+                                        <h6 className="text-muted mb-2 small">
                                             {bookingFilter === 'all' ? t('userHome.noBookingsYet') : t('userHome.noFilteredBookings')}
                                         </h6>
-                                        <p className="text-muted small mb-3">
+                                        <p className="text-muted small mb-3 d-none d-md-block">
                                             {bookingFilter === 'all' 
                                                 ? t('userHome.noBookingsDesc') 
                                                 : t('userHome.noFilteredBookingsDesc')
@@ -689,10 +701,11 @@ const UserHome = () => {
                                                 variant="primary" 
                                                 size="sm"
                                                 onClick={() => setShowModal(true)}
-                                                className="d-flex align-items-center mx-auto"
+                                                className="d-flex align-items-center justify-content-center mx-auto"
                                             >
-                                                <FaSearch className="me-2" size={12} />
-                                                {t('userHome.findServicesBtn')}
+                                                <FaSearch className="me-2" size={10} />
+                                                <span className="d-none d-md-inline">{t('userHome.findServicesBtn')}</span>
+                                                <span className="d-md-none">{t('userHome.findServicesBtn')}</span>
                                             </Button>
                                         )}
                                     </div>
@@ -717,9 +730,9 @@ const UserHome = () => {
                 <Row className="mb-4">
                     <Col>
                         <Card className="account-management-card border-0 shadow-sm">
-                            <Card.Body className="p-4">
-                                <h6 className="text-muted mb-3">{t('userHome.accountManagement')}</h6>
-                                <p className="text-muted small mb-3">{t('userHome.accountManagementDesc')}</p>
+                            <Card.Body className="p-3 p-md-4">
+                                <h6 className="text-muted mb-3 small">{t('userHome.accountManagement')}</h6>
+                                <p className="text-muted small mb-3 d-none d-md-block">{t('userHome.accountManagementDesc')}</p>
                                 <OverlayTrigger
                                     placement="top"
                                     overlay={<Tooltip>{t('userHome.actionCannotBeUndone')}</Tooltip>}
@@ -727,15 +740,16 @@ const UserHome = () => {
                                     <Button 
                                         variant="outline-danger" 
                                         size="sm"
-                                        className="delete-profile-btn"
+                                        className="delete-profile-btn w-100 w-md-auto"
                                         onClick={() => {
                                             if (window.confirm(t('userHome.deleteAccountConfirm'))) {
                                                 handleDeleteAccount();
                                             }
                                         }}
                                     >
-                                        <FaTrashAlt className="me-2" size={12} />
-                                        {t('userHome.deleteAccount')}
+                                        <FaTrashAlt className="me-2" size={10} />
+                                        <span className="d-none d-md-inline">{t('userHome.deleteAccount')}</span>
+                                        <span className="d-md-none">{t('userHome.deleteAccount')}</span>
                                     </Button>
                                 </OverlayTrigger>
                             </Card.Body>
