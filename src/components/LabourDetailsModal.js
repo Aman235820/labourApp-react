@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import { Modal, Button, Card, Row, Col, Badge, Image } from 'react-bootstrap';
-import { FaStar, FaPhone, FaMapMarkerAlt, FaClock, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import '../styles/LabourDetailsModal.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,19 +7,9 @@ const LabourDetailsModal = ({ show, onHide, selectedLabour, service }) => {
 
   useEffect(() => {
     if (show && selectedLabour) {
-      // Debug logging to see what data we're receiving
-      console.log('LabourDetailsModal - selectedLabour data:', selectedLabour);
-      console.log('LabourDetailsModal - service:', service);
-      console.log('LabourDetailsModal - Available ID fields:', {
-        id: selectedLabour.id,
-        labourId: selectedLabour.labourId,
-        _id: selectedLabour._id
-      });
-      
       // Close the modal immediately and navigate to the details page
       onHide();
       const labourId = selectedLabour.id || selectedLabour.labourId || selectedLabour._id || 'unknown';
-      console.log('LabourDetailsModal - Navigating to:', `/labour-details/${labourId}`);
       navigate(`/labour-details/${labourId}`, {
         state: { searchCategory: service }
       });

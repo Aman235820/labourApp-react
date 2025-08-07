@@ -188,13 +188,11 @@ const LabourDashboard = () => {
       setIsLoadingProfileSettings(true);
       const response = await labourService.getAdditionalLabourDetails(labourDetails?.labourId);
       
-      console.log('API Response:', response);
       
       if (response && response.length > 0) {
         const latestSettings = response[0]; // Get the most recent settings
         const profileData = latestSettings.profileSettings;
         
-        console.log('Loaded profile settings:', profileData);
         
         if (profileData) {
           // Initialize default pricing settings
@@ -223,12 +221,6 @@ const LabourDashboard = () => {
           // If no saved data exists, default to false for master pricing toggle
           const shouldEnablePricing = response.length > 0 ? pricingInfoEnabled : false;
           
-          console.log('Pricing settings:', {
-            hasSavedData: response.length > 0,
-            pricingInfoEnabled,
-            shouldEnablePricing,
-            defaultPricingEnabled
-          });
           
           // Determine if social media is enabled (if any social media URLs are set)
           const socialMediaEnabled = profileData.socialMedia && 
@@ -267,12 +259,9 @@ const LabourDashboard = () => {
              testimonialVideosEnabled
            }));
            
-           console.log('Profile settings loaded successfully');
          }
              } else {
          // No saved settings found, set defaults
-         console.log('No saved profile settings found, setting defaults');
-         console.log('Setting master pricing toggle to false for fresh case');
          if (labourDetails.labourSubSkills && labourDetails.labourSubSkills.length > 0) {
            const defaultPricingEnabled = {};
            const defaultHourlyRates = {};

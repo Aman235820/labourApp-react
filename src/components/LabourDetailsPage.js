@@ -12,13 +12,8 @@ import {
   FaArrowLeft,
   FaUser,
   FaEnvelope,
-  FaIdCard,
   FaCertificate,
   FaTools,
-  FaImages,
-  FaVideo,
-  FaMoneyBillWave,
-  FaMedal,
   FaShieldAlt,
   FaUserCircle,
   FaCamera,
@@ -29,7 +24,6 @@ import {
 } from 'react-icons/fa';
 import { labourService } from '../services/labourService';
 import { bookLabour } from '../services/BookingService';
-import BookingModal from './modals/BookingModal';
 import '../styles/LabourDetailsPage.css';
 
 const LabourDetailsPage = () => {
@@ -187,13 +181,10 @@ const LabourDetailsPage = () => {
   useEffect(() => {
     const fetchLabourDetails = async () => {
       if (!labourId) return;
-      
-      console.log('LabourDetailsPage - Received labourId from URL:', labourId);
-      
+    
       setLoading(true);
       try {
         const response = await labourService.getLabourById(labourId);
-        console.log('LabourDetailsPage - API Response:', response);
         
         // Map API response to component state
         const mappedLabour = {
@@ -260,20 +251,17 @@ const LabourDetailsPage = () => {
           testimonialVideos: []
         };
         
-        console.log('LabourDetailsPage - Mapped labour data:', mappedLabour);
         setLabour(mappedLabour);
         
         // Fetch additional labour details (profile settings)
         try {
           const additionalDetails = await labourService.getAdditionalLabourDetails(labourId);
-          console.log('LabourDetailsPage - Additional details API response:', additionalDetails);
           
           if (additionalDetails && additionalDetails.length > 0) {
             const latestSettings = additionalDetails[0]; // Get the most recent settings
             const profileData = latestSettings.profileSettings;
             
             if (profileData) {
-              console.log('LabourDetailsPage - Profile settings found:', profileData);
               
               // Update labour with additional details
               setLabour(prev => ({
@@ -288,10 +276,7 @@ const LabourDetailsPage = () => {
                 testimonialVideos: profileData.testimonialVideos || []
               }));
               
-              console.log('LabourDetailsPage - Additional details integrated successfully');
             }
-          } else {
-            console.log('LabourDetailsPage - No additional details found');
           }
         } catch (additionalError) {
           console.error('LabourDetailsPage - Error fetching additional details:', additionalError);
@@ -301,7 +286,6 @@ const LabourDetailsPage = () => {
         // Fetch reviews separately using the reviews API
         try {
           const reviewsData = await labourService.getReviews(labourId);
-          console.log('✅ Reviews loaded successfully:', reviewsData.length, 'reviews found');
           
           if (reviewsData && Array.isArray(reviewsData) && reviewsData.length > 0) {
             // Calculate average rating from reviews
@@ -336,9 +320,7 @@ const LabourDetailsPage = () => {
               reviews: processedReviews
             }));
             
-            console.log(`✅ Reviews integrated: ${reviewsData.length} reviews, avg rating: ${avgRating.toFixed(1)}`);
           } else {
-            console.log('ℹ️ No reviews found for this labour');
             // Set empty reviews state
             setLabour(prev => ({
               ...prev,

@@ -199,38 +199,7 @@ function Home() {
     fetchLabourers(page - 1, newPerPage);
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
 
-    const items = [];
-    for (let number = 0; number < totalPages; number++) {
-      items.push(
-        <Pagination.Item
-          key={number}
-          active={number === currentPage}
-          onClick={() => handlePageChange(number + 1)}
-        >
-          {number + 1}
-        </Pagination.Item>
-      );
-    }
-
-    return (
-      <div className="d-flex justify-content-center mt-3">
-        <Pagination>
-          <Pagination.Prev
-            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 0}
-          />
-          {items}
-          <Pagination.Next
-            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages - 1}
-          />
-        </Pagination>
-      </div>
-    );
-  };
 
   const handleLabourModalClose = () => {
     setShowLabourModal(false);
