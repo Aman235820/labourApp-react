@@ -242,6 +242,10 @@ const BookingModal = ({
     return `${hour12}:${minutes} ${ampm}`;
   };
 
+  // Determine if there are selectable slots for the chosen date
+  const hasAvailableSlots =
+    Boolean(bookingData.date) && Boolean(workingHours?.available) && generateTimeSlots().length > 0;
+
   // Auto-dismiss success message after 3 seconds
   useEffect(() => {
     if (bookingStatus && bookingStatus.type === 'success') {
@@ -281,12 +285,6 @@ const BookingModal = ({
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if working hours are available
-    if (!hasWorkingHours) {
-      alert(t('bookingModal.workingHoursNotAvailable'));
-      return;
-    }
-    
     // Check if user is logged in
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
@@ -301,7 +299,8 @@ const BookingModal = ({
       return;
     }
 
-    if (!bookingData.time) {
+    // Time slot is required only when available
+    if (hasAvailableSlots && !bookingData.time) {
       alert(t('bookingModal.pleaseSelectPreferredTimeSlot'));
       return;
     }
@@ -316,7 +315,7 @@ const BookingModal = ({
     }
 
     // Validate time is not in the past for today's bookings
-    if (!isValidTime(bookingData.time, bookingData.date)) {
+    if (bookingData.time && !isValidTime(bookingData.time, bookingData.date)) {
       alert(t('bookingModal.pleaseSelectFutureTimeSlot'));
       return;
     }
@@ -333,7 +332,7 @@ const BookingModal = ({
         labourId: labour.labourId || labour.id,
         labourSkill: serviceCategory,
         preferredDate: bookingData.date,
-        preferredTime: bookingData.time,
+        preferredTime: bookingData.time || null,
         workDescription: bookingData.description,
         urgencyLevel: bookingData.urgency
       };
@@ -347,8 +346,8 @@ const BookingModal = ({
           message: t('bookingModal.labourSuccessfullyBooked')
         });
         
-        // Show alert with specific message
-        alert(t('bookingModal.labourBookedForService', { labourName: labour.labourName, serviceCategory: serviceCategory }));
+        // Show alert with generic success message
+        alert(t('bookingModal.labourSuccessfullyBooked'));
         
         // Call success callback if provided
         if (onBookingSuccess) {
@@ -384,7 +383,7 @@ const BookingModal = ({
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{t('bookingModal.bookLabour', { labourName: labour.labourName })}</Modal.Title>
+        <Modal.Title>{t('bookingModal.bookLabourTitle')} {labour.labourName}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {bookingStatus && (
@@ -402,7 +401,7 @@ const BookingModal = ({
             <FaCalendarAlt className="text-primary mb-3" size={48} />
             <h5>{t('bookingModal.confirmYourBooking')}</h5>
             <p className="text-muted">
-              {t('bookingModal.areYouSureToBook', { labourName: labour.labourName, serviceCategory: serviceCategory })}
+              {t('bookingModal.areYouSureToBookPrefix')} <strong>{labour.labourName}</strong> {t('bookingModal.for')} <strong>{serviceCategory}</strong>?
             </p>
             <div className="booking-details bg-light p-3 rounded">
               <div className="row text-start">
@@ -424,73 +423,63 @@ const BookingModal = ({
         </div>
         
         <Form onSubmit={handleBookingSubmit}>
-          {loadingAdditionalDetails ? (
+          {loadingAdditionalDetails && (
             <div className="mb-3 text-center">
               <Spinner animation="border" size="sm" className="me-2" />
               {t('bookingModal.loadingLabourAvailability')}
             </div>
-          ) : hasWorkingHours ? (
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('bookingModal.preferredDate')}</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={bookingData.date}
-                    min={getMinDate()}
-                    onChange={(e) => {
-                      setBookingData({...bookingData, date: e.target.value, time: ''}); // Reset time when date changes
-                    }}
-                    required
-                  />
-                  <Form.Text className="text-muted">
-                    {t('bookingModal.selectDateFromToday')}
-                  </Form.Text>
-                </Form.Group>
-              </Col>
+          )}
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>{t('bookingModal.preferredDate')}</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={bookingData.date}
+                  min={getMinDate()}
+                  onChange={(e) => {
+                    setBookingData({ ...bookingData, date: e.target.value, time: '' });
+                  }}
+                  required
+                />
+                <Form.Text className="text-muted">
+                  {t('bookingModal.selectDateFromToday')}
+                </Form.Text>
+              </Form.Group>
+            </Col>
+
+            {hasAvailableSlots && (
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>{t('bookingModal.preferredTimeSlot')}</Form.Label>
                   <Form.Select
                     value={bookingData.time}
-                    onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
+                    onChange={(e) => setBookingData({ ...bookingData, time: e.target.value })}
                     disabled={!bookingData.date || loadingWorkingHours}
-                    required
+                    required={hasAvailableSlots}
                   >
                     <option value="">
-                      {!bookingData.date 
-                        ? t('bookingModal.selectDateFirst') 
-                        : loadingWorkingHours 
+                      {!bookingData.date
+                        ? t('bookingModal.selectDateFirst')
+                        : loadingWorkingHours
                         ? t('bookingModal.loadingAvailableSlots')
-                        : workingHours && !workingHours.available
-                        ? t('bookingModal.labourNotAvailableOnDay')
-                        : generateTimeSlots().length === 0
-                        ? t('bookingModal.noAvailableSlotsForDate')
-                        : t('bookingModal.chooseTimeSlot')
-                      }
+                        : t('bookingModal.chooseTimeSlot')}
                     </option>
-                    {bookingData.date && !loadingWorkingHours && workingHours?.available && generateTimeSlots().map((slot, index) => (
-                      <option key={index} value={slot}>
-                        {slot} ({convertTo12Hour(slot)})
-                      </option>
-                    ))}
+                    {bookingData.date && !loadingWorkingHours && workingHours?.available &&
+                      generateTimeSlots().map((slot, index) => (
+                        <option key={index} value={slot}>
+                          {slot} ({convertTo12Hour(slot)})
+                        </option>
+                      ))}
                   </Form.Select>
                   <Form.Text className="text-muted">
-                    {loadingWorkingHours 
-                      ? t('bookingModal.checkingLabourAvailability')
-                      : workingHours && !workingHours.available
-                      ? t('bookingModal.labourNotAvailableSelectedDay')
-                      : workingHours?.available && generateTimeSlots().length === 0
-                      ? t('bookingModal.allSlotsBookedForDate')
-                      : workingHours?.available
-                      ? t('bookingModal.availableSlotsBasedOnWorkingHours', { startTime: workingHours.startTime, endTime: workingHours.endTime })
-                      : t('bookingModal.availableSlots30MinIntervals')
-                    }
+                    {t('bookingModal.availableSlotsBasedOnWorkingHours')}
                   </Form.Text>
                 </Form.Group>
               </Col>
-            </Row>
-          ) : null}
+            )}
+          </Row>
           
           <Form.Group className="mb-3">
             <Form.Label>{t('bookingModal.workDescription')} <span className="text-muted">({t('bookingModal.workDescriptionOptional')})</span></Form.Label>
@@ -517,37 +506,29 @@ const BookingModal = ({
           </Form.Group>
           
           <div className="d-grid gap-2">
-            <Button 
-              variant="success" 
-              type="submit" 
-              size="lg" 
-              disabled={isBooking || !hasWorkingHours || loadingAdditionalDetails}
+            <Button
+              variant="success"
+              type="submit"
+              size="lg"
+              disabled={isBooking}
             >
               {isBooking ? (
                 <>
                   <Spinner animation="border" size="sm" className="me-2" />
                   {t('bookingModal.booking')}
                 </>
-              ) : loadingAdditionalDetails ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  {t('bookingModal.loading')}
-                </>
-              ) : !hasWorkingHours ? (
-                <>
-                  <FaCalendarAlt className="me-2" />
-                  {t('bookingModal.contactLabourDirectly')}
-                </>
               ) : (
                 <>
                   <FaCalendarAlt className="me-2" />
-                  {t('bookingModal.confirmBooking')}
+                  {t('bookingModal.bookLabourButton')}
                 </>
               )}
             </Button>
-            <Button variant="outline-secondary" onClick={onHide}>
-              {t('bookingModal.cancel')}
-            </Button>
+            {hasAvailableSlots && (
+              <Button variant="outline-secondary" onClick={onHide}>
+                {t('bookingModal.cancel')}
+              </Button>
+            )}
           </div>
         </Form>
       </Modal.Body>

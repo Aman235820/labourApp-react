@@ -137,7 +137,7 @@ const SearchLabourModal = ({
         <>
             <Modal show={show} onHide={onHide} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title>{t('searchLabourModal.searchResultsFor', { searchCategory: searchCategory })}</Modal.Title>
+                    <Modal.Title>{t('searchLabourModal.searchResultsForStatic')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {error && (
@@ -151,7 +151,7 @@ const SearchLabourModal = ({
                             <>
                                 <div className="mb-3">
                                     <small className="text-muted">
-                                        {t('searchLabourModal.showingResults', { count: searchResults.content.length, total: searchResults.totalElements })}
+                                        {t('searchLabourModal.showingResultsStatic')}
                                     </small>
                                 </div>
                                 <div className="labour-cards-container">

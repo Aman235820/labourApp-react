@@ -55,7 +55,9 @@
     "mechanicTitle": "Mechanic",
     "mechanicDescription": "गाड़ी maintenance और repair के लिए skilled professionals",
     "servicesText": "सेवा",
-    "chooseSpecialized": "हमारी specialized {serviceName} services में से choose करें"
+    "chooseSpecialized": "हमारी specialized services में से choose करें",
+    "chooseSpecializedPrefix": "हमारी specialized",
+    "chooseSpecializedSuffix": "services में से choose करें"
   },
   "services": {
     "cleaningServices": "सफाई सेवा",
@@ -248,9 +250,13 @@
     }
   },
   "bookingModal": {
-    "bookLabour": "Book {labourName}",
+    "bookLabour": "Book",
+    "bookLabourTitle": "Book",
     "confirmYourBooking": "अपनी Booking Confirm करें",
-    "areYouSureToBook": "क्या आप सच में {labourName} को {serviceCategory} के लिए book करना चाहते हैं?",
+    "areYouSureToBook": "क्या आप सच में book करना चाहते हैं?",
+    "areYouSureToBookPrefix": "क्या आप सच में",
+    "for": "के लिए",
+    "bookLabourButton": "Book Labour",
     "labour": "Labour",
     "service": "Service",
     "contact": "Contact",
@@ -287,7 +293,7 @@
     "pleaseSelectDateFromToday": "कृपया आज से date select करें।",
     "pleaseSelectFutureTimeSlot": "कृपया future time slot select करें।",
     "labourSuccessfullyBooked": "Labour successfully booked!",
-    "labourBookedForService": "{labourName} successfully booked for {serviceCategory}! आप अपनी bookings section में details देख सकते हैं।",
+    "labourBookedForService": "Successfully booked! आप अपनी bookings section में details देख सकते हैं।",
     "bookingFailed": "Booking failed। फिर से try करें।",
     "bookingFailedTryAgain": "Booking failed। फिर से try करें।",
     "booking": "Booking हो रहा है...",
@@ -295,8 +301,10 @@
     "cancel": "Cancel"
   },
   "searchLabourModal": {
-    "searchResultsFor": "\"{searchCategory}\" के लिए खोज परिणाम",
-    "showingResults": "{total} में से {count} परिणाम दिखा रहा है",
+    "searchResultsFor": "खोज परिणाम",
+    "searchResultsForStatic": "खोज परिणाम",
+    "showingResults": "परिणाम दिखा रहा है",
+    "showingResultsStatic": "परिणाम दिखा रहा है",
     "noResultsFound": "कोई परिणाम नहीं मिला",
     "trySearchingWithDifferentKeywords": "अलग-अलग कीवर्ड से खोज करें या बाद में फिर से देखें।",
     "callNow": "अभी कॉल करें",

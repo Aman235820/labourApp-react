@@ -54,7 +54,9 @@
     "mechanicTitle": "Mechanic",
     "mechanicDescription": "Skilled vehicle maintenance and repair services",
     "servicesText": "Services",
-    "chooseSpecialized": "Choose from our specialized {serviceName} services"
+    "chooseSpecialized": "Choose from our specialized services",
+    "chooseSpecializedPrefix": "Choose from our specialized",
+    "chooseSpecializedSuffix": "services"
   },
   "services": {
     "cleaningServices": "Cleaning Services",
@@ -321,9 +323,13 @@
     }
   },
   "bookingModal": {
-    "bookLabour": "Book {labourName}",
+    "bookLabour": "Book",
+    "bookLabourTitle": "Book",
     "confirmYourBooking": "Confirm Your Booking",
-    "areYouSureToBook": "Are you sure you want to book {labourName} for {serviceCategory}?",
+    "areYouSureToBook": "Are you sure you want to book?",
+    "areYouSureToBookPrefix": "Are you sure you want to book",
+    "for": "for",
+    "bookLabourButton": "Book Labour",
     "labour": "Labour",
     "service": "Service",
     "contact": "Contact",
@@ -360,7 +366,7 @@
     "pleaseSelectDateFromToday": "Please select a date from today onwards.",
     "pleaseSelectFutureTimeSlot": "Please select a future time slot.",
     "labourSuccessfullyBooked": "Labour successfully booked!",
-    "labourBookedForService": "{labourName} successfully booked for {serviceCategory}! You can check your bookings section for more details.",
+    "labourBookedForService": "Successfully booked! You can check your bookings section for more details.",
     "bookingFailed": "Booking failed. Please try again.",
     "bookingFailedTryAgain": "Booking failed. Please try again.",
     "booking": "Booking...",
@@ -368,8 +374,10 @@
     "cancel": "Cancel"
   },
   "searchLabourModal": {
-    "searchResultsFor": "Search Results for \"{searchCategory}\"",
-    "showingResults": "Showing {count} of {total} results",
+    "searchResultsFor": "Search Results",
+    "searchResultsForStatic": "Search Results",
+    "showingResults": "Showing results",
+    "showingResultsStatic": "Showing results",
     "noResultsFound": "No Results Found",
     "trySearchingWithDifferentKeywords": "Try searching with different keywords or check back later.",
     "callNow": "Call Now",
