@@ -378,13 +378,13 @@ const LabourDetailsPage = () => {
     // Validate date is not in the past
     const { currentDate } = getCurrentDateTime();
     if (bookingData.date < currentDate) {
-      alert('Please select a date from today onwards.');
+      alert(t('labourDetails.pleaseSelectDateFromToday'));
       return;
     }
 
     // Validate time is not in the past for today's bookings
     if (!isValidTime(bookingData.time, bookingData.date)) {
-      alert('Please select a future time slot.');
+      alert(t('labourDetails.pleaseSelectFutureTimeSlot'));
       return;
     }
     
@@ -408,31 +408,31 @@ const LabourDetailsPage = () => {
       // Make the booking API call
       const response = await bookLabour(bookingPayload);
       
-      if (response && !response.hasError) {
-        setBookingStatus({
-          type: 'success',
-          message: 'Labour Successfully booked!'
-        });
-        
-        // Show alert with specific message and redirect on close
-        const timeMessage = bookingData.time 
-          ? `for ${serviceCategory} at ${bookingData.time}`
-          : `for ${serviceCategory} (labour will contact you to arrange timing)`;
-        alert(`${labour.labourName} successfully booked ${timeMessage}, you can check your bookings section for more details`);
-        navigate('/');
-      } else {
-        setBookingStatus({
-          type: 'danger',
-          message: 'Booking failed. Please try again.'
-        });
-      }
-    } catch (error) {
-      console.error('Booking error:', error);
-      setBookingStatus({
-        type: 'danger',
-        message: 'Booking failed. Please try again.'
-      });
-    } finally {
+             if (response && !response.hasError) {
+         setBookingStatus({
+           type: 'success',
+           message: t('labourDetails.labourSuccessfullyBooked')
+         });
+         
+         // Show alert with specific message and redirect on close
+         const timeMessage = bookingData.time 
+           ? `for ${serviceCategory} at ${bookingData.time}`
+           : `for ${serviceCategory} (labour will contact you to arrange timing)`;
+         alert(`${labour.labourName} successfully booked ${timeMessage}, you can check your bookings section for more details`);
+         navigate('/');
+       } else {
+         setBookingStatus({
+           type: 'danger',
+           message: t('labourDetails.bookingFailed')
+         });
+       }
+     } catch (error) {
+       console.error('Booking error:', error);
+       setBookingStatus({
+         type: 'danger',
+         message: t('labourDetails.bookingFailed')
+       });
+     } finally {
       setIsBooking(false);
     }
   };
@@ -1036,7 +1036,7 @@ const LabourDetailsPage = () => {
       {/* Booking Modal */}
       <Modal show={showBookingModal} onHide={() => setShowBookingModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{t('labourDetails.bookLabour')} {labour.labourName}</Modal.Title>
+          <Modal.Title>Book {labour.labourName}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {bookingStatus && (
@@ -1048,23 +1048,23 @@ const LabourDetailsPage = () => {
           <div className="booking-confirmation mb-4">
             <div className="text-center">
               <FaCalendarAlt className="text-primary mb-3" size={48} />
-              <h5>{t('labourDetails.confirmYourBooking')}</h5>
+              <h5>Confirm Your Booking</h5>
               <p className="text-muted">
-                {t('labourDetails.areYouSureToBook')} <strong>{labour.labourName}</strong> {t('labourDetails.for')} <strong>{serviceCategory}</strong>?
+                Are you sure you want to book <strong>{labour.labourName}</strong> for <strong>{serviceCategory}</strong>?
               </p>
               <div className="booking-details bg-light p-3 rounded">
                 <div className="row text-start">
                   <div className="col-6">
-                    <strong>{t('labourDetails.labour')}:</strong> {labour.labourName}
+                    <strong>Labour:</strong> {labour.labourName}
                   </div>
                   <div className="col-6">
-                    <strong>{t('labourDetails.service')}:</strong> {serviceCategory}
+                    <strong>Service:</strong> {serviceCategory}
                   </div>
                   <div className="col-6">
-                    <strong>{t('labourDetails.contact')}:</strong> {labour.labourMobileNo}
+                    <strong>Contact:</strong> {labour.labourMobileNo}
                   </div>
                   <div className="col-6">
-                    <strong>{t('labourDetails.rating')}:</strong> {labour.rating ? `${labour.rating}/5` : t('labourDetails.noRating')}
+                    <strong>Rating:</strong> {labour.rating ? `${labour.rating}/5` : 'No rating'}
                   </div>
                 </div>
               </div>
@@ -1075,7 +1075,7 @@ const LabourDetailsPage = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>{t('labourDetails.preferredDate')}</Form.Label>
+                  <Form.Label>Preferred Date</Form.Label>
                   <Form.Control
                     type="date"
                     value={bookingData.date}
@@ -1093,7 +1093,7 @@ const LabourDetailsPage = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>{t('labourDetails.preferredTimeSlot')}</Form.Label>
+                  <Form.Label>Preferred Time Slot</Form.Label>
                   <Form.Select
                     value={bookingData.time}
                     onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
@@ -1133,7 +1133,7 @@ const LabourDetailsPage = () => {
             </Row>
             
             <Form.Group className="mb-3">
-                              <Form.Label>{t('labourDetails.workDescription')} <span className="text-muted">{t('labourDetails.optional')}</span></Form.Label>
+              <Form.Label>Work Description <span className="text-muted">(Optional)</span></Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
@@ -1144,15 +1144,15 @@ const LabourDetailsPage = () => {
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>{t('labourDetails.urgencyLevel')}</Form.Label>
+              <Form.Label>Urgency Level</Form.Label>
               <Form.Select
                 value={bookingData.urgency}
                 onChange={(e) => setBookingData({...bookingData, urgency: e.target.value})}
               >
-                <option value="low">{t('labourDetails.lowWithinWeek')}</option>
-                <option value="normal">{t('labourDetails.normalWithin2To3Days')}</option>
-                <option value="high">{t('labourDetails.highWithin24Hours')}</option>
-                <option value="urgent">{t('labourDetails.urgentAsap')}</option>
+                <option value="low">Low - Within a week</option>
+                <option value="normal">Normal - Within 2-3 days</option>
+                <option value="high">High - Within 24 hours</option>
+                <option value="urgent">Urgent - ASAP</option>
               </Form.Select>
             </Form.Group>
             
@@ -1161,17 +1161,17 @@ const LabourDetailsPage = () => {
                 {isBooking ? (
                   <>
                     <Spinner animation="border" size="sm" className="me-2" />
-                    {t('labourDetails.sendingBookingRequest')}
+                    Sending Booking Request...
                   </>
                 ) : (
                   <>
                     <FaCalendarAlt className="me-2" />
-                    {t('labourDetails.confirmBooking')}
+                    Confirm Booking
                   </>
                 )}
               </Button>
               <Button variant="outline-secondary" onClick={() => setShowBookingModal(false)}>
-                {t('labourDetails.cancel')}
+                Cancel
               </Button>
             </div>
           </Form>
