@@ -366,7 +366,9 @@ const LabourDetailsPage = () => {
       return;
     }
 
-    if (!bookingData.time) {
+    // Only require time slot if labour is available and has slots
+    const hasAvailableSlots = workingHours?.available && generateTimeSlots().length > 0;
+    if (hasAvailableSlots && !bookingData.time) {
               alert(t('labourDetails.pleaseSelectPreferredTimeSlot'));
       return;
     }
@@ -398,7 +400,7 @@ const LabourDetailsPage = () => {
         labourId: labour.id,
         labourSkill: serviceCategory,
         preferredDate: bookingData.date,
-        preferredTime: bookingData.time,
+        preferredTime: bookingData.time || null, // Allow null when no slots available
         workDescription: bookingData.description,
         urgencyLevel: bookingData.urgency
       };
@@ -413,7 +415,10 @@ const LabourDetailsPage = () => {
         });
         
         // Show alert with specific message and redirect on close
-        alert(`${labour.labourName} successfully booked for ${serviceCategory}, you can check your bookings section for more details`);
+        const timeMessage = bookingData.time 
+          ? `for ${serviceCategory} at ${bookingData.time}`
+          : `for ${serviceCategory} (labour will contact you to arrange timing)`;
+        alert(`${labour.labourName} successfully booked ${timeMessage}, you can check your bookings section for more details`);
         navigate('/');
       } else {
         setBookingStatus({
@@ -1093,7 +1098,7 @@ const LabourDetailsPage = () => {
                     value={bookingData.time}
                     onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
                     disabled={!bookingData.date || loadingTimeSlots}
-                    required
+                    required={bookingData.date && !loadingTimeSlots && workingHours?.available && generateTimeSlots().length > 0}
                   >
                     <option value="">
                       {!bookingData.date 
@@ -1101,10 +1106,10 @@ const LabourDetailsPage = () => {
                         : loadingTimeSlots 
                         ? 'Loading available slots...'
                         : workingHours && !workingHours.available
-                        ? 'Labour not available on this day'
+                        ? 'Labour not available on this day - booking allowed'
                         : generateTimeSlots().length === 0
-                        ? 'No available slots for this date'
-                        : 'Choose time slot'
+                        ? 'No available slots for this date - booking allowed'
+                        : 'Choose time slot (required)'
                       }
                     </option>
                     {bookingData.date && !loadingTimeSlots && workingHours?.available && generateTimeSlots().map((slot, index) => (
@@ -1117,9 +1122,9 @@ const LabourDetailsPage = () => {
                     {loadingTimeSlots 
                       ? 'Checking labour availability...'
                       : workingHours && !workingHours.available
-                      ? 'Labour is not available on the selected day. Please choose a different date.'
+                      ? 'Labour is not available on the selected day, but you can still book. Labour will contact you to arrange timing.'
                       : workingHours?.available && generateTimeSlots().length === 0
-                      ? 'All slots are booked for this date. Please choose a different date.'
+                      ? 'No available slots for this date, but you can still book. Labour will contact you to arrange timing.'
                       : `Available slots based on labour's working hours (${workingHours?.startTime || '09:00'} - ${workingHours?.endTime || '18:00'})`
                     }
                   </Form.Text>
