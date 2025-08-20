@@ -3,6 +3,7 @@
   padding: 2rem 0;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  overflow-x: hidden;
 }
 
 /* Quick Actions Section */
@@ -136,6 +137,7 @@
   background: white;
   border-radius: 0 0 15px 15px;
   padding: 2rem;
+  padding-top: 3.5rem; /* Reserve space for back button */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
   position: relative;
@@ -215,6 +217,7 @@
 @media (min-width: 992px) {
   .labour-header {
     padding: 2.5rem;
+    padding-top: 4rem; /* Extra space for back button at desktop */
     margin-bottom: 2.5rem;
   }
   
@@ -224,10 +227,10 @@
   }
   
   .back-btn {
-    top: 1.5rem;
-    left: 1.5rem;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
+    top: 1.25rem;
+    left: 1.25rem;
+    width: 44px;
+    height: 44px;
   }
   
   .labour-header .d-flex.align-items-center {
@@ -257,25 +260,29 @@
   position: absolute;
   top: 1rem;
   left: 1rem;
-  color: #6c757d;
+  color: #495057;
   text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.95);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: 1px solid #e9ecef;
   z-index: 10;
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .back-btn:hover {
-  color: #495057;
+  color: #212529;
   text-decoration: none;
-  transform: translateX(-5px);
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateX(-2px);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .labour-avatar {
@@ -458,6 +465,7 @@
   align-items: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  white-space: normal;
   background: #f8f9fa;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
@@ -1380,6 +1388,7 @@
   
   .labour-header {
     padding: 1.5rem;
+    padding-top: 3.25rem; /* Reserve space for back button at mobile */
     margin-bottom: 1rem;
   }
   
@@ -1391,8 +1400,8 @@
   .back-btn {
     top: 0.75rem;
     left: 0.75rem;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
+    width: 36px;
+    height: 36px;
   }
   
   .labour-header .col-md-8 {
@@ -1473,6 +1482,8 @@
   .labour-meta span {
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
+    white-space: normal;
+    max-width: 100%;
   }
   
   .rating-section {
@@ -1691,6 +1702,8 @@
   .labour-meta span {
     padding: 0.3rem 0.5rem;
     font-size: 0.8rem;
+    white-space: normal;
+    max-width: 100%;
   }
   
   .rating-section {

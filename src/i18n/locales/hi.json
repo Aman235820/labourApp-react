@@ -80,7 +80,8 @@
     "name": "नाम",
     "services": "सेवा",
     "phone": "फ़ोन",
-    "rating": "रेटिंग"
+    "rating": "रेटिंग",
+    "actions": "Actions"
   },
   "labourDashboard": {
     "editProfile": "Profile Edit करें",
@@ -303,6 +304,14 @@
   "searchLabourModal": {
     "searchResultsFor": "खोज परिणाम",
     "searchResultsForStatic": "खोज परिणाम",
+    "sortBy": "क्रमबद्ध करें",
+    "sortOrderDesc": "घटते क्रम",
+    "sortOrderAsc": "बढ़ते क्रम",
+    "pageSize": "पेज आकार",
+    "prev": "पिछला",
+    "next": "अगला",
+    "pageOf": "पेज {{current}} / {{total}}",
+    "viewProfile": "प्रोफ़ाइल देखें",
     "showingResults": "परिणाम दिखा रहा है",
     "showingResultsStatic": "परिणाम दिखा रहा है",
     "noResultsFound": "कोई परिणाम नहीं मिला",

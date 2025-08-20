@@ -496,11 +496,12 @@ const LabourDetailsPage = () => {
           <Col xs={12} md={8}>
             <Button 
               variant="link" 
-              className="back-btn p-0"
+              className="back-btn icon-only"
               onClick={() => navigate(-1)}
+              aria-label={t('labourDetails.backToSearch')}
+              title={t('labourDetails.backToSearch')}
             >
-              <FaArrowLeft className="me-2" />
-              {t('labourDetails.backToSearch')}
+              <FaArrowLeft size={18} />
             </Button>
             
             <div className="d-flex align-items-center">
@@ -1133,13 +1134,13 @@ const LabourDetailsPage = () => {
             </Row>
             
             <Form.Group className="mb-3">
-              <Form.Label>Work Description <span className="text-muted">(Optional)</span></Form.Label>
+              <Form.Label>{t('labourDetails.workDescription')} <span className="text-muted">{t('labourDetails.optional')}</span></Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 value={bookingData.description}
                 onChange={(e) => setBookingData({...bookingData, description: e.target.value})}
-                placeholder="Describe the work you need done (optional)..."
+                placeholder={t('labourDetails.describeWorkYouNeed')}
               />
             </Form.Group>
             

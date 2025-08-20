@@ -5,6 +5,7 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   min-height: 100vh;
   padding: 0;
+  overflow-x: hidden;
 }
 
 .dashboard-header {
@@ -293,7 +294,7 @@
 .labour-meta span {
   display: flex;
   align-items: center;
-  white-space: nowrap;
+  white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
   background: #f8f9fa;
@@ -462,6 +463,8 @@
   .labour-meta span {
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
+    white-space: normal;
+    max-width: 100%;
   }
   
   .rating-section {
@@ -536,6 +539,8 @@
   .labour-meta span {
     padding: 0.3rem 0.5rem;
     font-size: 0.8rem;
+    white-space: normal;
+    max-width: 100%;
   }
   
   .rating-section {

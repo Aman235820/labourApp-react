@@ -65,6 +65,27 @@ function LabourList({ show, onHide, labourers, onRowClick, totalElements = 0, is
         </div>
       ),
     },
+    {
+      name: t('labourList.actions') || 'Actions',
+      button: true,
+      cell: row => (
+        <div className="d-flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `#/labour-details/${row.labourId}`;
+            }}
+          >
+            {t('common.viewProfile') || 'View Profile'}
+          </Button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      minWidth: '160px'
+    },
   ];
 
   // DataTable custom styles (copied from Home.js)

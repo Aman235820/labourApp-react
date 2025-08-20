@@ -81,6 +81,27 @@ function Home() {
         </div>
       ),
     },
+    {
+      name: t('table.actions') || 'Actions',
+      button: true,
+      cell: row => (
+        <div className="d-flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/labour-details/${row.labourId}`, { state: { searchCategory: row.labourSkill } });
+            }}
+          >
+            {t('common.viewProfile') || 'View Profile'}
+          </Button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      minWidth: '160px'
+    },
   ];
 
   const customStyles = {

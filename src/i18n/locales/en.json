@@ -79,7 +79,8 @@
     "name": "Name",
     "services": "Services",
     "phone": "Phone",
-    "rating": "Rating"
+    "rating": "Rating",
+    "actions": "Actions"
   },
   "labourDashboard": {
     "editProfile": "Edit Profile",
@@ -376,6 +377,14 @@
   "searchLabourModal": {
     "searchResultsFor": "Search Results",
     "searchResultsForStatic": "Search Results",
+    "sortBy": "Sort by",
+    "sortOrderDesc": "Desc",
+    "sortOrderAsc": "Asc",
+    "pageSize": "Page size",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{current}} of {{total}}",
+    "viewProfile": "View Profile",
     "showingResults": "Showing results",
     "showingResultsStatic": "Showing results",
     "noResultsFound": "No Results Found",
