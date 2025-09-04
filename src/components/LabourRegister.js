@@ -3,15 +3,17 @@ import { Container, Form, Button, Card, Row, Col, Spinner, InputGroup } from 're
 import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import LocationService from '../services/LocationService';
-import { FaUser, FaTools, FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle, FaMapMarkerAlt, FaLocationArrow, FaCheckCircle } from 'react-icons/fa';
+import { FaUser, FaTools, FaPhone, FaArrowRight, FaExclamationCircle, FaMapMarkerAlt, FaLocationArrow, FaCheckCircle } from 'react-icons/fa';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import { useTranslation } from 'react-i18next';
+import OTPVerification from './OTPVerification';
 import '../styles/LabourRegister.css';
 
 function LabourRegister() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [step, setStep] = useState('form'); // 'form' or 'otp'
   const [formData, setFormData] = useState({
     labourName: '',
     labourSkill: '',
@@ -19,7 +21,6 @@ function LabourRegister() {
     labourMobileNo: '',
     labourLocation: ''
   });
-  const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,7 +28,6 @@ function LabourRegister() {
   const [isLoading, setIsLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-  const [showOtp, setShowOtp] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -195,80 +195,87 @@ function LabourRegister() {
     }
   };
 
-  const handleRequestOTP = async () => {
-    setOtpStatus('');
-    setOtpLoading(true);
-    const mobile = formData.labourMobileNo;
-    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-      setOtpStatus(t('auth.pleaseEnterValidMobile'));
-      setOtpLoading(false);
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    
+    // Validate form before sending OTP
+    if (selectedService && formData.labourSubSkill.length === 0) {
+      setError(t('auth.pleaseSelectAtLeastOneSubSkill'));
       return;
     }
+    
+    let finalLocation = formData.labourLocation;
+    
+    // If no location provided, auto-detect it
+    if (!finalLocation || finalLocation.trim() === '') {
+      try {
+        const coords = await LocationService.getCurrentLocation();
+        const locationData = await LocationService.getLocationFromCoordinates(coords.latitude, coords.longitude);
+        
+        // Extract city name from the location data
+        const detectedCity = locationData.address?.city || 
+                            locationData.address?.town || 
+                            locationData.address?.village || 
+                            locationData.address?.state_district || 
+                            locationData.address?.county || 
+                            'Unknown';
+        
+        // Find the closest matching city from our list
+        const closestCity = findClosestCity(detectedCity);
+        finalLocation = closestCity ? closestCity.value : t('auth.notSpecified');
+      } catch (locationError) {
+        finalLocation = t('auth.notSpecified');
+      }
+    }
+    
+    // Validate that the selected city is from our list
+    const isValidCity = cities.some(city => city.CityName === finalLocation);
+    
+    if (finalLocation !== t('auth.notSpecified') && !isValidCity) {
+      setError(t('auth.pleaseSelectValidCity'));
+      return;
+    }
+
+    const mobile = formData.labourMobileNo;
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      setError(t('auth.pleaseEnterValidMobile'));
+      return;
+    }
+
+    // Update location in formData if auto-detected
+    if (finalLocation !== formData.labourLocation) {
+      setFormData(prev => ({ ...prev, labourLocation: finalLocation }));
+    }
+    
+    setOtpLoading(true);
+    setError('');
+    
     try {
       await labourService.requestOTP(mobile, 'LABOUR');
+      setStep('otp');
       setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setOtpStatus(err.message || t('auth.failedToSendOtp'));
+      setError(err.message || t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  const handleVerifyOTP = async (otpValue) => {
     setIsLoading(true);
+    setError('');
     
-    if (selectedService && formData.labourSubSkill.length === 0) {
-      setError(t('auth.pleaseSelectAtLeastOneSubSkill'));
-      setIsLoading(false);
-      return;
-    }
     try {
-      let finalLocation = formData.labourLocation;
-      
-      // If no location provided, auto-detect it
-      if (!finalLocation || finalLocation.trim() === '') {
-        try {
-          const coords = await LocationService.getCurrentLocation();
-          const locationData = await LocationService.getLocationFromCoordinates(coords.latitude, coords.longitude);
-          
-          // Extract city name from the location data
-          const detectedCity = locationData.address?.city || 
-                              locationData.address?.town || 
-                              locationData.address?.village || 
-                              locationData.address?.state_district || 
-                              locationData.address?.county || 
-                              'Unknown';
-          
-          // Find the closest matching city from our list
-          const closestCity = findClosestCity(detectedCity);
-          finalLocation = closestCity ? closestCity.value : t('auth.notSpecified');
-        } catch (locationError) {
-          finalLocation = t('auth.notSpecified');
-        }
-      }
-      
-      // Validate that the selected city is from our list
-      const isValidCity = cities.some(city => city.CityName === finalLocation);
-      
-      if (finalLocation !== t('auth.notSpecified') && !isValidCity) {
-        setError(t('auth.pleaseSelectValidCity'));
-        setIsLoading(false);
-        return;
-      }
-      
       // Prepare subSkills array for API
       const labourData = {
         labourName: formData.labourName,
         labourSkill: formData.labourSkill,
         labourSubSkills: formData.labourSubSkill.map(subSkill => ({ subSkillName: subSkill })),
         labourMobileNo: formData.labourMobileNo,
-        labourLocation: finalLocation
+        labourLocation: formData.labourLocation
       };
       
-      const response = await labourService.registerLabour(labourData, otp);
+      const response = await labourService.registerLabour(labourData, otpValue);
       
       if (response.token && response.returnValue) {
         // Filter out reviews data before storing in localStorage
@@ -284,6 +291,43 @@ function LabourRegister() {
       setIsLoading(false);
     }
   };
+
+  const handleBackToForm = () => {
+    setStep('form');
+    setError('');
+    setOtpStatus('');
+  };
+
+  const handleResendOTP = async () => {
+    setOtpLoading(true);
+    setError('');
+    setOtpStatus('');
+    
+    try {
+      await labourService.requestOTP(formData.labourMobileNo, 'LABOUR');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
+    } catch (err) {
+      setError(err.message || t('auth.failedToSendOtp'));
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  if (step === 'otp') {
+    return (
+      <OTPVerification
+        onVerify={handleVerifyOTP}
+        onBack={handleBackToForm}
+        onResend={handleResendOTP}
+        isLoading={isLoading}
+        error={error}
+        success={otpStatus}
+        mobileNumber={formData.labourMobileNo}
+        title={t('auth.verifyOtp')}
+        subtitle={t('auth.enterOtpSentToMobile')}
+      />
+    );
+  }
 
   return (
     <Container className="mt-5 mb-5">
@@ -307,7 +351,7 @@ function LabourRegister() {
                   {success}
                 </div>
               )}
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSendOTP}>
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
                     <FaUser className="me-2" />
@@ -377,63 +421,23 @@ function LabourRegister() {
                     <FaPhone className="me-2" />
                     <Form.Label className="fw-bold mb-0">{t('auth.mobileNumber')}</Form.Label>
                   </div>
-                  <InputGroup>
-                    <Form.Control
-                      type="tel"
-                      name="labourMobileNo"
-                      value={formData.labourMobileNo}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                        setFormData({
-                          ...formData,
-                          labourMobileNo: value
-                        });
-                      }}
-                      required
-                      pattern="[0-9]{10}"
-                      className="form-control-lg"
-                      placeholder={t('auth.enterMobileNumber')}
-                      maxLength="10"
-                    />
-                    <Button
-                      variant="outline-primary"
-                      type="button"
-                      onClick={handleRequestOTP}
-                      disabled={otpLoading}
-                    >
-                      {otpLoading ? t('auth.sendingOtp') : t('auth.requestOtp')}
-                    </Button>
-                  </InputGroup>
-                  {otpStatus && (
-                    <Form.Text className={otpStatus.includes('success') ? 'text-success' : 'text-danger'}>
-                      {otpStatus}
-                    </Form.Text>
-                  )}
-                </Form.Group>
-                <Form.Group className="mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaKey className="me-2" />
-                    <Form.Label className="fw-bold mb-0">{t('auth.otp')}</Form.Label>
-                  </div>
-                  <InputGroup>
-                    <Form.Control
-                      type={showOtp ? "text" : "password"}
-                      placeholder={t('auth.enterOtp')}
-                      value={otp}
-                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="form-control-lg"
-                      maxLength="6"
-                      required
-                    />
-                    <Button
-                      variant="outline-secondary"
-                      type="button"
-                      onClick={() => setShowOtp(v => !v)}
-                      tabIndex={-1}
-                    >
-                      {showOtp ? <FaEyeSlash /> : <FaEye />}
-                    </Button>
-                  </InputGroup>
+                  <Form.Control
+                    type="tel"
+                    name="labourMobileNo"
+                    value={formData.labourMobileNo}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setFormData({
+                        ...formData,
+                        labourMobileNo: value
+                      });
+                    }}
+                    required
+                    pattern="[0-9]{10}"
+                    className="form-control-lg"
+                    placeholder={t('auth.enterMobileNumber')}
+                    maxLength="10"
+                  />
                 </Form.Group>
                 <Form.Group className="mb-4">
                   <div className="d-flex align-items-center">
@@ -504,9 +508,9 @@ function LabourRegister() {
                     variant="primary" 
                     type="submit" 
                     className="btn-lg fw-bold d-flex align-items-center justify-content-center"
-                    disabled={isLoading}
+                    disabled={otpLoading}
                   >
-                    {isLoading ? (
+                    {otpLoading ? (
                       <>
                         <Spinner
                           as="span"
@@ -516,11 +520,11 @@ function LabourRegister() {
                           aria-hidden="true"
                           className="me-2"
                         />
-                        {t('auth.creatingAccount')}
+                        {t('auth.sendingOtp')}
                       </>
                     ) : (
                       <>
-                        {t('auth.createAccountBtn')} <FaArrowRight className="ms-2" />
+                        {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
                       </>
                     )}
                   </Button>

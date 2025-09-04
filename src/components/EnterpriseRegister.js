@@ -5,6 +5,7 @@ import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { enterpriseService } from '../services/enterpriseService';
 import LocationService from '../services/LocationService';
+import OTPVerification from './OTPVerification';
 import '../styles/EnterpriseAuth.css';
 import { 
   FaPhone,
@@ -24,6 +25,7 @@ import {
 
 function EnterpriseRegister() {
   const navigate = useNavigate();
+  const [step, setStep] = useState('form'); // 'form' or 'otp'
 
   const [formData, setFormData] = useState({
     ownerContactInfo: '',
@@ -36,8 +38,6 @@ function EnterpriseRegister() {
     { serviceName: '', subServices: [] }
   ]);
 
-  const [otp, setOtp] = useState('');
-  const [showOtp, setShowOtp] = useState(false);
   const [otpStatus, setOtpStatus] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -166,76 +166,83 @@ function EnterpriseRegister() {
     return services.filter(s => !taken.has(s.name));
   };
 
-  const handleRequestOTP = async () => {
-    setOtpStatus('');
-    setOtpLoading(true);
-    const mobile = formData.ownerContactInfo;
-    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-      setOtpStatus('Please enter a valid 10-digit mobile number');
-      setOtpLoading(false);
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    
+    // Validate form before sending OTP
+    const locationValue = formData.location?.trim();
+    let finalLocation = locationValue;
+    if (!finalLocation) {
+      try {
+        const coords = await LocationService.getCurrentLocation();
+        const locationData = await LocationService.getLocationFromCoordinates(coords.latitude, coords.longitude);
+        const detectedCity = locationData.address?.city || locationData.address?.town || locationData.address?.village || locationData.address?.state_district || locationData.address?.county || 'Unknown';
+        const closestCity = findClosestCity(detectedCity);
+        finalLocation = closestCity ? closestCity.value : 'Not Specified';
+      } catch (_) {
+        finalLocation = 'Not Specified';
+      }
+    }
+
+    const isValidCity = finalLocation === 'Not Specified' || cities.some(c => c.CityName === finalLocation);
+    if (!isValidCity) {
+      setError('Please select a valid city');
       return;
     }
+
+    const servicesOffered = buildServicesOfferedObject();
+    if (Object.keys(servicesOffered).length === 0) {
+      setError('Please add at least one service with subservices');
+      return;
+    }
+    
+    for (const row of serviceSelections) {
+      if ((row.serviceName && row.subServices.length === 0) || (!row.serviceName && row.subServices.length > 0)) {
+        setError('Each service must have at least one subservice');
+        return;
+      }
+    }
+
+    const mobile = formData.ownerContactInfo;
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    // Update location in formData if auto-detected
+    if (finalLocation !== locationValue) {
+      setFormData(prev => ({ ...prev, location: finalLocation }));
+    }
+    
+    setOtpLoading(true);
+    setError('');
+    
     try {
       await enterpriseService.requestOTP(mobile, 'ENTERPRISE');
+      setStep('otp');
       setOtpStatus('OTP sent successfully');
     } catch (err) {
-      setOtpStatus('Failed to send OTP');
+      setError('Failed to send OTP');
     } finally {
       setOtpLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  const handleVerifyOTP = async (otpValue) => {
     setSubmitting(true);
-
+    setError('');
+    
     try {
-      const locationValue = formData.location?.trim();
-      let finalLocation = locationValue;
-      if (!finalLocation) {
-        try {
-          const coords = await LocationService.getCurrentLocation();
-          const locationData = await LocationService.getLocationFromCoordinates(coords.latitude, coords.longitude);
-          const detectedCity = locationData.address?.city || locationData.address?.town || locationData.address?.village || locationData.address?.state_district || locationData.address?.county || 'Unknown';
-          const closestCity = findClosestCity(detectedCity);
-          finalLocation = closestCity ? closestCity.value : 'Not Specified';
-        } catch (_) {
-          finalLocation = 'Not Specified';
-        }
-      }
-
-      const isValidCity = finalLocation === 'Not Specified' || cities.some(c => c.CityName === finalLocation);
-      if (!isValidCity) {
-        setError('Please select a valid city');
-        setSubmitting(false);
-        return;
-      }
-
       const servicesOffered = buildServicesOfferedObject();
-      if (Object.keys(servicesOffered).length === 0) {
-        setError('Please add at least one service with subservices');
-        setSubmitting(false);
-        return;
-      }
-      // Validate each row
-      for (const row of serviceSelections) {
-        if ((row.serviceName && row.subServices.length === 0) || (!row.serviceName && row.subServices.length > 0)) {
-          setError('Each service must have at least one subservice');
-          setSubmitting(false);
-          return;
-        }
-      }
-
+      
       const enterpriseData = {
         ownerContactInfo: formData.ownerContactInfo,
         companyName: formData.companyName,
         servicesOffered,
-        location: finalLocation
+        location: formData.location
       };
 
-      const response = await enterpriseService.registerEnterprise(enterpriseData, otp);
+      const response = await enterpriseService.registerEnterprise(enterpriseData, otpValue);
       if (response && response.token && response.returnValue) {
         localStorage.setItem('enterprise', JSON.stringify({ ...response.returnValue, token: response.token }));
         navigate('/enterpriseDashboard');
@@ -248,6 +255,43 @@ function EnterpriseRegister() {
       setSubmitting(false);
     }
   };
+
+  const handleBackToForm = () => {
+    setStep('form');
+    setError('');
+    setOtpStatus('');
+  };
+
+  const handleResendOTP = async () => {
+    setOtpLoading(true);
+    setError('');
+    setOtpStatus('');
+    
+    try {
+      await enterpriseService.requestOTP(formData.ownerContactInfo, 'ENTERPRISE');
+      setOtpStatus('OTP sent successfully');
+    } catch (err) {
+      setError('Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  if (step === 'otp') {
+    return (
+      <OTPVerification
+        onVerify={handleVerifyOTP}
+        onBack={handleBackToForm}
+        onResend={handleResendOTP}
+        isLoading={submitting}
+        error={error}
+        success={otpStatus}
+        mobileNumber={formData.ownerContactInfo}
+        title="Verify OTP"
+        subtitle="Enter the 4-digit code sent to your mobile number"
+      />
+    );
+  }
 
   return (
     <Container className="enterprise-auth-container">
@@ -273,30 +317,20 @@ function EnterpriseRegister() {
                 </div>
               )}
 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSendOTP}>
                 <Row className="g-3">
                   <Col md={6}>
                     <Form.Group>
                       <Form.Label className="enterprise-form-label"><FaPhone className="me-2" />Mobile Number</Form.Label>
-                      <InputGroup className="enterprise-stacked-inputs">
-                        <Form.Control
-                          type="tel"
-                          value={formData.ownerContactInfo}
-                          onChange={(e) => setField('ownerContactInfo', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                          placeholder="10-digit mobile number"
-                          pattern="[0-9]{10}"
-                          maxLength={10}
-                          required
-                        />
-                        <Button variant="outline-primary" type="button" onClick={handleRequestOTP} disabled={otpLoading}>
-                          {otpLoading ? 'Sending...' : 'Request OTP'}
-                        </Button>
-                      </InputGroup>
-                      {otpStatus && (
-                        <Form.Text className={otpStatus.includes('success') ? 'text-success' : 'text-danger'}>
-                          {otpStatus}
-                        </Form.Text>
-                      )}
+                      <Form.Control
+                        type="tel"
+                        value={formData.ownerContactInfo}
+                        onChange={(e) => setField('ownerContactInfo', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="10-digit mobile number"
+                        pattern="[0-9]{10}"
+                        maxLength={10}
+                        required
+                      />
                     </Form.Group>
                   </Col>
 
@@ -401,30 +435,12 @@ function EnterpriseRegister() {
                     </Form.Group>
                   </Col>
 
-                  <Col md={6} className="mt-3">
-                    <Form.Group>
-                      <Form.Label className="enterprise-form-label"><FaKey className="me-2" />OTP</Form.Label>
-                      <InputGroup>
-                        <Form.Control
-                          type={showOtp ? 'text' : 'password'}
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                          placeholder="Enter 4-6 digit OTP"
-                          maxLength={6}
-                          required
-                        />
-                        <Button variant="outline-secondary" type="button" onClick={() => setShowOtp(v => !v)}>
-                          {showOtp ? <FaEyeSlash /> : <FaEye />}
-                        </Button>
-                      </InputGroup>
-                    </Form.Group>
-                  </Col>
 
                 </Row>
 
                 <div className="enterprise-sticky-footer d-grid gap-2 mt-4">
-                  <Button type="submit" variant="primary" className="enterprise-auth-btn-lg fw-bold d-flex align-items-center justify-content-center" disabled={submitting}>
-                    {submitting ? (<><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" /> Creating Account</>) : (<>Create Account <FaArrowRight className="ms-2" /></>)}
+                  <Button type="submit" variant="primary" className="enterprise-auth-btn-lg fw-bold d-flex align-items-center justify-content-center" disabled={otpLoading}>
+                    {otpLoading ? (<><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" /> Sending OTP...</>) : (<>Send OTP <FaArrowRight className="ms-2" /></>)}
                   </Button>
                 </div>
                 <div className="text-center mt-4">

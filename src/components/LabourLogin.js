@@ -1,54 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
-import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaSignInAlt, FaArrowLeft, FaPhone, FaKey, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
-import { useNavigate, Link } from 'react-router-dom';
+import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import { useTranslation } from 'react-i18next';
+import OTPVerification from './OTPVerification';
 import '../styles/LabourLogin.css';
 
 function LabourLogin() {
+  const [step, setStep] = useState('form'); // 'form' or 'otp'
   const [mobileNumber, setMobileNumber] = useState('');
-  const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const handleRequestOTP = async () => {
-    setOtpStatus('');
-    setOtpLoading(true);
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
     if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
-      setOtpStatus(t('auth.pleaseEnterValidMobile'));
-      setOtpLoading(false);
+      setError(t('auth.pleaseEnterValidMobile'));
       return;
     }
+    
+    setOtpLoading(true);
+    setError(null);
+    
     try {
       await labourService.requestOTP(mobileNumber, 'LABOUR');
+      setStep('otp');
       setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setOtpStatus(err.message || t('auth.failedToSendOtp'));
+      setError(err.message || t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!mobileNumber.trim()) {
-      setError(t('auth.pleaseEnterMobileNumber'));
-      return;
-    }
-    if (!otp.trim()) {
-      setError(t('auth.pleaseEnterOtp'));
-      return;
-    }
+  const handleVerifyOTP = async (otpValue) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      const response = await labourService.loginLabour(mobileNumber, otp);
+      const response = await labourService.loginLabour(mobileNumber, otpValue);
       if (response && response.token && response.returnValue) {
         // Filter out reviews data before storing in localStorage
         const { reviews, ...labourDataWithoutReviews } = response.returnValue;
@@ -62,6 +57,27 @@ function LabourLogin() {
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleBackToForm = () => {
+    setStep('form');
+    setError(null);
+    setOtpStatus('');
+  };
+
+  const handleResendOTP = async () => {
+    setOtpLoading(true);
+    setError(null);
+    setOtpStatus('');
+    
+    try {
+      await labourService.requestOTP(mobileNumber, 'LABOUR');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
+    } catch (err) {
+      setError(err.message || t('auth.failedToSendOtp'));
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -79,6 +95,22 @@ function LabourLogin() {
     }
   }, [otpStatus]);
 
+  if (step === 'otp') {
+    return (
+      <OTPVerification
+        onVerify={handleVerifyOTP}
+        onBack={handleBackToForm}
+        onResend={handleResendOTP}
+        isLoading={isLoading}
+        error={error}
+        success={otpStatus}
+        mobileNumber={mobileNumber}
+        title={t('auth.verifyOtp')}
+        subtitle={t('auth.enterOtpSentToMobile')}
+      />
+    );
+  }
+
   return (
     <Container className="py-5">
       <Row className="justify-content-center">
@@ -95,70 +127,30 @@ function LabourLogin() {
                   {error}
                 </Alert>
               )}
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSendOTP}>
                 <Form.Group className="mb-4">
                   <Form.Label className="text-muted">
                     <FaPhone className="me-2" />
                     {t('auth.mobileNumber')}
                   </Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type="tel"
-                      placeholder={t('auth.enterMobileNumber')}
-                      value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      className="py-2"
-                      pattern="[0-9]{10}"
-                      maxLength="10"
-                      required
-                    />
-                    <Button
-                      variant="outline-primary"
-                      type="button"
-                      onClick={handleRequestOTP}
-                      disabled={otpLoading}
-                    >
-                      {otpLoading ? t('auth.sendingOtp') : t('auth.requestOtp')}
-                    </Button>
-                  </InputGroup>
-                  {otpStatus && (
-                    <Form.Text className={otpStatus.includes('success') ? 'text-success' : 'text-danger'}>
-                      {otpStatus}
-                    </Form.Text>
-                  )}
-                </Form.Group>
-                <Form.Group className="mb-4">
-                  <Form.Label className="text-muted">
-                    <FaKey className="me-2" />
-                    {t('auth.otp')}
-                  </Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type={showOtp ? "text" : "password"}
-                      placeholder={t('auth.enterOtp')}
-                      value={otp}
-                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="py-2"
-                      maxLength="6"
-                      required
-                    />
-                    <Button
-                      variant="outline-secondary"
-                      type="button"
-                      onClick={() => setShowOtp(v => !v)}
-                      tabIndex={-1}
-                    >
-                      {showOtp ? <FaEyeSlash /> : <FaEye />}
-                    </Button>
-                  </InputGroup>
+                  <Form.Control
+                    type="tel"
+                    placeholder={t('auth.enterMobileNumber')}
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="py-2"
+                    pattern="[0-9]{10}"
+                    maxLength="10"
+                    required
+                  />
                 </Form.Group>
                 <Button
                   variant="primary"
                   type="submit"
                   className="w-100 py-2 d-flex align-items-center justify-content-center"
-                  disabled={isLoading}
+                  disabled={otpLoading}
                 >
-                  {isLoading ? (
+                  {otpLoading ? (
                     <>
                       <Spinner
                         as="span"
@@ -168,11 +160,11 @@ function LabourLogin() {
                         aria-hidden="true"
                         className="me-2"
                       />
-                      {t('auth.loggingIn')}
+                      {t('auth.sendingOtp')}
                     </>
                   ) : (
                     <>
-                      {t('auth.login')} <FaArrowRight className="ms-2" />
+                      {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
                     </>
                   )}
                 </Button>

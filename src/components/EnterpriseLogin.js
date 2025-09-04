@@ -1,63 +1,79 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
-import { FaPhone, FaKey, FaEye, FaEyeSlash, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
+import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { enterpriseService } from '../services/enterpriseService';
+import OTPVerification from './OTPVerification';
 import '../styles/EnterpriseAuth.css';
 
 function EnterpriseLogin() {
+  const [step, setStep] = useState('form'); // 'form' or 'otp'
   const [mobileNumber, setMobileNumber] = useState('');
-  const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
   const navigate = useNavigate();
 
-  const handleRequestOTP = async () => {
-    setOtpStatus('');
-    setOtpLoading(true);
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
     if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
-      setOtpStatus('Please enter a valid 10-digit mobile number');
-      setOtpLoading(false);
+      setError('Please enter a valid 10-digit mobile number');
       return;
     }
+    
+    setOtpLoading(true);
+    setError(null);
+    
     try {
       await enterpriseService.requestOTP(mobileNumber, 'ENTERPRISE');
+      setStep('otp');
       setOtpStatus('OTP sent successfully');
     } catch (err) {
-      setOtpStatus('Failed to send OTP');
+      setError('Failed to send OTP');
     } finally {
       setOtpLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!mobileNumber.trim()) {
-      setError('Please enter mobile number');
-      return;
-    }
-    if (!otp.trim()) {
-      setError('Please enter OTP');
-      return;
-    }
+  const handleVerifyOTP = async (otpValue) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      const response = await enterpriseService.loginEnterprise(mobileNumber, otp);
+      const response = await enterpriseService.loginEnterprise(mobileNumber, otpValue);
       if (response && response.token && response.returnValue) {
         localStorage.setItem('enterprise', JSON.stringify({ ...response.returnValue, token: response.token }));
         navigate('/enterpriseDashboard');
       } else {
-        setError('Invalid mobile or OTP');
+        setError('Invalid OTP');
       }
     } catch (err) {
       setError('Error during login');
       console.error('Enterprise login error:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleBackToForm = () => {
+    setStep('form');
+    setError(null);
+    setOtpStatus('');
+  };
+
+  const handleResendOTP = async () => {
+    setOtpLoading(true);
+    setError(null);
+    setOtpStatus('');
+    
+    try {
+      await enterpriseService.requestOTP(mobileNumber, 'ENTERPRISE');
+      setOtpStatus('OTP sent successfully');
+    } catch (err) {
+      setError('Failed to send OTP');
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -75,6 +91,22 @@ function EnterpriseLogin() {
     }
   }, [otpStatus]);
 
+  if (step === 'otp') {
+    return (
+      <OTPVerification
+        onVerify={handleVerifyOTP}
+        onBack={handleBackToForm}
+        onResend={handleResendOTP}
+        isLoading={isLoading}
+        error={error}
+        success={otpStatus}
+        mobileNumber={mobileNumber}
+        title="Verify OTP"
+        subtitle="Enter the 4-digit code sent to your mobile number"
+      />
+    );
+  }
+
   return (
     <Container className="enterprise-auth-container">
       <Row className="justify-content-center w-100 m-0">
@@ -91,70 +123,30 @@ function EnterpriseLogin() {
                   {error}
                 </Alert>
               )}
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSendOTP}>
                 <Form.Group className="mb-4">
                   <Form.Label className="text-muted">
                     <FaPhone className="me-2" />
                     Mobile Number
                   </Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type="tel"
-                      placeholder="Enter mobile number"
-                      value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      className="py-2"
-                      pattern="[0-9]{10}"
-                      maxLength="10"
-                      required
-                    />
-                    <Button
-                      variant="outline-primary"
-                      type="button"
-                      onClick={handleRequestOTP}
-                      disabled={otpLoading}
-                    >
-                      {otpLoading ? 'Sending...' : 'Request OTP'}
-                    </Button>
-                  </InputGroup>
-                  {otpStatus && (
-                    <Form.Text className={otpStatus.includes('success') ? 'text-success' : 'text-danger'}>
-                      {otpStatus}
-                    </Form.Text>
-                  )}
-                </Form.Group>
-                <Form.Group className="mb-4">
-                  <Form.Label className="text-muted">
-                    <FaKey className="me-2" />
-                    OTP
-                  </Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type={showOtp ? "text" : "password"}
-                      placeholder="Enter OTP"
-                      value={otp}
-                      onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="py-2"
-                      maxLength="6"
-                      required
-                    />
-                    <Button
-                      variant="outline-secondary"
-                      type="button"
-                      onClick={() => setShowOtp(v => !v)}
-                      tabIndex={-1}
-                    >
-                      {showOtp ? <FaEyeSlash /> : <FaEye />}
-                    </Button>
-                  </InputGroup>
+                  <Form.Control
+                    type="tel"
+                    placeholder="Enter mobile number"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="py-2"
+                    pattern="[0-9]{10}"
+                    maxLength="10"
+                    required
+                  />
                 </Form.Group>
                 <Button
                   variant="primary"
                   type="submit"
                   className="w-100 enterprise-auth-btn-lg d-flex align-items-center justify-content-center"
-                  disabled={isLoading}
+                  disabled={otpLoading}
                 >
-                  {isLoading ? (
+                  {otpLoading ? (
                     <>
                       <Spinner
                         as="span"
@@ -164,11 +156,11 @@ function EnterpriseLogin() {
                         aria-hidden="true"
                         className="me-2"
                       />
-                      Logging in
+                      Sending OTP...
                     </>
                   ) : (
                     <>
-                      Login <FaArrowRight className="ms-2" />
+                      Send OTP <FaArrowRight className="ms-2" />
                     </>
                   )}
                 </Button>
