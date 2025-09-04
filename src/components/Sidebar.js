@@ -13,7 +13,8 @@ import {
   FaClipboardList,
   FaUserShield,
   FaSignOutAlt,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
+  FaBuilding
 } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 import LocationModal from './LocationModal';
@@ -467,6 +468,51 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             >
               <FaClipboardList className="me-2" />
               {isOpen && 'My Dashboard'}
+            </Nav.Link>
+          </div>
+
+          <div className="sidebar-section">
+            {isOpen && (
+              <h3 className="sidebar-section-title">
+                <FaBuilding className="me-2" />
+                Join us as an Enterprise
+              </h3>
+            )}
+            <Nav.Link 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/enterpriseRegister');
+              }}
+              className={`sidebar-link ${isActive('/enterpriseRegister') ? 'active' : ''}`}
+              title={!isOpen ? 'Register as an Enterprise' : ''}
+              style={{ cursor: 'pointer' }}
+            >
+              <FaUserPlus className="me-2" />
+              {isOpen && 'Register as an Enterprise'}
+            </Nav.Link>
+            <Nav.Link 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/enterpriseLogin');
+              }}
+              className={`sidebar-link ${isActive('/enterpriseLogin') ? 'active' : ''}`}
+              title={!isOpen ? 'Enterprise Login' : ''}
+              style={{ cursor: 'pointer' }}
+            >
+              <FaSignInAlt className="me-2" />
+              {isOpen && 'Enterprise Login'}
+            </Nav.Link>
+            <Nav.Link 
+              onClick={(e) => {
+                e.preventDefault();
+                handleSidebarNavigation(null, '/enterpriseDashboard');
+              }}
+              className={`sidebar-link ${isActive('/enterpriseDashboard') ? 'active' : ''}`}
+              title={!isOpen ? 'Enterprise Dashboard' : ''}
+              style={{ cursor: 'pointer' }}
+            >
+              <FaClipboardList className="me-2" />
+              {isOpen && 'Enterprise Dashboard'}
             </Nav.Link>
           </div>
 
