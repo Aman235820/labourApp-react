@@ -22,6 +22,8 @@ const LabourDashboard = lazy(() => import('./components/LabourDashboard'));
 const LabourRegister = lazy(() => import('./components/LabourRegister'));
 const EnterpriseRegister = lazy(() => import('./components/EnterpriseRegister'));
 const EnterpriseLogin = lazy(() => import('./components/EnterpriseLogin'));
+const EnterpriseDetailsPage = lazy(() => import('./components/EnterpriseDetailsPage'));
+const EnterpriseDetailsDemo = lazy(() => import('./components/EnterpriseDetailsDemo'));
 const EnterpriseDashboard = lazy(() => import('./components/EnterpriseDashboard'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const AadhaarQrDecoder = lazy(() => import('./aadhar/AadhaarQrDecoder'));
@@ -119,6 +121,8 @@ function App() {
                   <Route path="/labourRegister" element={<LabourRegister />} />
                   <Route path="/enterpriseRegister" element={<EnterpriseRegister />} />
                   <Route path="/enterpriseLogin" element={<EnterpriseLogin />} />
+                  <Route path="/enterpriseDetails" element={<EnterpriseDetailsPage />} />
+                  <Route path="/enterpriseDetailsDemo" element={<EnterpriseDetailsDemo />} />
                   <Route path="/enterpriseDashboard" element={<EnterpriseDashboard />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/labourDashboard" element={<LabourDashboard />} />

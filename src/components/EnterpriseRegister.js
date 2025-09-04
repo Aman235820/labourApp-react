@@ -242,15 +242,16 @@ function EnterpriseRegister() {
         location: formData.location
       };
 
-      const response = await enterpriseService.registerEnterprise(enterpriseData, otpValue);
-      if (response && response.token && response.returnValue) {
-        localStorage.setItem('enterprise', JSON.stringify({ ...response.returnValue, token: response.token }));
-        navigate('/enterpriseDashboard');
-      } else {
-        setError('Registration failed');
-      }
+      // Store initial registration data and OTP for the details page
+      localStorage.setItem('pendingEnterpriseRegistration', JSON.stringify(enterpriseData));
+      localStorage.setItem('enterpriseOTP', otpValue);
+      
+      // Navigate to enterprise details form
+      navigate('/enterpriseDetails', { 
+        state: { registrationData: enterpriseData } 
+      });
     } catch (err) {
-      setError(typeof err === 'string' ? err : 'Registration failed');
+      setError(typeof err === 'string' ? err : 'Registration setup failed');
     } finally {
       setSubmitting(false);
     }

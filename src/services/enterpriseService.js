@@ -14,6 +14,53 @@ export const enterpriseService = {
     }
   },
 
+  // Update a single field for an enterprise
+  // field: string, value: any
+  // Uses PATCH semantics to only update the provided field
+  updateEnterpriseField: async (enterpriseId, field, value, token) => {
+    try {
+      const endpoint = `${baseurl}/enterprise/updateField/${enterpriseId}`;
+      const response = await axios.patch(
+        endpoint,
+        { field, value },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  updateEnterpriseDetails: async (enterpriseId, detailsData, token) => {
+    try {
+      const endpoint = `${baseurl}/enterprise/updateDetails/${enterpriseId}`;
+      const response = await axios.put(endpoint, detailsData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  completeRegistration: async (completeData, otp) => {
+    try {
+      const endpoint = `${baseurl}/enterprise/completeRegistration?otp=${otp}`;
+      const response = await axios.post(endpoint, completeData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   loginEnterprise: async (mobileNumber, otp) => {
     try {
       const endpoint = `${baseurl}/enterprise/enterpriseLogin?mobileNumber=${mobileNumber}&otp=${otp}`;
