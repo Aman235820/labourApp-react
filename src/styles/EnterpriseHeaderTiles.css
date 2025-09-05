@@ -1,0 +1,107 @@
+.eh-wrapper { 
+  background: #f7fafc; 
+  border-bottom: 1px solid #e5e7eb; 
+  padding: 20px 0;
+}
+
+.eh-row { 
+  display: grid; 
+  grid-template-columns: repeat(4, minmax(220px, 1fr)); 
+  gap: 20px; 
+  padding: 0 20px; 
+}
+
+.eh-tile { 
+  background: #ffffff; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 16px; 
+  box-shadow: 0 2px 8px rgba(16,24,40,.08); 
+  transition: all .2s ease; 
+}
+.eh-tile:hover { 
+  box-shadow: 0 8px 24px rgba(0,0,0,.12); 
+  transform: translateY(-2px); 
+}
+.eh-tile:focus-within { 
+  outline: 3px solid #93c5fd; 
+  outline-offset: 2px; 
+}
+.eh-tile-body { 
+  padding: 20px; 
+}
+
+.eh-label { 
+  color: #374151; 
+  font-size: 14px; 
+  font-weight: 700; 
+  letter-spacing: .02em; 
+  margin-bottom: 12px; 
+  text-transform: uppercase;
+}
+
+.eh-value { 
+  display: flex; 
+  align-items: center; 
+  width: 100%;
+}
+
+.eh-value-display {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  width: 100%;
+  transition: background-color .2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eh-value-display:hover {
+  background-color: #f3f4f6;
+}
+
+.eh-value-display.eh-saving {
+  cursor: not-allowed;
+  opacity: 0.7;
+  background-color: #f9fafb;
+}
+
+.eh-value-display.eh-saving:hover {
+  background-color: #f9fafb;
+}
+
+.eh-value-text { 
+  font-size: 20px; 
+  font-weight: 800; 
+  color: #111827; 
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+}
+
+.eh-editor-input {
+  width: 100%;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  background: #ffffff;
+}
+
+.eh-editor-input:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+@media (max-width: 1200px) { .eh-row { grid-template-columns: repeat(2, 1fr); } }
+
+@media (max-width: 768px) { .eh-row { grid-template-columns: repeat(2, 1fr); } }
+
+@media (max-width: 576px) { .eh-row { grid-template-columns: 1fr; } }
+
+

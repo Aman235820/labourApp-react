@@ -14,15 +14,13 @@ export const enterpriseService = {
     }
   },
 
-  // Update a single field for an enterprise
-  // field: string, value: any
-  // Uses PATCH semantics to only update the provided field
-  updateEnterpriseField: async (enterpriseId, field, value, token) => {
+  // Update one or many enterprise fields (backend accepts partial payload)
+  updateEnterpriseFields: async (enterpriseId, partialPayload, token) => {
     try {
-      const endpoint = `${baseurl}/enterprise/updateField/${enterpriseId}`;
+      const endpoint = `${baseurl}/enterprise/updateEnterpriseField/${enterpriseId}`;
       const response = await axios.patch(
         endpoint,
-        { field, value },
+        partialPayload,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -34,6 +32,14 @@ export const enterpriseService = {
     } catch (error) {
       throw error.response?.data || error.message;
     }
+  },
+
+  // Backwards-compatible helper that updates a single field using the same endpoint
+  updateEnterpriseField: async (enterpriseId, field, value, token) => {
+    return await (async () => {
+      const payload = { [field]: value };
+      return await enterpriseService.updateEnterpriseFields(enterpriseId, payload, token);
+    })();
   },
 
   updateEnterpriseDetails: async (enterpriseId, detailsData, token) => {

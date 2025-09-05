@@ -128,30 +128,40 @@ const LocationModal = ({ show, onHide, onLocationSelect }) => {
   };
 
   const handleLocationSelect = (location) => {
+    console.log('LocationModal received location data:', location);
     let formattedLocation;
     
     if (location.coords) {
-      // Auto-detected location
+      // Auto-detected location - extract just the city name
+      const cityName = location.address?.address?.city || 
+                      location.address?.address?.town || 
+                      location.address?.address?.village || 
+                      location.address?.city || 
+                      location.address?.town || 
+                      location.address?.village ||
+                      'Unknown';
       formattedLocation = {
         coords: location.coords,
         address: location.address,
-        displayName: getDisplayName(location.address)
+        displayName: cityName
       };
     } else if (location.lat && location.lon) {
-      // Search result
-      const cityName = location.address?.city || location.address?.town || location.address?.village || 
-                      location.display_name.split(',')[0] || 'Unknown';
+      // Search result - extract just the city name
+      const cityName = location.address?.city || 
+                      location.address?.town || 
+                      location.address?.village || 
+                      (location.display_name ? location.display_name.split(',').pop().trim() : 'Unknown');
       formattedLocation = {
         coords: { latitude: parseFloat(location.lat), longitude: parseFloat(location.lon) },
         address: { display_name: location.display_name, ...location.address },
         displayName: cityName
       };
     } else {
-      // Manual entry
+      // Manual entry - use just the city name
       formattedLocation = {
         coords: null,
         address: manualAddress,
-        displayName: `${manualAddress.area}, ${manualAddress.city}`
+        displayName: manualAddress.city || 'Unknown'
       };
     }
 
