@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Card, Form, Spinner, Modal, Button } from 'react-bootstrap';
 import { enterpriseService } from '../services/enterpriseService';
 import LocationModal from './LocationModal';
@@ -12,9 +12,63 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingUpdate, setPendingUpdate] = useState(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const wrapperRef = useRef(null);
+  const editInputRef = useRef(null);
 
   const enterpriseId = enterprise?._id || enterprise?.id || enterprise?.returnValue?._id || enterprise?.returnValue?.id;
   const token = enterprise?.token || enterprise?.returnValue?.token || '';
+
+  // Mobile keyboard detection and handling
+  useEffect(() => {
+    const handleResize = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.clientHeight;
+      const heightDifference = Math.abs(windowHeight - documentHeight);
+      
+      // Detect if keyboard is open (height difference > 150px is usually keyboard)
+      if (heightDifference > 150) {
+        setIsKeyboardOpen(true);
+        document.body.classList.add('enterprise-keyboard-open');
+      } else {
+        setIsKeyboardOpen(false);
+        document.body.classList.remove('enterprise-keyboard-open');
+      }
+    };
+
+    const handleTouchStart = (e) => {
+      // If touching outside of input fields and not in editing mode, blur the active input
+      if (!e.target.matches('input, textarea') && editingKey) {
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          // Only blur if not clicking on the input itself
+          if (!activeElement.contains(e.target)) {
+            activeElement.blur();
+          }
+        }
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      // If clicking outside the wrapper and editing, cancel edit
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target) && editingKey) {
+        setTimeout(() => {
+          checkForChangesAndConfirm();
+        }, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('click', handleClickOutside);
+      document.body.classList.remove('enterprise-keyboard-open');
+    };
+  }, [editingKey]);
 
   const values = useMemo(() => {
     const ev = enterprise || {};
@@ -48,6 +102,13 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
     const currentValue = String(values[key] || '');
     setTempValue(currentValue);
     setOriginalValue(currentValue);
+    
+    // Focus input after state update
+    setTimeout(() => {
+      if (editInputRef.current) {
+        editInputRef.current.focus();
+      }
+    }, 100);
   };
 
   const handleChange = (e) => {
@@ -128,7 +189,12 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
   };
 
   const handleBlur = () => {
-    checkForChangesAndConfirm();
+    // Add small delay to prevent blur conflicts with touch events
+    setTimeout(() => {
+      checkForChangesAndConfirm();
+      // Close keyboard
+      setIsKeyboardOpen(false);
+    }, 150);
   };
 
   const handleKeyDown = (e) => {
@@ -167,13 +233,18 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
         <div className="eh-value">
           {editingKey === keyName ? (
             <Form.Control
+              ref={editInputRef}
               type={inputType}
               value={tempValue}
               onChange={handleChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              autoFocus
               className="eh-editor-input"
+              style={{ fontSize: '16px' }} // Prevent zoom on iOS
+              onFocus={() => {
+                // Small delay to detect keyboard
+                setTimeout(() => setIsKeyboardOpen(true), 300);
+              }}
             />
           ) : (
             <div 
@@ -191,7 +262,7 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
   );
 
   return (
-    <div className="eh-wrapper">
+    <div ref={wrapperRef} className={`eh-wrapper ${isKeyboardOpen ? 'keyboard-open' : ''}`}>
       <div className="eh-row">
         <Tile label="Owner name" value={values.ownername || '—'} keyName="ownername" />
         <Tile label="Company" value={values.companyName || '—'} keyName="companyName" />
