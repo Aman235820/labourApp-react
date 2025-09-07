@@ -1,0 +1,544 @@
+/* Enterprise Dashboard Styles */
+
+/* Global Enterprise Dashboard Styles */
+.enterprise-services-card {
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.enterprise-services-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.enterprise-services-card .card-header {
+  border-radius: 15px 15px 0 0;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.enterprise-services-card .card-body {
+  border-radius: 0 0 15px 15px;
+}
+
+/* Enterprise Service Category Cards */
+.enterprise-service-category-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.enterprise-service-category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.enterprise-service-category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.enterprise-service-icon-large {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.enterprise-service-icon-large:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.specializations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.enterprise-skill-badge {
+  transition: all 0.3s ease;
+  border-radius: 15px !important;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+  font-size: 0.8rem;
+}
+
+.enterprise-skill-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Enterprise Service Statistics */
+.enterprise-service-stats {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.enterprise-service-stats .stat-item {
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.enterprise-service-stats .stat-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.enterprise-service-stats .stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.enterprise-service-stats .stat-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Enterprise Service Edit Mode */
+.enterprise-service-edit-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.enterprise-service-edit-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.enterprise-service-edit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.enterprise-service-edit-card:hover::before {
+  transform: scaleX(1);
+}
+
+.enterprise-service-select {
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.enterprise-service-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  background: #ffffff;
+}
+
+/* React Select Styling for Enterprise */
+.select__control {
+  border-radius: 12px !important;
+  border: 2px solid #e9ecef !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s ease !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+  min-height: 42px !important;
+}
+
+.select__control:hover {
+  border-color: #007bff !important;
+}
+
+.select__control--is-focused {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+  background: #ffffff !important;
+}
+
+.select__multi-value {
+  background-color: #e3f2fd !important;
+  border: 1px solid #90caf9 !important;
+  border-radius: 15px !important;
+}
+
+.select__multi-value__label {
+  color: #1565c0 !important;
+  font-weight: 500 !important;
+}
+
+.select__multi-value__remove {
+  color: #1565c0 !important;
+  border-radius: 0 15px 15px 0 !important;
+}
+
+.select__multi-value__remove:hover {
+  background-color: #bbdefb !important;
+  color: #0d47a1 !important;
+}
+
+.select__placeholder {
+  color: #6c757d !important;
+  font-weight: 400 !important;
+}
+
+.select__single-value {
+  color: #495057 !important;
+  font-weight: 500 !important;
+}
+
+.select__menu {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.select__option {
+  transition: all 0.2s ease !important;
+}
+
+.select__option:hover {
+  background-color: #e3f2fd !important;
+  color: #1565c0 !important;
+}
+
+.select__option--is-selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+/* Action Buttons */
+.services-edit .btn {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.875rem;
+}
+
+.services-edit .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.services-edit .btn-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.services-edit .btn-primary:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.services-edit .btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+  background: transparent;
+}
+
+.services-edit .btn-outline-secondary:hover {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border-color: #6c757d;
+}
+
+.services-edit .btn-outline-primary {
+  border: 2px solid #007bff;
+  color: #007bff;
+  background: transparent;
+}
+
+.services-edit .btn-outline-primary:hover {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border-color: #007bff;
+}
+
+/* Form Labels */
+.services-edit .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.services-edit .text-muted {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* Loading States */
+.services-edit .spinner-border {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Badge Enhancements */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+
+.badge.bg-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.badge.bg-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+  color: white;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.2);
+}
+
+/* Empty State Styling */
+.services-display .text-center {
+  padding: 3rem 1rem;
+}
+
+.services-display .text-center .btn {
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.services-display .text-center .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* Preview Section */
+.services-edit .bg-light {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  border: 1px solid #90caf9;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+}
+
+/* Responsive Design for Enterprise Services Portfolio */
+@media (max-width: 768px) {
+  .enterprise-service-category-card {
+    margin-bottom: 1.5rem;
+  }
+  
+  .enterprise-service-icon-large {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .enterprise-service-stats .stat-item {
+    padding: 0.75rem;
+  }
+  
+  .enterprise-service-stats .stat-number {
+    font-size: 1.5rem;
+  }
+  
+  .enterprise-service-stats .stat-label {
+    font-size: 0.75rem;
+  }
+  
+  .services-edit .btn {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+  }
+  
+  .enterprise-skill-badge {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .enterprise-service-category-card {
+    padding: 1rem !important;
+  }
+  
+  .enterprise-service-icon-large {
+    font-size: 1.75rem;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .enterprise-service-stats .stat-item {
+    padding: 0.5rem;
+  }
+  
+  .enterprise-service-stats .stat-number {
+    font-size: 1.25rem;
+  }
+  
+  .enterprise-service-stats .stat-label {
+    font-size: 0.7rem;
+  }
+  
+  .services-edit .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .services-edit .btn {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .services-edit .d-flex.gap-3 {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .enterprise-skill-badge {
+    font-size: 0.7rem !important;
+    padding: 3px 6px !important;
+  }
+  
+  .specializations-list {
+    gap: 0.25rem;
+  }
+  
+  .enterprise-service-edit-card {
+    margin-bottom: 1rem;
+  }
+  
+  .enterprise-service-edit-card .row .col-md-1 {
+    text-align: center;
+    margin-top: 1rem;
+  }
+}
+
+/* Card Header Responsive */
+@media (max-width: 768px) {
+  .enterprise-services-card .card-header .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+  
+  .enterprise-services-card .card-header .btn {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+/* Enhanced hover states for better user experience */
+.enterprise-service-category-card,
+.enterprise-service-edit-card,
+.enterprise-services-card {
+  cursor: default;
+}
+
+.enterprise-service-category-card:hover .enterprise-service-icon-large,
+.enterprise-service-edit-card:hover .enterprise-service-select {
+  transform: scale(1.02);
+}
+
+/* Success and Error Alert Styling */
+.alert {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+}
+
+/* Form Validation States */
+.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.is-valid {
+  border-color: #28a745 !important;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+/* Enterprise specific button styling */
+.enterprise-services-card .btn-outline-primary {
+  border: 2px solid #007bff;
+  color: #007bff;
+  background: transparent;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.enterprise-services-card .btn-outline-primary:hover {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border-color: #007bff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Loading button state */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* High DPI Mobile Devices */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .enterprise-service-icon-large {
+    border-width: 2px;
+  }
+  
+  .enterprise-skill-badge {
+    border-width: 1px;
+  }
+  
+  .enterprise-service-edit-card {
+    border-width: 1px;
+  }
+}

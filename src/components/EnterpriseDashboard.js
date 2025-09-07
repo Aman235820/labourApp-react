@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
-import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar } from 'react-icons/fa';
+import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert } from 'react-bootstrap';
+import Select from 'react-select';
+import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
+import { enterpriseService } from '../services/enterpriseService';
+import '../styles/EnterpriseDashboard.css';
 
 function EnterpriseDashboard() {
   const [enterprise, setEnterprise] = useState(null);
+  const [services, setServices] = useState([]);
+  const [isEditingServices, setIsEditingServices] = useState(false);
+  const [serviceSelections, setServiceSelections] = useState([]);
+  const [isSavingServices, setIsSavingServices] = useState(false);
+  const [servicesError, setServicesError] = useState('');
+  const [servicesSuccess, setServicesSuccess] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,9 +26,170 @@ function EnterpriseDashboard() {
     } catch (_) {}
   }, []);
 
+  // Load services data
+  useEffect(() => {
+    fetch('/services.json')
+      .then(response => response.json())
+      .then(data => setServices(data.services || []))
+      .catch(error => console.error('Error loading services:', error));
+  }, []);
+
+  // Initialize service selections when enterprise data loads
+  useEffect(() => {
+    if (enterprise && services.length > 0) {
+      const servicesOffered = enterprise.servicesOffered || enterprise.returnValue?.servicesOffered || {};
+      const selections = Object.entries(servicesOffered).map(([serviceName, subServices]) => ({
+        serviceName,
+        subServices: subServices || []
+      }));
+      setServiceSelections(selections.length > 0 ? selections : [{ serviceName: '', subServices: [] }]);
+    }
+  }, [enterprise, services]);
+
+  // Clear messages
+  useEffect(() => {
+    if (servicesError) {
+      const timer = setTimeout(() => setServicesError(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [servicesError]);
+
+  useEffect(() => {
+    if (servicesSuccess) {
+      const timer = setTimeout(() => setServicesSuccess(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [servicesSuccess]);
+
   const handleLogout = () => {
     localStorage.removeItem('enterprise');
     navigate('/');
+  };
+
+  // Services Portfolio Handlers
+  const handleEditServices = () => {
+    setIsEditingServices(true);
+    setServicesError('');
+    setServicesSuccess('');
+  };
+
+  const handleCancelEditServices = () => {
+    setIsEditingServices(false);
+    // Reset to original selections
+    if (enterprise) {
+      const servicesOffered = enterprise.servicesOffered || enterprise.returnValue?.servicesOffered || {};
+      const selections = Object.entries(servicesOffered).map(([serviceName, subServices]) => ({
+        serviceName,
+        subServices: subServices || []
+      }));
+      setServiceSelections(selections.length > 0 ? selections : [{ serviceName: '', subServices: [] }]);
+    }
+    setServicesError('');
+    setServicesSuccess('');
+  };
+
+  const handleAddServiceRow = () => {
+    setServiceSelections(prev => ([...prev, { serviceName: '', subServices: [] }]));
+  };
+
+  const handleRemoveServiceRow = (idx) => {
+    setServiceSelections(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleServiceChange = (idx, serviceName) => {
+    setServiceSelections(prev => prev.map((row, i) => i === idx ? { serviceName, subServices: [] } : row));
+  };
+
+  const handleSubServicesChange = (idx, options) => {
+    const values = (options || []).map(o => o.value);
+    setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: values } : row));
+  };
+
+  const getAvailableServicesForIndex = (idx) => {
+    const taken = new Set(serviceSelections.map((r, i) => i !== idx ? r.serviceName : '').filter(Boolean));
+    return services.filter(s => !taken.has(s.name));
+  };
+
+  const buildServicesOfferedObject = () => {
+    const obj = {};
+    serviceSelections.forEach((sel) => {
+      const key = (sel.serviceName || '').trim();
+      const items = (sel.subServices || []).map(i => i.trim()).filter(Boolean);
+      if (key && items.length > 0) {
+        obj[key] = items;
+      }
+    });
+    return obj;
+  };
+
+  const validateServicesData = () => {
+    const servicesOffered = buildServicesOfferedObject();
+    if (Object.keys(servicesOffered).length === 0) {
+      return 'Please add at least one service with subservices';
+    }
+    
+    for (const row of serviceSelections) {
+      if ((row.serviceName && row.subServices.length === 0) || (!row.serviceName && row.subServices.length > 0)) {
+        return 'Each service must have at least one subservice';
+      }
+    }
+    
+    return null;
+  };
+
+  const handleSaveServices = async () => {
+    const validationError = validateServicesData();
+    if (validationError) {
+      setServicesError(validationError);
+      return;
+    }
+
+    setIsSavingServices(true);
+    setServicesError('');
+    
+    try {
+      const servicesOffered = buildServicesOfferedObject();
+      const enterpriseId = enterprise._id || enterprise.returnValue?._id;
+      const token = enterprise.token || enterprise.returnValue?.token;
+      
+      if (!enterpriseId) {
+        throw new Error('Enterprise ID not found. Please refresh and try again.');
+      }
+      
+      const response = await enterpriseService.updateEnterpriseFields(
+        enterpriseId,
+        { servicesOffered },
+        token
+      );
+      
+      if (response && !response.hasError) {
+        // Update local storage and state
+        const updatedEnterprise = {
+          ...enterprise,
+          servicesOffered: servicesOffered
+        };
+        
+        if (enterprise.returnValue) {
+          updatedEnterprise.returnValue = {
+            ...enterprise.returnValue,
+            servicesOffered: servicesOffered
+          };
+        }
+        
+        setEnterprise(updatedEnterprise);
+        localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
+        
+        setServicesSuccess('Services updated successfully!');
+        setIsEditingServices(false);
+      } else {
+        throw new Error(response?.message || 'Failed to update services');
+      }
+    } catch (error) {
+      console.error('Error updating services:', error);
+      setServicesError(typeof error === 'string' ? error : error.message || 'Failed to update services. Please try again.');
+    } finally {
+      setIsSavingServices(false);
+    }
   };
 
   if (!enterprise) {
@@ -50,79 +220,295 @@ function EnterpriseDashboard() {
 
   return (
     <Container className="py-4">
-      {/* Light-themed interactive tiles header */}
-      <Row>
-        <Col xs={12}>
-          <EnterpriseHeaderTiles
-            enterprise={enterprise}
-            onUpdated={(next) => setEnterprise(next)}
-          />
-        </Col>
-      </Row>
-      <Row className="g-3">
-        {/* Enterprise Status Card */}
-        <Col xs={12}>
-          <Card className="shadow-sm">
+      
+      {/* Header Tiles */}
+      <EnterpriseHeaderTiles enterprise={enterprise} />
+
+      {/* Main Dashboard Content */}
+      <Row className="mt-4">
+        {/* Enterprise Details Card */}
+        <Col md={6} className="mb-4">
+          <Card className="h-100 shadow-sm">
+            <Card.Header className="bg-primary text-white">
+              <h5 className="mb-0">
+                <FaBuilding className="me-2" />
+                Enterprise Details
+              </h5>
+            </Card.Header>
             <Card.Body>
-              <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: 64, height: 64 }}>
-                    <FaBuilding className="text-white" size={28} />
-                  </div>
-                  <div>
-                    <h4 className="mb-1">{companyName}</h4>
-                    <div className="d-flex align-items-center gap-3 text-muted">
-                      <span className="d-inline-flex align-items-center">
-                        <FaPhone className="me-1" />
-                        {ownerContactInfo}
-                      </span>
-                      <span className="d-inline-flex align-items-center">
-                        <FaIdCard className="me-1" />
-                        GST: {gstNumber || 'N/A'}
-                      </span>
-                    </div>
-                  </div>
+              <div className="mb-3">
+                <div className="d-flex align-items-center mb-2">
+                  <FaBuilding className="text-primary me-2" />
+                  <strong>Company:</strong>
+                  <span className="ms-2">{companyName || 'Not provided'}</span>
                 </div>
-                <div className="d-flex align-items-center gap-2">
-                  <Badge bg={verificationStatus === 'VERIFIED' ? 'success' : verificationStatus === 'REJECTED' ? 'danger' : 'warning'}>
-                    <FaShieldAlt className="me-1" /> {verificationStatus}
+                <div className="d-flex align-items-center mb-2">
+                  <FaIdCard className="text-primary me-2" />
+                  <strong>Owner:</strong>
+                  <span className="ms-2">{ownername || 'Not provided'}</span>
+                </div>
+                <div className="d-flex align-items-center mb-2">
+                  <FaPhone className="text-primary me-2" />
+                  <strong>Contact:</strong>
+                  <span className="ms-2">{ownerContactInfo || 'Not provided'}</span>
+                </div>
+                <div className="d-flex align-items-center mb-2">
+                  <FaIdCard className="text-primary me-2" />
+                  <strong>GST:</strong>
+                  <span className="ms-2">{gstNumber || 'Not provided'}</span>
+                </div>
+                <div className="d-flex align-items-center mb-2">
+                  <FaShieldAlt className="text-primary me-2" />
+                  <strong>Status:</strong>
+                  <Badge 
+                    bg={verificationStatus === 'APPROVED' ? 'success' : verificationStatus === 'REJECTED' ? 'danger' : 'warning'}
+                    className="ms-2"
+                  >
+                    {verificationStatus}
                   </Badge>
-                  <Badge bg="info" text="dark">
-                    <FaStar className="me-1" /> {rating} ({ratingCount})
-                  </Badge>
-                  <Button variant="outline-danger" size="sm" onClick={handleLogout}>
-                    <FaSignOutAlt className="me-1" /> Logout
-                  </Button>
+                </div>
+                <div className="d-flex align-items-center">
+                  <FaStar className="text-warning me-2" />
+                  <strong>Rating:</strong>
+                  <span className="ms-2">{rating} ({ratingCount} reviews)</span>
                 </div>
               </div>
             </Card.Body>
           </Card>
         </Col>
 
-        {/* Services Overview Card */}
+        {/* Quick Actions Card */}
+        <Col md={6} className="mb-4">
+          <Card className="h-100 shadow-sm">
+            <Card.Header className="bg-success text-white">
+              <h5 className="mb-0">
+                <FaUsers className="me-2" />
+                Quick Actions
+              </h5>
+            </Card.Header>
+            <Card.Body className="d-flex flex-column">
+              <Button variant="outline-primary" className="mb-3 d-flex align-items-center">
+                <FaEye className="me-2" />
+                View All Bookings
+              </Button>
+              <Button variant="outline-success" className="mb-3 d-flex align-items-center">
+                <FaMapMarkerAlt className="me-2" />
+                Update Location
+              </Button>
+              <Button variant="outline-warning" className="mb-3 d-flex align-items-center">
+                <FaAward className="me-2" />
+                Manage Certificates
+              </Button>
+              <div className="mt-auto">
+                <Button 
+                  variant="outline-danger" 
+                  onClick={handleLogout}
+                  className="w-100 d-flex align-items-center justify-content-center"
+                >
+                  <FaSignOutAlt className="me-2" />
+                  Logout
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Services Portfolio Section */}
+      <Row className="mt-4">
         <Col xs={12}>
-          <Card className="shadow-sm">
+          <Card className="shadow-sm enterprise-services-card">
+            <Card.Header className="bg-primary bg-opacity-10 border-0">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h4 className="mb-0 fw-bold">
+                    <FaTools className="me-3 text-primary" />
+                    <span className="d-none d-sm-inline">Services Portfolio</span>
+                    <span className="d-inline d-sm-none">Services</span>
+                  </h4>
+                  <p className="text-muted mb-0 mt-2 d-none d-md-block">
+                    Manage your service categories and specializations
+                  </p>
+                </div>
+                
+                {!isEditingServices && (
+                  <Button
+                    variant="outline-primary"
+                    onClick={handleEditServices}
+                    className="d-flex align-items-center justify-content-center"
+                  >
+                    <FaEdit className="me-2" />
+                    <span className="d-none d-sm-inline">Edit Services</span>
+                    <span className="d-inline d-sm-none">Edit</span>
+                  </Button>
+                )}
+              </div>
+            </Card.Header>
+
             <Card.Body>
-              <h5 className="mb-3">Services Portfolio</h5>
-              {Object.keys(servicesOffered).length === 0 ? (
-                <p className="text-muted mb-0">No services configured. Please contact support to add services.</p>
+              {/* Error and Success Messages */}
+              {servicesError && (
+                <Alert variant="danger" className="mb-3">
+                  <FaTimesCircle className="me-2" />
+                  {servicesError}
+                </Alert>
+              )}
+              
+              {servicesSuccess && (
+                <Alert variant="success" className="mb-3">
+                  <FaCheckCircle className="me-2" />
+                  {servicesSuccess}
+                </Alert>
+              )}
+
+              {!isEditingServices ? (
+                /* Display Mode */
+                <div className="services-display">
+                  {Object.keys(servicesOffered).length === 0 ? (
+                    <div className="text-center py-5">
+                      <FaTools className="text-muted mb-3" style={{ fontSize: '3rem' }} />
+                      <p className="text-muted mb-3">No services configured yet</p>
+                      <Button variant="primary" onClick={handleEditServices}>
+                        <FaPlus className="me-2" />
+                        Add Services
+                      </Button>
+                    </div>
+                  ) : (
+                    <Row>
+                      {Object.entries(servicesOffered).map(([category, items]) => (
+                        <Col lg={6} xl={4} key={category} className="mb-4">
+                          <div className="enterprise-service-category-card h-100 p-4">
+                            <div className="d-flex align-items-center mb-3">
+                              <div className="enterprise-service-icon-large text-primary me-3">
+                                <FaTools />
+                              </div>
+                              <div>
+                                <h5 className="fw-bold mb-1 text-primary">{category}</h5>
+                                <small className="text-muted">{items.length} specialization{items.length !== 1 ? 's' : ''}</small>
+                              </div>
+                            </div>
+                            
+                            <div className="enterprise-service-subservices">
+                              {items.map((item, idx) => (
+                                <Badge 
+                                  key={idx} 
+                                  bg="light" 
+                                  text="dark" 
+                                  className="enterprise-service-badge me-2 mb-2"
+                                >
+                                  {item}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </Col>
+                      ))}
+                    </Row>
+                  )}
+                </div>
               ) : (
-                <Row>
-                  {Object.entries(servicesOffered).map(([category, items]) => (
-                    <Col md={6} lg={4} key={category} className="mb-3">
-                      <div className="service-category">
-                        <h6 className="fw-bold text-primary mb-2">{category}</h6>
-                        <ul className="list-unstyled">
-                          {items.map((item, idx) => (
-                            <li key={idx} className="text-muted small mb-1">
-                              • {item}
-                            </li>
-                          ))}
-                        </ul>
+                /* Edit Mode */
+                <div className="enterprise-services-edit">
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="mb-0">Edit Services Portfolio</h5>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={handleAddServiceRow}
+                      className="d-flex align-items-center"
+                    >
+                      <FaPlus className="me-1" />
+                      Add Service
+                    </Button>
+                  </div>
+
+                  {serviceSelections.map((row, idx) => {
+                    const availableServices = getAvailableServicesForIndex(idx);
+                    const selectedService = services.find(s => s.name === row.serviceName);
+                    const availableSubServices = selectedService?.subCategories || [];
+
+                    return (
+                      <div key={idx} className="enterprise-service-edit-row mb-4 p-3 border rounded">
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <h6 className="mb-0">Service Category {idx + 1}</h6>
+                          {serviceSelections.length > 1 && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleRemoveServiceRow(idx)}
+                            >
+                              <FaTrash />
+                            </Button>
+                          )}
+                        </div>
+
+                        <Row>
+                          <Col md={6} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className="fw-semibold">Service Category *</Form.Label>
+                              <Select
+                                value={row.serviceName ? { value: row.serviceName, label: row.serviceName } : null}
+                                onChange={(option) => handleServiceChange(idx, option?.value || '')}
+                                options={availableServices.map(s => ({ value: s.name, label: s.name }))}
+                                placeholder="Select a service category..."
+                                isClearable
+                                className="enterprise-service-select"
+                                classNamePrefix="select"
+                              />
+                            </Form.Group>
+                          </Col>
+                          
+                          <Col md={6} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className="fw-semibold">Specializations *</Form.Label>
+                              <Select
+                                isMulti
+                                value={row.subServices.map(ss => ({ value: ss, label: ss }))}
+                                onChange={(options) => handleSubServicesChange(idx, options)}
+                                options={availableSubServices.map(ss => ({ value: ss, label: ss }))}
+                                placeholder={row.serviceName ? "Select specializations..." : "First select a service category"}
+                                isDisabled={!row.serviceName}
+                                className="enterprise-service-select"
+                                classNamePrefix="select"
+                              />
+                            </Form.Group>
+                          </Col>
+                        </Row>
                       </div>
-                    </Col>
-                  ))}
-                </Row>
+                    );
+                  })}
+
+                  {/* Action Buttons */}
+                  <div className="d-flex justify-content-end gap-3 mt-4">
+                    <Button
+                      variant="outline-secondary"
+                      onClick={handleCancelEditServices}
+                      disabled={isSavingServices}
+                      className="d-flex align-items-center justify-content-center"
+                    >
+                      <FaTimesCircle className="me-2" />
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={handleSaveServices}
+                      disabled={isSavingServices || serviceSelections.every(row => !row.serviceName || row.subServices.length === 0)}
+                      className="d-flex align-items-center justify-content-center"
+                    >
+                      {isSavingServices ? (
+                        <>
+                          <Spinner animation="border" size="sm" className="me-2" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <FaCheckCircle className="me-2" />
+                          Save Services
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               )}
             </Card.Body>
           </Card>
@@ -133,5 +519,3 @@ function EnterpriseDashboard() {
 }
 
 export default EnterpriseDashboard;
-
-
