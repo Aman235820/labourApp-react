@@ -264,169 +264,34 @@
   cursor: not-allowed;
 }
 
-/* Mobile Keyboard Handling */
-body.keyboard-open {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
-
-.location-modal.keyboard-open .modal-dialog {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  width: 100%;
-  max-width: 100%;
-  height: 100vh;
-  max-height: 100vh;
-  transition: all 0.3s ease;
-}
-
-.location-modal.keyboard-open .modal-content {
-  height: 100vh;
-  max-height: 100vh;
-  border-radius: 0;
-  border: none;
-}
-
-.location-modal.keyboard-open .location-modal-body {
-  padding: 0.5rem;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  height: calc(100vh - 80px);
-}
-
-.location-modal.keyboard-open .location-tab-content {
-  padding: 1rem;
-  min-height: auto;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Smooth transitions for modal positioning */
-.location-modal .modal-dialog {
-  transition: transform 0.3s ease, margin 0.3s ease;
-}
-
-.location-modal .modal-content {
-  transition: height 0.3s ease, border-radius 0.3s ease;
-}
-
-/* Input focus handling for mobile */
-.location-modal .form-control:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-  outline: none;
-  -webkit-appearance: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Prevent zoom on input focus for iOS */
-.location-modal .form-control {
-  font-size: 16px;
-  -webkit-appearance: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Touch improvements */
-.location-modal .search-result-item,
-.location-modal .recent-location-item {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.location-modal .btn {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .location-modal .modal-dialog {
-    margin: 0.5rem;
-    max-width: calc(100% - 1rem);
-    min-height: calc(100vh - 1rem);
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
   }
   
   .location-modal-body {
     padding: 1rem;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
   
   .location-tab-content {
     padding: 1.5rem;
     min-height: 300px;
-    max-height: calc(100vh - 250px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
   
   .tab-buttons {
-    flex-direction: row;
+    flex-direction: column;
     gap: 0.25rem;
-    flex-wrap: nowrap;
   }
   
   .tab-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    min-width: 0;
-    flex: 1;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
   
   .location-icon {
     font-size: 2.5rem;
-  }
-  
-  /* Search results adjustments for mobile */
-  .search-results-list,
-  .recent-locations-list {
-    max-height: 250px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .search-result-item,
-  .recent-location-item {
-    padding: 0.75rem;
-  }
-  
-  /* Manual form adjustments */
-  .manual-form .row {
-    margin-bottom: 1rem;
-  }
-  
-  .manual-form .form-control {
-    padding: 0.75rem;
-    font-size: 16px;
-  }
-}
-
-/* Extra small screens */
-@media (max-width: 480px) {
-  .location-modal .modal-dialog {
-    margin: 0.25rem;
-    max-width: calc(100% - 0.5rem);
-  }
-  
-  .location-modal-body {
-    padding: 0.75rem;
-  }
-  
-  .location-tab-content {
-    padding: 1rem;
-  }
-  
-  .tab-btn {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.5rem;
   }
 }
 
