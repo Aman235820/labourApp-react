@@ -4,6 +4,8 @@ import Select from 'react-select';
 import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
+import CallNowModal from './CallNowModal';
+import EnterpriseDetailsModal from './EnterpriseDetailsModal';
 import { enterpriseService } from '../services/enterpriseService';
 import '../styles/EnterpriseDashboard.css';
 
@@ -15,15 +17,86 @@ function EnterpriseDashboard() {
   const [isSavingServices, setIsSavingServices] = useState(false);
   const [servicesError, setServicesError] = useState('');
   const [servicesSuccess, setServicesSuccess] = useState('');
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [enterpriseId, setEnterpriseId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('enterprise');
-      if (stored) {
-        setEnterprise(JSON.parse(stored));
+    const loadEnterpriseData = async () => {
+      try {
+        const stored = localStorage.getItem('enterprise');
+        if (stored) {
+          const enterpriseData = JSON.parse(stored);
+          
+          // Extract the MongoDB ID from localStorage
+          const extractedId = enterpriseData?.enterpriseId;
+          console.log('Dashboard - Raw enterpriseData:', enterpriseData);
+          console.log('Dashboard - Extracted ID:', extractedId);
+          console.log('Dashboard - ID type:', typeof extractedId);
+          
+          // Validate MongoDB ObjectId format
+          const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
+          if (extractedId && !mongoIdPattern.test(extractedId)) {
+            console.error('Dashboard - Invalid enterprise ID format in localStorage:', extractedId);
+            console.error('Dashboard - Expected MongoDB ObjectId format (24 hex characters)');
+          }
+          
+          setEnterpriseId(extractedId);
+          
+          const token = enterpriseData.token || '';
+
+          if (extractedId && token) {
+            // Fetch fresh data from server
+            const freshData = await enterpriseService.findEnterpriseById(extractedId, token);
+            if (freshData && freshData.returnValue) {
+              const updatedEnterprise = {
+                ...freshData.returnValue,
+                token: token
+              };
+              setEnterprise(updatedEnterprise);
+              localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
+              
+              // Check if owner name is blank or null
+              const ownerName = updatedEnterprise.ownername || '';
+              if (!ownerName || ownerName.trim() === '') {
+                setShowDetailsModal(true);
+              }
+            } else {
+              // Fallback to stored data if API fails
+              setEnterprise(enterpriseData);
+              const ownerName = enterpriseData.ownername || '';
+              if (!ownerName || ownerName.trim() === '') {
+                setShowDetailsModal(true);
+              }
+            }
+          } else {
+            // No valid enterprise ID or token, use stored data
+            setEnterprise(enterpriseData);
+            const ownerName = enterpriseData.ownername || '';
+            if (!ownerName || ownerName.trim() === '') {
+              setShowDetailsModal(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading enterprise data:', error);
+        // Fallback to stored data if API fails
+        try {
+          const stored = localStorage.getItem('enterprise');
+          if (stored) {
+            const enterpriseData = JSON.parse(stored);
+            setEnterprise(enterpriseData);
+            const ownerName = enterpriseData.ownername || '';
+            if (!ownerName || ownerName.trim() === '') {
+              setShowDetailsModal(true);
+            }
+          }
+        } catch (_) {}
       }
-    } catch (_) {}
+    };
+
+    loadEnterpriseData();
   }, []);
 
   // Load services data
@@ -66,6 +139,30 @@ function EnterpriseDashboard() {
     navigate('/');
   };
 
+  const handleEnterpriseUpdate = async (updatedEnterprise) => {
+    try {
+      // Update local state immediately
+      setEnterprise(updatedEnterprise);
+      
+      // Use the stored enterpriseId
+      if (enterpriseId) {
+        const token = updatedEnterprise.token || '';
+        const freshData = await enterpriseService.findEnterpriseById(enterpriseId, token);
+        if (freshData && freshData.returnValue) {
+          const freshEnterprise = {
+            ...freshData.returnValue,
+            token: token
+          };
+          setEnterprise(freshEnterprise);
+          localStorage.setItem('enterprise', JSON.stringify(freshEnterprise));
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing enterprise data:', error);
+      // Keep the updated enterprise data even if refresh fails
+    }
+  };
+
   // Services Portfolio Handlers
   const handleEditServices = () => {
     setIsEditingServices(true);
@@ -101,8 +198,16 @@ function EnterpriseDashboard() {
   };
 
   const handleSubServicesChange = (idx, options) => {
-    const values = (options || []).map(o => o.value);
-    setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: values } : row));
+    if (options && options.some(option => option.value === 'all')) {
+      // Select All option was chosen - select all subcategories for this service
+      const currentService = services.find(s => s.name === serviceSelections[idx].serviceName);
+      const allSubServices = currentService?.subCategories || [];
+      setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: allSubServices } : row));
+    } else {
+      // Normal selection - filter out 'all' option if present
+      const values = (options || []).map(o => o.value).filter(value => value !== 'all');
+      setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: values } : row));
+    }
   };
 
   const getAvailableServicesForIndex = (idx) => {
@@ -209,14 +314,19 @@ function EnterpriseDashboard() {
   }
 
   const ev = enterprise; // token + returnValue stored as we saved
-  const rating = ev.rating || ev.returnValue?.rating || '0.0';
-  const ratingCount = ev.ratingCount || ev.returnValue?.ratingCount || '0';
-  const verificationStatus = ev.verificationStatus || ev.returnValue?.verificationStatus || 'PENDING';
-  const companyName = ev.companyName || ev.returnValue?.companyName || '';
-  const ownername = ev.ownername || ev.returnValue?.ownername || '';
-  const gstNumber = ev.gstNumber || ev.returnValue?.gstNumber || '';
-  const ownerContactInfo = ev.ownerContactInfo || ev.returnValue?.ownerContactInfo || '';
-  const servicesOffered = ev.servicesOffered || ev.returnValue?.servicesOffered || {};
+  const rating = ev.returnValue?.rating || ev.rating || '0.0';
+  const ratingCount = ev.returnValue?.ratingCount || ev.ratingCount || '0';
+  const verificationStatus = ev.returnValue?.verificationStatus || ev.verificationStatus || 'PENDING';
+  const companyName = ev.returnValue?.companyName || ev.companyName || '';
+  const ownername = ev.returnValue?.ownername || ev.ownername || '';
+  const gstNumber = ev.returnValue?.gstNumber || ev.gstNumber || '';
+  const ownerContactInfo = ev.returnValue?.ownerContactInfo || ev.ownerContactInfo || '';
+  const otherContactNumbers = ev.returnValue?.otherContactNumbers || ev.otherContactNumbers || [];
+  const servicesOffered = ev.returnValue?.servicesOffered || ev.servicesOffered || {};
+
+  // Extract contact numbers for Call Now modal
+  const primaryNumber = ownerContactInfo;
+  const alternateNumbers = Array.isArray(otherContactNumbers) ? otherContactNumbers.filter(num => num && num.trim()) : [];
 
   return (
     <Container className="py-4">
@@ -287,6 +397,14 @@ function EnterpriseDashboard() {
               </h5>
             </Card.Header>
             <Card.Body className="d-flex flex-column">
+              <Button 
+                variant="outline-primary" 
+                className="mb-3 d-flex align-items-center"
+                onClick={() => setShowCallModal(true)}
+              >
+                <FaPhone className="me-2" />
+                Call Now
+              </Button>
               <Button variant="outline-primary" className="mb-3 d-flex align-items-center">
                 <FaEye className="me-2" />
                 View All Bookings
@@ -465,7 +583,10 @@ function EnterpriseDashboard() {
                                 isMulti
                                 value={row.subServices.map(ss => ({ value: ss, label: ss }))}
                                 onChange={(options) => handleSubServicesChange(idx, options)}
-                                options={availableSubServices.map(ss => ({ value: ss, label: ss }))}
+                                options={[
+                                  { value: 'all', label: 'Select All' },
+                                  ...availableSubServices.map(ss => ({ value: ss, label: ss }))
+                                ]}
                                 placeholder={row.serviceName ? "Select specializations..." : "First select a service category"}
                                 isDisabled={!row.serviceName}
                                 className="enterprise-service-select"
@@ -514,6 +635,23 @@ function EnterpriseDashboard() {
           </Card>
         </Col>
       </Row>
+
+      {/* Call Now Modal */}
+      <CallNowModal
+        show={showCallModal}
+        onHide={() => setShowCallModal(false)}
+        primaryNumber={primaryNumber}
+        alternateNumbers={alternateNumbers}
+      />
+
+      {/* Enterprise Details Modal */}
+      <EnterpriseDetailsModal
+        show={showDetailsModal}
+        onHide={() => setShowDetailsModal(false)}
+        enterprise={enterprise}
+        enterpriseId={enterpriseId}
+        onUpdate={handleEnterpriseUpdate}
+      />
     </Container>
   );
 }

@@ -157,8 +157,16 @@ function EnterpriseRegister() {
   };
 
   const handleSubServicesChange = (idx, options) => {
-    const values = (options || []).map(o => o.value);
-    setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: values } : row));
+    if (options && options.some(option => option.value === 'all')) {
+      // Select All option was chosen - select all subcategories for this service
+      const currentService = services.find(s => s.name === serviceSelections[idx].serviceName);
+      const allSubServices = currentService?.subCategories || [];
+      setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: allSubServices } : row));
+    } else {
+      // Normal selection - filter out 'all' option if present
+      const values = (options || []).map(o => o.value).filter(value => value !== 'all');
+      setServiceSelections(prev => prev.map((row, i) => i === idx ? { ...row, subServices: values } : row));
+    }
   };
 
   const getAvailableServicesForIndex = (idx) => {
@@ -239,19 +247,59 @@ function EnterpriseRegister() {
         ownerContactInfo: formData.ownerContactInfo,
         companyName: formData.companyName,
         servicesOffered,
-        location: formData.location
+        location: formData.location,
+        ownername: '', // Initialize as empty to trigger popup
+        otherContactNumbers: [],
+        gstNumber: '',
+        workforceSize: '',
+        registrationCertificateLink: '',
+        otherDocumentLinks: {
+          license: '',
+          insurance: ''
+        }
       };
 
-      // Store initial registration data and OTP for the details page
-      localStorage.setItem('pendingEnterpriseRegistration', JSON.stringify(enterpriseData));
-      localStorage.setItem('enterpriseOTP', otpValue);
+      // Complete registration directly
+      const response = await enterpriseService.registerEnterprise(enterpriseData, otpValue);
       
-      // Navigate to enterprise details form
-      navigate('/enterpriseDetails', { 
-        state: { registrationData: enterpriseData } 
-      });
+      if (response && response.token && response.returnValue) {
+        // Ensure the ID is properly extracted as a string
+        const rawId = response.returnValue.id || response.returnValue._id || '';
+        const enterpriseId = String(rawId);
+        console.log('Registration - Raw ID from API:', rawId);
+        console.log('Registration - Raw ID type:', typeof rawId);
+        console.log('Registration - String ID:', enterpriseId);
+        console.log('Registration - Full response:', response);
+        
+        // Validate that we have a proper MongoDB ObjectId format
+        const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!enterpriseId || enterpriseId === 'null' || enterpriseId === 'undefined' || !mongoIdPattern.test(enterpriseId)) {
+          console.error('Registration - Invalid enterprise ID format:', enterpriseId);
+          console.error('Registration - Expected MongoDB ObjectId format (24 hex characters)');
+          setError('Registration failed: Invalid enterprise ID format received');
+          return;
+        }
+        
+        // Store only the required details in localStorage
+        const enterpriseData = {
+          enterpriseId: enterpriseId,
+          ownername: response.returnValue.ownername || '',
+          ownerContactInfo: response.returnValue.ownerContactInfo || formData.ownerContactInfo,
+          servicesOffered: response.returnValue.servicesOffered || servicesOffered,
+          companyName: response.returnValue.companyName || formData.companyName,
+          token: response.token
+        };
+        
+        console.log('Registration - Storing enterprise data:', enterpriseData);
+        localStorage.setItem('enterprise', JSON.stringify(enterpriseData));
+        
+        // Navigate directly to dashboard
+        navigate('/enterpriseDashboard');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } catch (err) {
-      setError(typeof err === 'string' ? err : 'Registration setup failed');
+      setError(typeof err === 'string' ? err : 'Registration failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -353,7 +401,11 @@ function EnterpriseRegister() {
                       {serviceSelections.map((row, idx) => {
                         const available = getAvailableServicesForIndex(idx);
                         const currentService = services.find(s => s.name === row.serviceName) || null;
-                        const options = (currentService?.subCategories || []).map(sc => ({ value: sc, label: sc }));
+                        const subCategories = currentService?.subCategories || [];
+                        const options = [
+                          { value: 'all', label: 'Select All' },
+                          ...subCategories.map(sc => ({ value: sc, label: sc }))
+                        ];
                         return (
                           <Card key={`svc-${idx}`} className="mb-3 enterprise-service-card">
                             <Card.Body>

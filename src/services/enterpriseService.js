@@ -85,6 +85,21 @@ export const enterpriseService = {
     } catch (error) {
       throw error.response?.data || error.message;
     }
+  },
+
+  findEnterpriseById: async (enterpriseId, token) => {
+    try {
+      const endpoint = `${baseurl}/enterprise/findEnterpriseById/${enterpriseId}`;
+      const response = await axios.get(endpoint, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   }
 };
 
