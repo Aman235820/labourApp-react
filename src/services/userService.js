@@ -1,7 +1,20 @@
 import axios from 'axios';
 
-const appUrl = process.env.REACT_APP_API_BASEURL;
+const fallbackBaseUrl =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:4000'
+    : 'https://labourapp.onrender.com';
+const appUrl = process.env.REACT_APP_API_BASEURL || fallbackBaseUrl;
 const baseurl = `${appUrl}/labourapp`;
+
+const unwrapResponseDTO = (data) => {
+    if (data && typeof data === 'object' && data.hasError === true) {
+        throw data;
+    }
+    return data;
+};
+
+const normalizeAxiosError = (error) => error?.response?.data ?? error;
 
 export const registerUser = async (userData, otp) => {
     try {
@@ -13,9 +26,9 @@ export const registerUser = async (userData, otp) => {
             },
             withCredentials: true
         });
-        return response.data;
+        return unwrapResponseDTO(response.data);
     } catch (error) {
-        throw error.response?.data || error.message;
+        throw normalizeAxiosError(error);
     }
 };
 
@@ -29,9 +42,9 @@ export const loginUser = async ({ mobileNumber, otp }) => {
             },
             withCredentials: true
         });
-        return response.data;
+        return unwrapResponseDTO(response.data);
     } catch (error) {
-        throw error.response?.data || error.message;
+        throw normalizeAxiosError(error);
     }
 };
 
@@ -45,9 +58,9 @@ export const requestOTP = async (mobile, role) => {
             },
             withCredentials: true
         });
-        return response.data;
+        return unwrapResponseDTO(response.data);
     } catch (error) {
-        throw error.response?.data || error.message;
+        throw normalizeAxiosError(error);
     }
 };
 
@@ -61,8 +74,8 @@ export const deleteUser = async (userId) => {
             },
             withCredentials: true
         });
-        return response.data;
+        return unwrapResponseDTO(response.data);
     } catch (error) {
-        throw error.response?.data || error.message;
+        throw normalizeAxiosError(error);
     }
 }; 

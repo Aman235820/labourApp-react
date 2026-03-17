@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, Form, Spinner, Modal, Button } from 'react-bootstrap';
 import { enterpriseService } from '../services/enterpriseService';
 import LocationModal from './LocationModal';
+import { withEnterpriseId } from '../utils/enterpriseSession';
 import '../styles/EnterpriseHeaderTiles.css';
 
 function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
@@ -74,7 +75,7 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
     
     try {
       const resp = await enterpriseService.updateEnterpriseField(enterpriseId, fieldKey, value, token);
-      const next = { ...(enterprise || {}), ...(resp?.returnValue || {}) };
+      const next = withEnterpriseId({ ...(enterprise || {}), ...(resp?.returnValue || {}) });
       localStorage.setItem('enterprise', JSON.stringify(next));
       onUpdated && onUpdated(next);
     } catch (error) {

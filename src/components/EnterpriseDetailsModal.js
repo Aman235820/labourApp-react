@@ -11,14 +11,17 @@ import {
   FaTrash
 } from 'react-icons/fa';
 import { enterpriseService } from '../services/enterpriseService';
+import { withEnterpriseId } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDetailsModal.css';
 
 function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpdate }) {
   const [formData, setFormData] = useState({
     ownername: '',
+    companyName: '',
     otherContactNumbers: [''],
     gstNumber: '',
     workforceSize: '',
+    location: '',
     registrationCertificateLink: '',
     otherDocumentLinks: {
       license: '',
@@ -32,11 +35,20 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
 
   useEffect(() => {
     if (enterprise) {
+      const rawOtherNumbers =
+        enterprise.otherContactNumbers ||
+        enterprise.returnValue?.otherContactNumbers ||
+        [];
+      const normalizedOtherNumbers =
+        Array.isArray(rawOtherNumbers) && rawOtherNumbers.length > 0 ? rawOtherNumbers : [''];
+
       setFormData({
         ownername: enterprise.ownername || enterprise.returnValue?.ownername || '',
-        otherContactNumbers: enterprise.otherContactNumbers || enterprise.returnValue?.otherContactNumbers || [''],
+        companyName: enterprise.companyName || enterprise.returnValue?.companyName || '',
+        otherContactNumbers: normalizedOtherNumbers,
         gstNumber: enterprise.gstNumber || enterprise.returnValue?.gstNumber || '',
         workforceSize: enterprise.workforceSize || enterprise.returnValue?.workforceSize || '',
+        location: enterprise.location || enterprise.returnValue?.location || '',
         registrationCertificateLink: enterprise.registrationCertificateLink || enterprise.returnValue?.registrationCertificateLink || '',
         otherDocumentLinks: {
           license: enterprise.otherDocumentLinks?.license || enterprise.returnValue?.otherDocumentLinks?.license || '',
@@ -115,6 +127,36 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
     return Object.keys(newErrors).length === 0;
   };
 
+  const getErrorMessage = (err) => {
+    if (!err) return 'Failed to update details. Please try again.';
+    if (typeof err === 'string') return err;
+    if (typeof err !== 'object') return String(err);
+
+    // Common API response shapes
+    const direct =
+      err.message ||
+      err.error ||
+      err.msg ||
+      err.details ||
+      err.title;
+    if (direct) return String(direct);
+
+    // Spring ResponseDTO (our backend)
+    if (typeof err.hasError === 'boolean' && err.message) return String(err.message);
+
+    // Sometimes nested
+    const nested =
+      err?.response?.data?.message ||
+      err?.response?.data?.error;
+    if (nested) return String(nested);
+
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return 'Failed to update details. Please try again.';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -126,13 +168,11 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
     setError('');
     setSuccess('');
     try {
-      // Use the enterpriseId passed from parent component
-      const token = enterprise?.token || '';
+      const token = enterprise?.token || enterprise?.returnValue?.token || '';
+      const resolvedId = enterpriseId || enterprise?._id || enterprise?.returnValue?._id || '';
 
-      const enterpriseId = enterprise?.id || '';
-
-      if (!enterpriseId) {
-        console.error('Modal - Missing enterpriseId:', { enterpriseId });
+      if (!resolvedId) {
+        console.error('Modal - Missing enterpriseId:', { enterpriseId, enterprise });
         throw new Error('Enterprise session not found');
       }
 
@@ -141,19 +181,33 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
 
       const updateData = {
         ownername: formData.ownername.trim(),
+        companyName: formData.companyName?.trim?.() ?? formData.companyName,
         otherContactNumbers: cleanedContactNumbers,
-        workforceSize: parseInt(formData.workforceSize)
+        gstNumber: formData.gstNumber?.trim?.() ?? formData.gstNumber,
+        workforceSize: parseInt(formData.workforceSize),
+        location: formData.location?.trim?.() ?? formData.location,
+        registrationCertificateLink: formData.registrationCertificateLink?.trim?.() ?? formData.registrationCertificateLink,
+        otherDocumentLinks: {
+          license: formData.otherDocumentLinks?.license?.trim?.() ?? formData.otherDocumentLinks?.license ?? '',
+          insurance: formData.otherDocumentLinks?.insurance?.trim?.() ?? formData.otherDocumentLinks?.insurance ?? ''
+        }
       };
 
-      await enterpriseService.updateEnterpriseFields(enterpriseId, updateData, token);
+      await enterpriseService.updateEnterpriseFields(resolvedId, updateData, token);
 
       setSuccess('Details updated successfully!');
       
       // Update the enterprise data in localStorage
-      const updatedEnterprise = {
+      const updatedEnterprise = withEnterpriseId({
         ...enterprise,
         ...updateData
-      };
+      });
+      if (updateData.otherDocumentLinks) {
+        updatedEnterprise.otherDocumentLinks = {
+          ...(enterprise?.otherDocumentLinks || enterprise?.returnValue?.otherDocumentLinks || {}),
+          ...updateData.otherDocumentLinks
+        };
+      }
       localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
 
       // Call the onUpdate callback to refresh the parent component
@@ -168,7 +222,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
 
     } catch (err) {
       console.error('Update error:', err);
-      setError(typeof err === 'string' ? err : 'Failed to update details. Please try again.');
+      setError(getErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -199,13 +253,6 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
         <div className="text-center mb-4">
           <p className="text-muted">Please provide some additional details about your business to complete your profile.</p>
         </div>
-
-        {error && (
-          <Alert variant="danger" className="mb-3">
-            <FaTimes className="me-2" />
-            {error}
-          </Alert>
-        )}
         
         {success && (
           <Alert variant="success" className="mb-3">
@@ -236,6 +283,22 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               </Form.Group>
             </Col>
 
+            {/* Company Name */}
+            <Col md={12} className="mt-3">
+              <Form.Group>
+                <Form.Label>
+                  <FaBuilding className="me-2 text-primary" />
+                  Company Name
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.companyName}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                  placeholder="Enter company name"
+                />
+              </Form.Group>
+            </Col>
+
             {/* Workforce Size */}
             <Col md={12}>
               <Form.Group>
@@ -254,6 +317,22 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
                 <Form.Control.Feedback type="invalid">
                   {errors.workforceSize}
                 </Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+
+            {/* Location */}
+            <Col md={12} className="mt-3">
+              <Form.Group>
+                <Form.Label>
+                  <FaIdCard className="me-2 text-primary" />
+                  Location
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  placeholder="Enter city/location"
+                />
               </Form.Group>
             </Col>
 
@@ -301,31 +380,107 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
                 </Button>
               </Form.Group>
             </Col>
+
+            {/* GST Number */}
+            <Col md={12} className="mt-4">
+              <Form.Group>
+                <Form.Label>
+                  <FaIdCard className="me-2 text-primary" />
+                  GST Number
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.gstNumber}
+                  onChange={(e) =>
+                    handleInputChange(
+                      'gstNumber',
+                      String(e.target.value || '')
+                        .toUpperCase()
+                        .slice(0, 15)
+                    )
+                  }
+                  placeholder="Enter GST number (optional)"
+                  maxLength={15}
+                />
+              </Form.Group>
+            </Col>
+
+            {/* Registration Certificate Link */}
+            <Col md={12} className="mt-3">
+              <Form.Group>
+                <Form.Label>
+                  <FaIdCard className="me-2 text-primary" />
+                  Registration Certificate Link
+                </Form.Label>
+                <Form.Control
+                  type="url"
+                  value={formData.registrationCertificateLink}
+                  onChange={(e) => handleInputChange('registrationCertificateLink', e.target.value)}
+                  placeholder="Paste link (optional)"
+                />
+              </Form.Group>
+            </Col>
+
+            {/* Other Document Links */}
+            <Col md={12} className="mt-3">
+              <Form.Group>
+                <Form.Label className="fw-semibold">Other Document Links</Form.Label>
+                <Row>
+                  <Col md={6} className="mt-2">
+                    <Form.Label className="text-muted mb-1">License</Form.Label>
+                    <Form.Control
+                      type="url"
+                      value={formData.otherDocumentLinks.license}
+                      onChange={(e) => handleDocumentLinkChange('license', e.target.value)}
+                      placeholder="Paste license link"
+                    />
+                  </Col>
+                  <Col md={6} className="mt-2">
+                    <Form.Label className="text-muted mb-1">Insurance</Form.Label>
+                    <Form.Control
+                      type="url"
+                      value={formData.otherDocumentLinks.insurance}
+                      onChange={(e) => handleDocumentLinkChange('insurance', e.target.value)}
+                      placeholder="Paste insurance link"
+                    />
+                  </Col>
+                </Row>
+              </Form.Group>
+            </Col>
           </Row>
         </Form>
       </Modal.Body>
       
-      <Modal.Footer className="bg-light">
-        <Button variant="outline-secondary" onClick={handleSkip}>
-          Skip for Now
-        </Button>
-        <Button 
-          variant="primary" 
-          onClick={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Spinner animation="border" size="sm" className="me-2" />
-              Updating...
-            </>
-          ) : (
-            <>
-              <FaCheckCircle className="me-2" />
-              Update Details
-            </>
-          )}
-        </Button>
+      <Modal.Footer className="bg-light d-flex flex-column align-items-stretch">
+        {error && (
+          <Alert variant="danger" className="mb-3 w-100">
+            <FaTimes className="me-2" />
+            {error}
+          </Alert>
+        )}
+
+        <div className="d-flex justify-content-end gap-2 w-100">
+          <Button variant="outline-secondary" onClick={handleSkip}>
+            Skip for Now
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <FaCheckCircle className="me-2" />
+                Update Details
+              </>
+            )}
+          </Button>
+        </div>
       </Modal.Footer>
     </Modal>
   );

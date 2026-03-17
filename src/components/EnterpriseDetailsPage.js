@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Alert, Container } from 'react-bootstrap';
 import EnterpriseDetailsForm from './EnterpriseDetailsForm';
 import { enterpriseService } from '../services/enterpriseService';
+import { withEnterpriseId } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDetailsForm.css';
 
 function EnterpriseDetailsPage() {
@@ -51,10 +52,11 @@ function EnterpriseDetailsPage() {
 
       if (response && response.token && response.returnValue) {
         // Store enterprise data
-        localStorage.setItem('enterprise', JSON.stringify({ 
-          ...response.returnValue, 
-          token: response.token 
-        }));
+        const session = withEnterpriseId({
+          ...response.returnValue,
+          token: response.token
+        });
+        localStorage.setItem('enterprise', JSON.stringify(session));
         
         // Clean up temporary storage
         localStorage.removeItem('pendingEnterpriseRegistration');

@@ -7,6 +7,7 @@ import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
 import CallNowModal from './CallNowModal';
 import EnterpriseDetailsModal from './EnterpriseDetailsModal';
 import { enterpriseService } from '../services/enterpriseService';
+import { withEnterpriseId } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDashboard.css';
 
 function EnterpriseDashboard() {
@@ -27,7 +28,12 @@ function EnterpriseDashboard() {
       try {
         const stored = localStorage.getItem('enterprise');
         if (stored) {
-          const enterpriseData = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          const enterpriseData = withEnterpriseId(parsed);
+          // Self-heal older sessions by persisting enterpriseId once we can derive it
+          if (enterpriseData?.enterpriseId && enterpriseData?.enterpriseId !== parsed?.enterpriseId) {
+            localStorage.setItem('enterprise', JSON.stringify(enterpriseData));
+          }
           
           // Extract the MongoDB ID from localStorage
           const extractedId = enterpriseData?.enterpriseId;
@@ -50,10 +56,10 @@ function EnterpriseDashboard() {
             // Fetch fresh data from server
             const freshData = await enterpriseService.findEnterpriseById(extractedId, token);
             if (freshData && freshData.returnValue) {
-              const updatedEnterprise = {
+              const updatedEnterprise = withEnterpriseId({
                 ...freshData.returnValue,
                 token: token
-              };
+              });
               setEnterprise(updatedEnterprise);
               localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
               
@@ -85,7 +91,7 @@ function EnterpriseDashboard() {
         try {
           const stored = localStorage.getItem('enterprise');
           if (stored) {
-            const enterpriseData = JSON.parse(stored);
+            const enterpriseData = withEnterpriseId(JSON.parse(stored));
             setEnterprise(enterpriseData);
             const ownerName = enterpriseData.ownername || '';
             if (!ownerName || ownerName.trim() === '') {
@@ -142,17 +148,20 @@ function EnterpriseDashboard() {
   const handleEnterpriseUpdate = async (updatedEnterprise) => {
     try {
       // Update local state immediately
-      setEnterprise(updatedEnterprise);
+      const updated = withEnterpriseId(updatedEnterprise);
+      setEnterprise(updated);
+      localStorage.setItem('enterprise', JSON.stringify(updated));
       
       // Use the stored enterpriseId
-      if (enterpriseId) {
-        const token = updatedEnterprise.token || '';
-        const freshData = await enterpriseService.findEnterpriseById(enterpriseId, token);
+      const effectiveEnterpriseId = updated?.enterpriseId || enterpriseId;
+      if (effectiveEnterpriseId) {
+        const token = updated.token || '';
+        const freshData = await enterpriseService.findEnterpriseById(effectiveEnterpriseId, token);
         if (freshData && freshData.returnValue) {
-          const freshEnterprise = {
+          const freshEnterprise = withEnterpriseId({
             ...freshData.returnValue,
             token: token
-          };
+          });
           setEnterprise(freshEnterprise);
           localStorage.setItem('enterprise', JSON.stringify(freshEnterprise));
         }
@@ -254,34 +263,55 @@ function EnterpriseDashboard() {
     
     try {
       const servicesOffered = buildServicesOfferedObject();
-      const enterpriseId = enterprise._id || enterprise.returnValue?._id;
-      const token = enterprise.token || enterprise.returnValue?.token;
+      const normalizedEnterprise = withEnterpriseId(enterprise || {});
+      const effectiveEnterpriseId =
+        normalizedEnterprise?.enterpriseId ||
+        enterpriseId ||
+        enterprise?._id ||
+        enterprise?.returnValue?._id ||
+        enterprise?.id ||
+        enterprise?.returnValue?.id;
+
+      const token =
+        enterprise?.token ||
+        enterprise?.returnValue?.token ||
+        (() => {
+          try {
+            return JSON.parse(localStorage.getItem('enterprise') || '{}')?.token || '';
+          } catch {
+            return '';
+          }
+        })();
       
-      if (!enterpriseId) {
+      if (!effectiveEnterpriseId) {
         throw new Error('Enterprise ID not found. Please refresh and try again.');
       }
       
       const response = await enterpriseService.updateEnterpriseFields(
-        enterpriseId,
+        effectiveEnterpriseId,
         { servicesOffered },
         token
       );
       
       if (response && !response.hasError) {
         // Update local storage and state
-        const updatedEnterprise = {
+        const updatedEnterprise = withEnterpriseId({
           ...enterprise,
-          servicesOffered: servicesOffered
-        };
+          ...(response?.returnValue || {}),
+          servicesOffered: servicesOffered,
+          token: token || enterprise?.token || enterprise?.returnValue?.token
+        });
         
         if (enterprise.returnValue) {
           updatedEnterprise.returnValue = {
             ...enterprise.returnValue,
+            ...(response?.returnValue || {}),
             servicesOffered: servicesOffered
           };
         }
         
         setEnterprise(updatedEnterprise);
+        setEnterpriseId(updatedEnterprise.enterpriseId || effectiveEnterpriseId);
         localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
         
         setServicesSuccess('Services updated successfully!');
@@ -409,13 +439,21 @@ function EnterpriseDashboard() {
                 <FaEye className="me-2" />
                 View All Bookings
               </Button>
-              <Button variant="outline-success" className="mb-3 d-flex align-items-center">
+              <Button
+                variant="outline-success"
+                className="mb-3 d-flex align-items-center"
+                onClick={() => setShowDetailsModal(true)}
+              >
                 <FaMapMarkerAlt className="me-2" />
-                Update Location
+                Update Details
               </Button>
-              <Button variant="outline-warning" className="mb-3 d-flex align-items-center">
+              <Button
+                variant="outline-warning"
+                className="mb-3 d-flex align-items-center"
+                onClick={() => setShowDetailsModal(true)}
+              >
                 <FaAward className="me-2" />
-                Manage Certificates
+                Documents / Certificates
               </Button>
               <div className="mt-auto">
                 <Button 
@@ -465,13 +503,6 @@ function EnterpriseDashboard() {
 
             <Card.Body>
               {/* Error and Success Messages */}
-              {servicesError && (
-                <Alert variant="danger" className="mb-3">
-                  <FaTimesCircle className="me-2" />
-                  {servicesError}
-                </Alert>
-              )}
-              
               {servicesSuccess && (
                 <Alert variant="success" className="mb-3">
                   <FaCheckCircle className="me-2" />
@@ -600,7 +631,15 @@ function EnterpriseDashboard() {
                   })}
 
                   {/* Action Buttons */}
-                  <div className="d-flex justify-content-end gap-3 mt-4">
+                  <div className="mt-4">
+                    {servicesError && (
+                      <Alert variant="danger" className="mb-3">
+                        <FaTimesCircle className="me-2" />
+                        {servicesError}
+                      </Alert>
+                    )}
+
+                    <div className="d-flex justify-content-end gap-3">
                     <Button
                       variant="outline-secondary"
                       onClick={handleCancelEditServices}
@@ -628,6 +667,7 @@ function EnterpriseDashboard() {
                         </>
                       )}
                     </Button>
+                    </div>
                   </div>
                 </div>
               )}

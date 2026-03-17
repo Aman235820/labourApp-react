@@ -4,6 +4,7 @@ import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { enterpriseService } from '../services/enterpriseService';
 import OTPVerification from './OTPVerification';
+import { withEnterpriseId } from '../utils/enterpriseSession';
 import '../styles/EnterpriseAuth.css';
 
 function EnterpriseLogin() {
@@ -43,7 +44,8 @@ function EnterpriseLogin() {
     try {
       const response = await enterpriseService.loginEnterprise(mobileNumber, otpValue);
       if (response && response.token && response.returnValue) {
-        localStorage.setItem('enterprise', JSON.stringify({ ...response.returnValue, token: response.token }));
+        const session = withEnterpriseId({ ...response.returnValue, token: response.token });
+        localStorage.setItem('enterprise', JSON.stringify(session));
         navigate('/enterpriseDashboard');
       } else {
         setError('Invalid OTP');

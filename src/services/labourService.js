@@ -3,6 +3,15 @@ import axios from 'axios';
 const appUrl = process.env.REACT_APP_API_BASEURL || 'https://labourapp.onrender.com';
 const baseurl = `${appUrl}/labourapp`;
 
+const unwrapResponseDTO = (data) => {
+  if (data && typeof data === 'object' && data.hasError === true) {
+    throw data;
+  }
+  return data;
+};
+
+const normalizeAxiosError = (error) => error?.response?.data ?? error;
+
 export const labourService = {
   // Get requested services for a labour
   getRequestedServices: async (labourId) => {
@@ -105,9 +114,9 @@ export const labourService = {
     try {
       const endpoint = `${baseurl}/auth/registerLabour?otp=${otp}`;
       const response = await axios.post(endpoint, labourData);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -115,9 +124,9 @@ export const labourService = {
     try {
       const endpoint = `${baseurl}/auth/labourLogin?mobileNumber=${mobileNumber}&otp=${otp}`;
       const response = await axios.get(endpoint);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -125,9 +134,9 @@ export const labourService = {
     try {
       const endpoint = `${baseurl}/auth/requestOTP`;
       const response = await axios.post(endpoint, { mobile, role });
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -135,9 +144,9 @@ export const labourService = {
     try {
       const endpoint = `${baseurl}/admin/removeLabour/${labourId}`;
       const response = await axios.delete(endpoint);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -146,9 +155,9 @@ export const labourService = {
     try {
       const endpoint = `${baseurl}/labour/updateLabourDetails`;
       const response = await axios.patch(endpoint, labourData);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 

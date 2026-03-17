@@ -1,23 +1,51 @@
 import axios from 'axios';
+import { normalizeMongoId } from '../utils/enterpriseSession';
 
-const appUrl = process.env.REACT_APP_API_BASEURL || 'https://labourapp.onrender.com';
+const fallbackBaseUrl =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:4000'
+    : 'https://labourapp.onrender.com';
+const appUrl = process.env.REACT_APP_API_BASEURL || fallbackBaseUrl;
 const baseurl = `${appUrl}/labourapp`;
+
+const unwrapResponseDTO = (data) => {
+  if (data && typeof data === 'object' && data.hasError === true) {
+    throw data;
+  }
+  return data;
+};
+
+const normalizeAxiosError = (error) => error?.response?.data ?? error;
+
+const requireEnterpriseId = (enterpriseIdLike) => {
+  const normalizedId = normalizeMongoId(enterpriseIdLike);
+  const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
+  if (!normalizedId || !mongoIdPattern.test(String(normalizedId))) {
+    throw {
+      returnValue: null,
+      hasError: true,
+      message: 'Enterprise ID is missing or invalid'
+    };
+  }
+  return String(normalizedId);
+};
 
 export const enterpriseService = {
   registerEnterprise: async (enterpriseData, otp) => {
     try {
       const endpoint = `${baseurl}/enterprise/registerEnterprise?otp=${otp}`;
       const response = await axios.post(endpoint, enterpriseData);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
   // Update one or many enterprise fields (backend accepts partial payload)
   updateEnterpriseFields: async (enterpriseId, partialPayload, token) => {
     try {
-      const endpoint = `${baseurl}/enterprise/updateEnterpriseField/${enterpriseId}`;
+      const normalizedId = requireEnterpriseId(enterpriseId);
+      const endpoint = `${baseurl}/enterprise/updateEnterpriseField/${normalizedId}`;
       const response = await axios.patch(
         endpoint,
         partialPayload,
@@ -28,9 +56,9 @@ export const enterpriseService = {
           }
         }
       );
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -44,16 +72,17 @@ export const enterpriseService = {
 
   updateEnterpriseDetails: async (enterpriseId, detailsData, token) => {
     try {
-      const endpoint = `${baseurl}/enterprise/updateDetails/${enterpriseId}`;
+      const normalizedId = requireEnterpriseId(enterpriseId);
+      const endpoint = `${baseurl}/enterprise/updateDetails/${normalizedId}`;
       const response = await axios.put(endpoint, detailsData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -61,9 +90,9 @@ export const enterpriseService = {
     try {
       const endpoint = `${baseurl}/enterprise/completeRegistration?otp=${otp}`;
       const response = await axios.post(endpoint, completeData);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -71,9 +100,9 @@ export const enterpriseService = {
     try {
       const endpoint = `${baseurl}/enterprise/enterpriseLogin?mobileNumber=${mobileNumber}&otp=${otp}`;
       const response = await axios.get(endpoint);
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
@@ -81,24 +110,25 @@ export const enterpriseService = {
     try {
       const endpoint = `${baseurl}/auth/requestOTP`;
       const response = await axios.post(endpoint, { mobile, role });
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   },
 
   findEnterpriseById: async (enterpriseId, token) => {
     try {
-      const endpoint = `${baseurl}/enterprise/findEnterpriseById/${enterpriseId}`;
+      const normalizedId = requireEnterpriseId(enterpriseId);
+      const endpoint = `${baseurl}/enterprise/findEnterpriseById/${normalizedId}`;
       const response = await axios.get(endpoint, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      return response.data;
+      return unwrapResponseDTO(response.data);
     } catch (error) {
-      throw error.response?.data || error.message;
+      throw normalizeAxiosError(error);
     }
   }
 };
