@@ -250,7 +250,6 @@ function EnterpriseRegister() {
         location: formData.location,
         ownername: '', // Initialize as empty to trigger popup
         otherContactNumbers: [],
-        gstNumber: '',
         workforceSize: '',
         registrationCertificateLink: '',
         otherDocumentLinks: {

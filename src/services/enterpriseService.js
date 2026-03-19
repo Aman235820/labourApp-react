@@ -17,6 +17,22 @@ const unwrapResponseDTO = (data) => {
 
 const normalizeAxiosError = (error) => error?.response?.data ?? error;
 
+const stripEmptyRegistrationFields = (payload) => {
+  const next = { ...(payload || {}) };
+
+  // GST is optional during registration; backend validates if present.
+  if (typeof next.gstNumber !== 'undefined') {
+    const gst = String(next.gstNumber ?? '').trim();
+    if (!gst) {
+      delete next.gstNumber;
+    } else {
+      next.gstNumber = gst;
+    }
+  }
+
+  return next;
+};
+
 const requireEnterpriseId = (enterpriseIdLike) => {
   const normalizedId = normalizeMongoId(enterpriseIdLike);
   const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
@@ -34,7 +50,8 @@ export const enterpriseService = {
   registerEnterprise: async (enterpriseData, otp) => {
     try {
       const endpoint = `${baseurl}/enterprise/registerEnterprise?otp=${otp}`;
-      const response = await axios.post(endpoint, enterpriseData);
+      const payload = stripEmptyRegistrationFields(enterpriseData);
+      const response = await axios.post(endpoint, payload);
       return unwrapResponseDTO(response.data);
     } catch (error) {
       throw normalizeAxiosError(error);
@@ -89,7 +106,8 @@ export const enterpriseService = {
   completeRegistration: async (completeData, otp) => {
     try {
       const endpoint = `${baseurl}/enterprise/completeRegistration?otp=${otp}`;
-      const response = await axios.post(endpoint, completeData);
+      const payload = stripEmptyRegistrationFields(completeData);
+      const response = await axios.post(endpoint, payload);
       return unwrapResponseDTO(response.data);
     } catch (error) {
       throw normalizeAxiosError(error);
