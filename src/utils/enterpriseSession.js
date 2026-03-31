@@ -46,3 +46,38 @@ export const withEnterpriseId = (enterpriseLike) => {
   };
 };
 
+const ENTERPRISE_MONGO_ID = /^[0-9a-fA-F]{24}$/;
+
+/**
+ * Reads the logged-in enterprise session from localStorage (`enterprise` key).
+ * Normalizes `enterpriseId` and `token` for API calls when React state is stale or missing.
+ */
+export function getStoredEnterpriseSession() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return { enterpriseId: '', token: '', enterprise: null };
+  }
+  try {
+    const raw = localStorage.getItem('enterprise');
+    if (!raw) {
+      return { enterpriseId: '', token: '', enterprise: null };
+    }
+    const parsed = JSON.parse(raw);
+    const merged = withEnterpriseId(parsed);
+    const idCandidate =
+      merged?.enterpriseId ||
+      normalizeMongoId(merged?._id) ||
+      normalizeMongoId(merged?.returnValue?._id) ||
+      normalizeMongoId(merged?.returnValue?.id);
+    const idStr = idCandidate != null ? String(idCandidate).trim() : '';
+    const enterpriseId = ENTERPRISE_MONGO_ID.test(idStr) ? idStr : '';
+    const token = String(
+      merged?.token ||
+        merged?.returnValue?.token ||
+        merged?.accessToken ||
+        ''
+    ).trim();
+    return { enterpriseId, token, enterprise: merged };
+  } catch {
+    return { enterpriseId: '', token: '', enterprise: null };
+  }
+}

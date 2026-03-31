@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import Select from 'react-select';
-import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
 import CallNowModal from './CallNowModal';
 import EnterpriseDetailsModal from './EnterpriseDetailsModal';
+import EnterpriseLabourOnboardModal from './EnterpriseLabourOnboardModal';
 import { enterpriseService } from '../services/enterpriseService';
-import { withEnterpriseId } from '../utils/enterpriseSession';
+import {
+  withEnterpriseId,
+  normalizeMongoId,
+  getStoredEnterpriseSession,
+} from '../utils/enterpriseSession';
 import '../styles/EnterpriseDashboard.css';
+
+const ONBOARDED_LABOUR_STORAGE_PREFIX = 'labourApp_enterpriseOnboardedLabours_';
 
 function EnterpriseDashboard() {
   const [enterprise, setEnterprise] = useState(null);
@@ -20,6 +27,8 @@ function EnterpriseDashboard() {
   const [servicesSuccess, setServicesSuccess] = useState('');
   const [showCallModal, setShowCallModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showOnboardLabourModal, setShowOnboardLabourModal] = useState(false);
+  const [onboardedLabourers, setOnboardedLabourers] = useState([]);
   const [enterpriseId, setEnterpriseId] = useState(null);
   const navigate = useNavigate();
 
@@ -105,6 +114,19 @@ function EnterpriseDashboard() {
     loadEnterpriseData();
   }, []);
 
+  useEffect(() => {
+    if (!enterpriseId) {
+      setOnboardedLabourers([]);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(ONBOARDED_LABOUR_STORAGE_PREFIX + enterpriseId);
+      setOnboardedLabourers(raw ? JSON.parse(raw) : []);
+    } catch {
+      setOnboardedLabourers([]);
+    }
+  }, [enterpriseId]);
+
   // Load services data
   useEffect(() => {
     fetch('/services.json')
@@ -143,6 +165,59 @@ function EnterpriseDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('enterprise');
     navigate('/');
+  };
+
+  const getDashboardEnterpriseContext = () => {
+    const normalized = withEnterpriseId(enterprise || {});
+    const fromStorage = getStoredEnterpriseSession();
+    const id =
+      enterpriseId ||
+      normalized.enterpriseId ||
+      normalizeMongoId(enterprise?._id) ||
+      normalizeMongoId(enterprise?.returnValue?._id) ||
+      fromStorage.enterpriseId;
+    const idStr = id != null ? String(id).trim() : '';
+    const mongoOk = /^[0-9a-fA-F]{24}$/.test(idStr);
+    let token =
+      enterprise?.token || enterprise?.returnValue?.token || fromStorage.token || '';
+    if (!token) {
+      try {
+        token = JSON.parse(localStorage.getItem('enterprise') || '{}')?.token || '';
+      } catch {
+        token = '';
+      }
+    }
+    return { id: mongoOk ? idStr : '', token: String(token || '').trim() };
+  };
+
+  const handleEnterpriseLabourOnboardSuccess = (record) => {
+    const { id: effId } = getDashboardEnterpriseContext();
+    if (!effId || !/^[0-9a-fA-F]{24}$/.test(effId)) return;
+    const stableKey =
+      record?.enterpriseLabourId ??
+      record?._id ??
+      (typeof record?._id === 'object' && record?._id != null
+        ? JSON.stringify(record._id)
+        : null) ??
+      record?.id ??
+      `client-${Date.now()}`;
+    const entry = {
+      ...record,
+      _listKey: String(stableKey) + `-${Date.now()}`,
+      _savedAt: Date.now(),
+    };
+    setOnboardedLabourers((prev) => {
+      const next = [...prev, entry];
+      try {
+        localStorage.setItem(
+          ONBOARDED_LABOUR_STORAGE_PREFIX + effId,
+          JSON.stringify(next)
+        );
+      } catch (e) {
+        console.warn('Could not save onboarded labour list', e);
+      }
+      return next;
+    });
   };
 
   const handleEnterpriseUpdate = async (updatedEnterprise) => {
@@ -354,6 +429,9 @@ function EnterpriseDashboard() {
   const otherContactNumbers = ev.returnValue?.otherContactNumbers || ev.otherContactNumbers || [];
   const servicesOffered = ev.returnValue?.servicesOffered || ev.servicesOffered || {};
 
+  const { id: dashboardEnterpriseId, token: dashboardEnterpriseToken } =
+    getDashboardEnterpriseContext();
+
   // Extract contact numbers for Call Now modal
   const primaryNumber = ownerContactInfo;
   const alternateNumbers = Array.isArray(otherContactNumbers) ? otherContactNumbers.filter(num => num && num.trim()) : [];
@@ -448,6 +526,14 @@ function EnterpriseDashboard() {
                 Update Details
               </Button>
               <Button
+                variant="outline-primary"
+                className="mb-3 d-flex align-items-center"
+                onClick={() => setShowOnboardLabourModal(true)}
+              >
+                <FaUserPlus className="me-2" />
+                Onboard labour
+              </Button>
+              <Button
                 variant="outline-warning"
                 className="mb-3 d-flex align-items-center"
                 onClick={() => setShowDetailsModal(true)}
@@ -465,6 +551,124 @@ function EnterpriseDashboard() {
                   Logout
                 </Button>
               </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Onboarded labour (this browser / enterprise session) */}
+      <Row className="mt-4">
+        <Col xs={12}>
+          <Card className="shadow-sm border-0 enterprise-onboarded-labour-card">
+            <Card.Header className="bg-info bg-opacity-10 border-0 py-3">
+              <h4 className="mb-0 fw-bold text-dark">
+                <FaUsers className="me-2 text-info" />
+                Onboarded labour
+              </h4>
+              <p className="text-muted small mb-0 mt-1">
+                Team members added from this dashboard are listed here (saved on this device).
+              </p>
+            </Card.Header>
+            <Card.Body>
+              {onboardedLabourers.length === 0 ? (
+                <div className="text-center py-4 text-muted">
+                  <FaUserPlus className="mb-2 opacity-50" style={{ fontSize: '2rem' }} />
+                  <p className="mb-0">No labour onboarded yet. Use &quot;Onboard labour&quot; above.</p>
+                </div>
+              ) : (
+                <Row className="g-3">
+                  {onboardedLabourers.map((lab) => (
+                    <Col md={6} xl={4} key={lab._listKey}>
+                      <div className="border rounded-3 p-3 h-100 bg-light bg-opacity-50">
+                        <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                          <strong className="text-primary text-break">
+                            {lab.fullName || '—'}
+                          </strong>
+                          <Badge bg="secondary" className="text-uppercase flex-shrink-0">
+                            {lab.role || '—'}
+                          </Badge>
+                        </div>
+                        <div className="small text-muted mb-1">
+                          <FaPhone className="me-1" />
+                          {lab.mobile || '—'}
+                          {lab.alternateMobile ? (
+                            <span className="d-block mt-1">Alt: {lab.alternateMobile}</span>
+                          ) : null}
+                        </div>
+                        {lab.email ? (
+                          <div className="small mb-1 text-break">{lab.email}</div>
+                        ) : null}
+                        <div className="small mb-1">
+                          <strong>Skill:</strong> {lab.primarySkill || '—'}
+                        </div>
+                        <div className="small mb-1 text-break">
+                          <FaMapMarkerAlt className="me-1 text-primary" />
+                          {lab.location || '—'}
+                        </div>
+                        {lab.emergencyContactMobile ? (
+                          <div className="small mb-1">
+                            <strong>Emergency:</strong> {lab.emergencyContactMobile}
+                          </div>
+                        ) : null}
+                        <div className="d-flex flex-wrap gap-1 mt-2">
+                          <Badge bg={lab.status === 'ACTIVE' ? 'success' : 'secondary'}>
+                            {lab.status || '—'}
+                          </Badge>
+                          <Badge
+                            bg={
+                              lab.verificationStatus === 'VERIFIED'
+                                ? 'success'
+                                : lab.verificationStatus === 'REJECTED'
+                                  ? 'danger'
+                                  : 'warning'
+                            }
+                            className={
+                              lab.verificationStatus === 'PENDING' ? 'text-dark' : ''
+                            }
+                          >
+                            {lab.verificationStatus || '—'}
+                          </Badge>
+                        </div>
+                        {lab.notes ? (
+                          <p className="small text-muted mt-2 mb-0 fst-italic">{lab.notes}</p>
+                        ) : null}
+                        <div className="small text-muted mt-2">
+                          {lab.joinedAt ? <div>Joined: {lab.joinedAt}</div> : null}
+                          {lab.registrationTime ? (
+                            <div>Registered: {lab.registrationTime}</div>
+                          ) : null}
+                        </div>
+                        {(lab.profileImageUrl || lab.idDocumentUrl) && (
+                          <div className="mt-2 d-flex flex-wrap gap-2">
+                            {lab.profileImageUrl ? (
+                              <Button
+                                size="sm"
+                                variant="outline-primary"
+                                href={lab.profileImageUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Profile image
+                              </Button>
+                            ) : null}
+                            {lab.idDocumentUrl ? (
+                              <Button
+                                size="sm"
+                                variant="outline-secondary"
+                                href={lab.idDocumentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                ID document
+                              </Button>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -691,6 +895,14 @@ function EnterpriseDashboard() {
         enterprise={enterprise}
         enterpriseId={enterpriseId}
         onUpdate={handleEnterpriseUpdate}
+      />
+
+      <EnterpriseLabourOnboardModal
+        show={showOnboardLabourModal}
+        onHide={() => setShowOnboardLabourModal(false)}
+        enterpriseId={dashboardEnterpriseId}
+        token={dashboardEnterpriseToken}
+        onSuccess={handleEnterpriseLabourOnboardSuccess}
       />
     </Container>
   );

@@ -46,6 +46,26 @@ const requireEnterpriseId = (enterpriseIdLike) => {
   return String(normalizedId);
 };
 
+const buildOptionalAuthHeaders = () => {
+  const headers = { 'Content-Type': 'application/json' };
+  let auth =
+    (typeof window !== 'undefined' && window.localStorage
+      ? localStorage.getItem('token') || localStorage.getItem('authToken')
+      : '') || '';
+  if (!auth && typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      if (u?.token) auth = u.token;
+    } catch (_) {
+      /* ignore */
+    }
+  }
+  if (auth) {
+    headers.Authorization = `Bearer ${auth}`;
+  }
+  return headers;
+};
+
 export const enterpriseService = {
   registerEnterprise: async (enterpriseData, otp) => {
     try {
@@ -138,15 +158,68 @@ export const enterpriseService = {
     try {
       const normalizedId = requireEnterpriseId(enterpriseId);
       const endpoint = `${baseurl}/enterprise/findEnterpriseById/${normalizedId}`;
-      const response = await axios.get(endpoint, {
+      const headers = buildOptionalAuthHeaders();
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      const response = await axios.get(endpoint, { headers });
+      return unwrapResponseDTO(response.data);
+    } catch (error) {
+      throw normalizeAxiosError(error);
+    }
+  },
+
+  /**
+   * Public enterprise reviews (mirrors labour showMyReviews path).
+   * Returns [] if the endpoint is missing or errors — adjust URL if your API differs.
+   */
+  /**
+   * Onboard a labour / staff member under the enterprise (owner dashboard).
+   * POST body matches backend enterprise labour onboarding DTO.
+   */
+  enterpriseLabourOnboarding: async (payload, token) => {
+    try {
+      const endpoint = `${baseurl}/enterprise/enterpriseLabourOnboarding`;
+      if (!token || String(token).trim() === '') {
+        throw {
+          returnValue: null,
+          hasError: true,
+          message: 'Authentication required. Please log in again.'
+        };
+      }
+      const response = await axios.post(endpoint, payload, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
       return unwrapResponseDTO(response.data);
     } catch (error) {
       throw normalizeAxiosError(error);
+    }
+  },
+
+  getEnterpriseReviews: async (
+    enterpriseId,
+    sortBy = 'reviewTime',
+    sortOrder = 'desc'
+  ) => {
+    try {
+      const normalizedId = requireEnterpriseId(enterpriseId);
+      const endpoint = `${baseurl}/enterprise/showMyReviews/${normalizedId}?sortBy=${encodeURIComponent(
+        sortBy
+      )}&sortOrder=${encodeURIComponent(sortOrder)}`;
+      const response = await axios.get(endpoint, {
+        headers: buildOptionalAuthHeaders()
+      });
+      if (response.data?.hasError) {
+        return [];
+      }
+      const rv = response.data?.returnValue;
+      return Array.isArray(rv) ? rv : [];
+    } catch (error) {
+      console.warn('Enterprise reviews API:', error?.message || error);
+      return [];
     }
   }
 };

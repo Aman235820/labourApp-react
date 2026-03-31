@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Modal, Spinner } from 'react-bootstrap';
-import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon, FaTimes } from 'react-icons/fa';
+import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Spinner, Badge } from 'react-bootstrap';
+import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon, FaTimes, FaBuilding } from 'react-icons/fa';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,11 +10,24 @@ import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
 import LabourList from './LabourList';
 import { useTranslation } from 'react-i18next';
+import {
+  getSearchResultKind,
+  getRowDisplayName,
+  getRowMainServiceCategory,
+  getRowPhone,
+  summarizeEnterpriseServices,
+} from '../utils/searchCategoryResult';
+import { normalizeMongoId } from '../utils/enterpriseSession';
+
+const ENTERPRISE_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
+  /** What the user is typing (does not trigger search). */
+  const [searchInput, setSearchInput] = useState('');
+  /** Last query used for API + results table (set only on Enter / Search click). */
+  const [committedSearchQuery, setCommittedSearchQuery] = useState('');
   const [labourers, setLabourers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,48 +40,64 @@ function Home() {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showLabourListModal, setShowLabourListModal] = useState(false);
-
   const columns = [
     {
       name: t('table.name'),
-      selector: row => row.labourName,
+      selector: (row) => getRowDisplayName(row),
       sortable: true,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <FaUser className="text-primary me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium text-primary">
-            {row.labourName}
-          </span>
-        </div>
-      ),
+      cell: (row) => {
+        const isEnt = getSearchResultKind(row) === 'enterprise';
+        return (
+          <div className="d-flex align-items-center flex-wrap gap-2">
+            {isEnt ? (
+              <FaBuilding className="text-info me-1" style={{ fontSize: '1.2rem' }} />
+            ) : (
+              <FaUser className="text-primary me-1" style={{ fontSize: '1.2rem' }} />
+            )}
+            <div className="d-flex flex-column">
+              <span className="fw-medium text-primary">{getRowDisplayName(row)}</span>
+              <Badge bg={isEnt ? 'info' : 'primary'} className={isEnt ? 'text-dark' : ''} style={{ width: 'fit-content', fontSize: '0.7rem' }}>
+                {isEnt ? t('searchLabourModal.entityTypeEnterprise') : t('searchLabourModal.entityTypeLabour')}
+              </Badge>
+            </div>
+          </div>
+        );
+      },
     },
     {
       name: t('table.services'),
-      selector: row => row.labourSkill,
+      selector: (row) => getRowMainServiceCategory(row, committedSearchQuery),
       sortable: true,
-      cell: row => (
+      cell: (row) => (
         <div className="d-flex align-items-center">
           <FaTools className="text-success me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.labourSkill}</span>
+          <span className="fw-medium">{getRowMainServiceCategory(row, committedSearchQuery)}</span>
         </div>
       ),
     },
     {
       name: t('table.phone'),
-      selector: row => row.labourMobileNo,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <Button
-            variant="outline-primary"
-            size="sm"
-            onClick={() => window.location.href = `tel:${row.labourMobileNo}`}
-            className="d-flex align-items-center"
-          >
-            <FaPhone className="me-2" />
-            {t('common.callNow')}
-          </Button>
-        </div>
-      ),
+      selector: (row) => getRowPhone(row),
+      cell: (row) => {
+        const phone = getRowPhone(row);
+        return (
+          <div className="d-flex align-items-center">
+            <Button
+              variant="outline-primary"
+              size="sm"
+              disabled={!phone}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (phone) window.location.href = `tel:${phone}`;
+              }}
+              className="d-flex align-items-center"
+            >
+              <FaPhone className="me-2" />
+              {t('common.callNow')}
+            </Button>
+          </div>
+        );
+      },
     },
     {
       name: t('table.rating'),
@@ -84,23 +113,42 @@ function Home() {
     {
       name: t('table.actions') || 'Actions',
       button: true,
-      cell: row => (
-        <div className="d-flex gap-2">
+      cell: (row) => (
+        <div className="d-flex gap-2 align-items-center">
           <Button
-            variant="secondary"
+            variant="outline-primary"
             size="sm"
+            className="search-result-view-profile-btn d-inline-flex align-items-center justify-content-center text-nowrap"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/labour-details/${row.labourId}`, { state: { searchCategory: row.labourSkill } });
+              if (getSearchResultKind(row) === 'enterprise') {
+                const id = normalizeMongoId(row._id);
+                if (!id || !ENTERPRISE_ID_REGEX.test(id)) {
+                  alert(
+                    t('enterprisePublic.invalidId', {
+                      defaultValue: 'Enterprise profile is unavailable (invalid ID).',
+                    })
+                  );
+                  return;
+                }
+                navigate(`/enterprise-profile/${id}`, {
+                  state: { searchCategory: committedSearchQuery },
+                });
+              } else {
+                navigate(`/labour-details/${row.labourId}`, {
+                  state: { searchCategory: row.labourSkill },
+                });
+              }
             }}
           >
-            {t('common.viewProfile') || 'View Profile'}
+            <FaUser className="me-2 flex-shrink-0" />
+            {t('common.viewProfile')}
           </Button>
         </div>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
-      minWidth: '160px'
+      minWidth: '140px'
     },
   ];
 
@@ -173,35 +221,42 @@ function Home() {
       .catch(err => console.error('Failed to load services.json', err));
   }, []);
 
-  const handleSearch = async (e) => {
-    if (e) e.preventDefault();
-    // Always clear previous results before searching
+  const clearSearchResultsUi = () => {
     setLabourers([]);
     setTotalPages(0);
     setTotalElements(0);
     setCurrentPage(0);
-    if (!searchTerm.trim()) return;
-    await fetchLabourers(0, pageSize);
-    // Only clear the search bar if results are set (labourers is not empty)
-    // We'll use a setTimeout to ensure state is updated after fetchLabourers
-    setTimeout(() => {
-      if (labourers.length > 0) setSearchTerm('');
-    }, 0);
+    setCommittedSearchQuery('');
+    setSearchInput('');
   };
 
-  const fetchLabourers = async (pageNumber, size) => {
+  const handleSearch = async (e) => {
+    if (e) e.preventDefault();
+    const q = searchInput.trim();
+    setLabourers([]);
+    setTotalPages(0);
+    setTotalElements(0);
+    setCurrentPage(0);
+    if (!q) return;
+    setCommittedSearchQuery(q);
+    await fetchLabourers(0, pageSize, q);
+  };
+
+  const fetchLabourers = async (pageNumber, size, query) => {
+    const q = String(query || '').trim();
+    if (!q) return;
     try {
       setIsLoading(true);
       setError(null);
-      const response = await searchLabourByCategory(searchTerm, pageNumber, size);
+      const response = await searchLabourByCategory(q, pageNumber, size);
       if (response) {
         setLabourers(response.content || []);
         setTotalPages(response.totalPages || 0);
         setTotalElements(response.totalElements || 0);
         setCurrentPage(pageNumber);
         setPageSize(size);
-        if(response.content.length === 0){
-          alert(`Search results for "${searchTerm}" not found Sorry for the inconvenience. We couldn't find any skilled professionals for this service at the moment.`);
+        if (response.content.length === 0) {
+          alert(`Search results for "${q}" not found Sorry for the inconvenience. We couldn't find any skilled professionals for this service at the moment.`);
         }
       }
     } catch (error) {
@@ -213,11 +268,13 @@ function Home() {
   };
 
   const handlePageChange = (page) => {
-    fetchLabourers(page - 1, pageSize); // Subtract 1 because DataTable uses 1-based indexing
+    if (!committedSearchQuery.trim()) return;
+    fetchLabourers(page - 1, pageSize, committedSearchQuery);
   };
 
   const handlePerRowsChange = async (newPerPage, page) => {
-    fetchLabourers(page - 1, newPerPage);
+    if (!committedSearchQuery.trim()) return;
+    fetchLabourers(page - 1, newPerPage, committedSearchQuery);
   };
 
 
@@ -227,8 +284,23 @@ function Home() {
     setSelectedLabour(null);
   };
 
-  const handleLabourModalShow = (labour) => {
-    setSelectedLabour(labour);
+  const handleLabourModalShow = (row) => {
+    if (getSearchResultKind(row) === 'enterprise') {
+      const id = normalizeMongoId(row._id);
+      if (!id || !ENTERPRISE_ID_REGEX.test(id)) {
+        alert(
+          t('enterprisePublic.invalidId', {
+            defaultValue: 'Enterprise profile is unavailable (invalid ID).',
+          })
+        );
+        return;
+      }
+      navigate(`/enterprise-profile/${id}`, {
+        state: { searchCategory: committedSearchQuery },
+      });
+      return;
+    }
+    setSelectedLabour(row);
     setShowLabourModal(true);
   };
 
@@ -404,16 +476,8 @@ function Home() {
                     <Form.Control
                       type="text"
                       placeholder={t('search.placeholder')}
-                      value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        if (e.target.value === '') {
-                          setLabourers([]);
-                          setTotalPages(0);
-                          setTotalElements(0);
-                          setCurrentPage(0);
-                        }
-                      }}
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
                       className="search-input"
                     />
                     <Button 
@@ -446,12 +510,12 @@ function Home() {
           </Form>
 
           {/* Results Dropdown */}
-          {searchTerm && labourers.length > 0 && (
+          {labourers.length > 0 && (
             <>
               {/* Backdrop */}
               <div 
                 className="search-backdrop"
-                onClick={() => setSearchTerm('')}
+                onClick={clearSearchResultsUi}
               />
               
               {/* Results Container */}
@@ -464,7 +528,7 @@ function Home() {
                   <Button 
                     variant="link" 
                     className="text-muted p-0 close-results-btn"
-                    onClick={() => setSearchTerm('')}
+                    onClick={clearSearchResultsUi}
                   >
                     <FaTimes size={20} />
                   </Button>
@@ -807,7 +871,7 @@ function Home() {
         show={showLabourModal}
         onHide={handleLabourModalClose}
         selectedLabour={selectedLabour}
-        service={searchTerm}
+        service={committedSearchQuery}
       />
     </Container>
   );

@@ -148,26 +148,59 @@
   flex: 1 1 100%;
 }
 
-@media (min-width: 992px) {
-  .labour-cards-container .labour-card .card-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 0.75rem 1rem;
-    align-items: center;
+/* Search modal: stacked card layout (grid broke enterprise vs labour alignment) */
+.search-modal .labour-cards-container .labour-card .card-body.search-result-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  align-items: stretch;
+}
+
+.search-modal .labour-cards-container .labour-card .search-result-card-top {
+  width: 100%;
+}
+
+.search-modal .entity-type-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.enterprise-search-card {
+  cursor: default !important;
+}
+
+.enterprise-search-card:hover {
+  cursor: default !important;
+}
+
+.search-modal .enterprise-search-card:hover {
+  transform: none;
+  border-color: rgba(13, 202, 240, 0.45);
+}
+
+.search-result-actions .search-action-btn {
+  min-height: 42px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.search-result-actions .search-result-view-profile-btn {
+  border-width: 2px;
+}
+
+@media (max-width: 576px) {
+  .search-result-actions .search-action-btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 0;
+    font-size: 0.8rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    white-space: normal;
   }
 
-  .labour-cards-container .labour-card .labour-name {
-    margin: 0;
-    font-size: 1rem;
-  }
-
-  .labour-cards-container .labour-card .contact-info,
-  .labour-cards-container .labour-card .d-flex.align-items-center.text-muted {
-    margin: 0;
-  }
-
-  .labour-cards-container .labour-card .action-buttons .d-flex {
-    justify-content: flex-end;
+  .search-result-actions .search-action-btn .me-2 {
+    margin-right: 0.35rem !important;
   }
 }
 

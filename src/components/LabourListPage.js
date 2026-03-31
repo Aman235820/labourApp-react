@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Button, Spinner, Card, Badge } from 'react-bootstrap';
-import { FaArrowLeft, FaUser, FaTools, FaPhone, FaStar, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaTools, FaPhone, FaStar, FaMapMarkerAlt, FaCalendarAlt, FaBuilding } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
 import BookingModal from './modals/BookingModal';
+import { getSearchResultKind, searchResultItemKey, summarizeEnterpriseServices } from '../utils/searchCategoryResult';
+import { normalizeMongoId } from '../utils/enterpriseSession';
+import { useTranslation } from 'react-i18next';
 import '../styles/LabourListPage.css';
+
+const ENTERPRISE_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 
 function LabourListPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const isMounted = useRef(true);
   
   // Get data from navigation state
@@ -61,13 +67,116 @@ function LabourListPage() {
     });
   };
 
-  const renderLabourCard = (labour) => (
+  const renderEnterpriseCard = (ent, reactKey) => {
+    const phone = ent.ownerContactInfo || '';
+    const servicesLine = summarizeEnterpriseServices(ent.servicesOffered, service);
+    return (
+      <Card
+        key={reactKey}
+        className="labour-card mb-3 mobile-card enterprise-search-card border border-info border-opacity-50"
+      >
+        <Card.Body className="p-3">
+          <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+            <Badge bg="info" className="text-dark fw-semibold">
+              Enterprise
+            </Badge>
+            <div className="rating-section">
+              {ent.rating && parseFloat(ent.rating) > 0 ? (
+                <div className="d-flex align-items-center">
+                  <FaStar className="text-warning me-1" size={14} />
+                  <span className="fw-bold text-dark">{ent.rating}</span>
+                  <small className="text-muted ms-1">({ent.ratingCount || 0})</small>
+                </div>
+              ) : (
+                <Badge bg="secondary">No ratings yet</Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="labour-avatar bg-info">
+              <FaBuilding className="text-white" size={20} />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h5 className="mb-1 fw-bold text-primary labour-name">{ent.companyName || '—'}</h5>
+            {(ent.ownername || '').trim() ? (
+              <div className="text-muted small mb-2">{ent.ownername}</div>
+            ) : null}
+            {servicesLine ? (
+              <div className="d-flex align-items-start text-muted mb-2">
+                <FaTools className="me-2 mt-1" size={14} />
+                <span className="small">{servicesLine}</span>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="contact-info mb-3">
+            <div className="d-flex align-items-start text-muted mb-2">
+              <FaMapMarkerAlt className="me-2 text-primary mt-1" size={14} />
+              <span className="location-detail">{ent.location || 'Location not specified'}</span>
+            </div>
+          </div>
+
+          <div className="action-buttons d-grid gap-2">
+            <div className="d-flex gap-2 flex-wrap">
+              <Button
+                variant="outline-primary"
+                className="flex-fill call-btn"
+                disabled={!phone}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (phone) window.location.href = `tel:${phone}`;
+                }}
+              >
+                <FaPhone className="me-2" />
+                Call Now
+              </Button>
+              <Button
+                variant="outline-primary"
+                className="flex-fill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const id = normalizeMongoId(ent._id);
+                  if (!id || !ENTERPRISE_ID_REGEX.test(id)) {
+                    alert(
+                      t('enterprisePublic.invalidId', {
+                        defaultValue: 'Enterprise profile is unavailable (invalid ID).',
+                      })
+                    );
+                    return;
+                  }
+                  navigate(`/enterprise-profile/${id}`, { state: { searchCategory: service } });
+                }}
+              >
+                <FaUser className="me-2" />
+                {t('common.viewProfile')}
+              </Button>
+              <Button variant="outline-secondary" className="flex-fill" disabled title="Booking applies to individual professionals only.">
+                <FaCalendarAlt className="me-2" />
+                Book for Later
+              </Button>
+            </div>
+            <small className="text-muted">Booking applies to individual professionals only. Use Call for this business.</small>
+          </div>
+        </Card.Body>
+      </Card>
+    );
+  };
+
+  const renderLabourCard = (labour, reactKey) => (
     <Card 
-      key={labour.labourId} 
+      key={reactKey} 
       className="labour-card mb-3 mobile-card"
       onClick={() => handleCardClicked(labour)}
     >
       <Card.Body className="p-3">
+        <div className="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+          <Badge bg="primary" className="fw-semibold">
+            Individual professional
+          </Badge>
+        </div>
         {/* Top Row - Avatar and Rating */}
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div className="labour-avatar">
@@ -267,7 +376,12 @@ function LabourListPage() {
                 </small>
               </div>
               <div className="labour-cards-grid">
-                {labourers.map(renderLabourCard)}
+                {labourers.map((item, idx) => {
+                  const k = searchResultItemKey(item, idx);
+                  return getSearchResultKind(item) === 'enterprise'
+                    ? renderEnterpriseCard(item, k)
+                    : renderLabourCard(item, k);
+                })}
               </div>
               
               {/* Pagination - Always show if we have data */}

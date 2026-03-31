@@ -11,7 +11,11 @@ import {
   FaTrash
 } from 'react-icons/fa';
 import { enterpriseService } from '../services/enterpriseService';
-import { withEnterpriseId } from '../utils/enterpriseSession';
+import {
+  withEnterpriseId,
+  normalizeMongoId,
+  getStoredEnterpriseSession,
+} from '../utils/enterpriseSession';
 import '../styles/EnterpriseDetailsModal.css';
 
 function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpdate }) {
@@ -168,11 +172,19 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
     setError('');
     setSuccess('');
     try {
-      const token = enterprise?.token || enterprise?.returnValue?.token || '';
-      const resolvedId = enterpriseId || enterprise?._id || enterprise?.returnValue?._id || '';
+      const stored = getStoredEnterpriseSession();
+      const token =
+        String(
+          enterprise?.token || enterprise?.returnValue?.token || stored.token || ''
+        ).trim();
+      const resolvedId =
+        normalizeMongoId(enterpriseId) ||
+        normalizeMongoId(enterprise?._id) ||
+        normalizeMongoId(enterprise?.returnValue?._id) ||
+        stored.enterpriseId;
 
-      if (!resolvedId) {
-        console.error('Modal - Missing enterpriseId:', { enterpriseId, enterprise });
+      if (!resolvedId || !/^[0-9a-fA-F]{24}$/.test(String(resolvedId))) {
+        console.error('Modal - Missing enterpriseId:', { enterpriseId, enterprise, stored });
         throw new Error('Enterprise session not found');
       }
 

@@ -52,4 +52,17 @@
   .labour-table-container {
     font-size: 0.875rem;
   }
-} 
+}
+
+.search-result-view-profile-btn {
+  white-space: nowrap;
+  font-weight: 600;
+  border-width: 2px;
+  min-height: 2.25rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.search-result-view-profile-btn:hover {
+  background-color: rgba(13, 110, 253, 0.08);
+}

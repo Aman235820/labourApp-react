@@ -20,7 +20,8 @@
     "backgroundChecked": "Background Checked",
     "experienced": "Experienced",
     "mobileService": "Mobile Service",
-    "warranty": "Warranty"
+    "warranty": "Warranty",
+    "viewProfile": "View Profile"
   },
   "navigation": {
     "brand": "InstaHelp",
@@ -392,7 +393,11 @@
     "callNow": "Call Now",
     "bookForLater": "Book for Later",
     "pleaseLoginToBookService": "Please login to book a service. Redirecting to registration page.",
-    "locationNotSpecified": "Location not specified"
+    "locationNotSpecified": "Location not specified",
+    "entityTypeEnterprise": "Enterprise",
+    "entityTypeLabour": "Individual professional",
+    "servicesOffered": "Services",
+    "bookingNotAvailableForEnterprise": "Booking applies to individual professionals only. Use Call to reach this business."
   },
   "locationModal": {
     "selectYourLocation": "Select Your Location",

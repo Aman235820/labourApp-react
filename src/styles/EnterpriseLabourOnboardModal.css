@@ -1,0 +1,169 @@
+/* —— Mobile-first onboarding modal: full-height sheet, safe areas, touch targets —— */
+
+.enterprise-labour-onboard-modal .modal-dialog {
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enterprise-labour-onboard-modal .modal-dialog {
+    transition: none;
+  }
+}
+
+.enterprise-labour-onboard-content {
+  border: none;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.12);
+}
+
+/* Small screens: edge-to-edge sheet with scrollable body */
+@media (max-width: 575.98px) {
+  .enterprise-labour-onboard-modal .modal-dialog {
+    margin: 0;
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+
+  .enterprise-labour-onboard-modal .modal-content.enterprise-labour-onboard-content,
+  .enterprise-labour-onboard-content {
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    border-radius: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .enterprise-labour-onboard-form {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .enterprise-labour-onboard-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: 1rem;
+    max-height: none !important;
+  }
+
+  .enterprise-labour-onboard-header {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    flex-shrink: 0;
+  }
+
+  .enterprise-labour-onboard-footer {
+    flex-shrink: 0;
+    padding: 1rem max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-right));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Tablet / desktop */
+@media (min-width: 576px) {
+  .enterprise-labour-onboard-body {
+    max-height: min(72vh, 680px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .enterprise-labour-onboard-footer {
+    padding: 1rem 1.25rem;
+    background: #fff;
+  }
+}
+
+.enterprise-labour-onboard-lead {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+@media (min-width: 576px) {
+  .enterprise-labour-onboard-lead {
+    font-size: 0.875rem;
+  }
+}
+
+.enterprise-labour-onboard-label {
+  font-size: 0.875rem;
+  margin-bottom: 0.35rem;
+  color: #374151;
+}
+
+/* 16px+ inputs reduce iOS Safari zoom-on-focus */
+.enterprise-labour-onboard-input,
+.enterprise-labour-onboard-modal .form-select.enterprise-labour-onboard-input {
+  min-height: 3rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  border-radius: 0.5rem;
+  touch-action: manipulation;
+}
+
+@media (min-width: 576px) {
+  .enterprise-labour-onboard-input,
+  .enterprise-labour-onboard-modal .form-select.enterprise-labour-onboard-input {
+    min-height: 2.625rem;
+    font-size: 0.9375rem;
+  }
+}
+
+.enterprise-labour-onboard-textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+.enterprise-labour-onboard-footer-btn {
+  min-height: 3rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  touch-action: manipulation;
+}
+
+@media (min-width: 576px) {
+  .enterprise-labour-onboard-footer-btn {
+    min-height: 2.75rem;
+  }
+}
+
+.enterprise-labour-onboard-alert {
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.enterprise-labour-onboard-error-anchor {
+  scroll-margin-top: 0.75rem;
+}
+
+/* Footer: primary action full width on phone (thumb reach) */
+@media (max-width: 575.98px) {
+  .enterprise-labour-onboard-footer {
+    width: 100%;
+  }
+
+  .enterprise-labour-onboard-footer .enterprise-labour-onboard-footer-btn {
+    width: 100%;
+  }
+}

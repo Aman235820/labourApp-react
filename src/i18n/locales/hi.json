@@ -21,7 +21,8 @@
     "experienced": "अनुभवी",
     "mobileService": "Mobile Service",
     "warranty": "Warranty",
-    "locationNotSpecified": "स्थान निर्दिष्ट नहीं किया गया"
+    "locationNotSpecified": "स्थान निर्दिष्ट नहीं किया गया",
+    "viewProfile": "प्रोफ़ाइल देखें"
   },
   "navigation": {
     "brand": "InstaHelp",
@@ -319,7 +320,11 @@
     "callNow": "अभी कॉल करें",
     "bookForLater": "बाद के लिए बुक करें",
     "pleaseLoginToBookService": "सेवा बुक करने के लिए कृपया लॉगिन करें। पंजीकरण पेज पर पुनर्निर्देशित हो रहा है।",
-    "locationNotSpecified": "स्थान निर्दिष्ट नहीं किया गया"
+    "locationNotSpecified": "स्थान निर्दिष्ट नहीं किया गया",
+    "entityTypeEnterprise": "एंटरप्राइज़",
+    "entityTypeLabour": "व्यक्तिगत पेशेवर",
+    "servicesOffered": "सेवाएँ",
+    "bookingNotAvailableForEnterprise": "बुकिंग केवल व्यक्तिगत पेशेवरों के लिए है। इस व्यवसाय से संपर्क के लिए कॉल करें।"
   },
   "locationModal": {
     "selectYourLocation": "अपना Location Select करें",

@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
+import '../styles/SearchLabourModal.css';
 import { Modal, Button, Container, Card, Badge, Alert, Form } from 'react-bootstrap';
-import { FaStar, FaPhone, FaTools, FaUser, FaMapMarkerAlt, FaCalendarAlt } from 'react-icons/fa';
+import { FaStar, FaPhone, FaTools, FaUser, FaMapMarkerAlt, FaCalendarAlt, FaBuilding } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import BookingModal from './modals/BookingModal';
 import { useTranslation } from 'react-i18next';
-import '../styles/SearchLabourModal.css';
+import {
+    getSearchResultKind,
+    searchResultItemKey,
+    summarizeEnterpriseServices,
+    getRowMainServiceCategory,
+} from '../utils/searchCategoryResult';
+import { normalizeMongoId } from '../utils/enterpriseSession';
+
+const ENTERPRISE_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 
 const SearchLabourModal = ({ 
     show, 
@@ -91,63 +100,158 @@ const SearchLabourModal = ({
         });
     };
 
-    const renderLabourCard = (labour) => (
+    const renderRatingBlock = (rating, ratingCount) => (
+        <div className="search-result-rating flex-shrink-0 text-end">
+            {rating && parseFloat(rating) > 0 ? (
+                <div className="d-flex align-items-center justify-content-end">
+                    <FaStar className="text-warning me-1" size={14} />
+                    <span className="fw-bold text-dark">{rating}</span>
+                    <small className="text-muted ms-1">({ratingCount || 0})</small>
+                </div>
+            ) : (
+                <Badge bg="secondary" className="fw-normal">{t('common.noRatingsYet')}</Badge>
+            )}
+        </div>
+    );
+
+    const renderEnterpriseCard = (ent, reactKey) => {
+        const phone = ent.ownerContactInfo || '';
+        const mainCategory = getRowMainServiceCategory(ent, searchCategory || '');
+        const servicesLine = summarizeEnterpriseServices(ent.servicesOffered, searchCategory);
+        return (
+            <Card
+                key={reactKey}
+                className="labour-card mb-3 mobile-card enterprise-search-card border border-info border-opacity-25"
+            >
+                <Card.Body className="p-3 search-result-card-body">
+                    <div className="search-result-card-top d-flex align-items-start gap-3">
+                        <div className="labour-avatar bg-info flex-shrink-0 enterprise-avatar">
+                            <FaBuilding className="text-white" size={20} />
+                        </div>
+                        <div className="flex-grow-1 min-w-0">
+                            <div className="d-flex align-items-start justify-content-between gap-2">
+                                <div className="min-w-0">
+                                    <h5 className="mb-1 fw-bold text-primary labour-name text-break">{ent.companyName || '—'}</h5>
+                                    <Badge bg="info" className="text-dark fw-semibold entity-type-badge">
+                                        {t('searchLabourModal.entityTypeEnterprise')}
+                                    </Badge>
+                                    {(ent.ownername || '').trim() ? (
+                                        <div className="text-muted small mt-1">{ent.ownername}</div>
+                                    ) : null}
+                                </div>
+                                {renderRatingBlock(ent.rating, ent.ratingCount)}
+                            </div>
+                            <div className="d-flex align-items-center text-muted mt-2 pt-1 border-top border-light">
+                                <FaTools className="me-2 flex-shrink-0 text-success" size={14} />
+                                <span className="service-type fw-medium text-dark">{mainCategory}</span>
+                            </div>
+                            {servicesLine ? (
+                                <div className="small text-muted mt-1 ms-4 ps-1">{servicesLine}</div>
+                            ) : null}
+                        </div>
+                    </div>
+
+                    <div className="contact-info">
+                        <div className="d-flex align-items-start text-muted">
+                            <FaMapMarkerAlt className="me-2 text-primary mt-1 flex-shrink-0" size={14} />
+                            <span className="location-detail">{ent.location || t('searchLabourModal.locationNotSpecified')}</span>
+                        </div>
+                    </div>
+
+                    <div className="action-buttons search-result-actions">
+                        <div className="d-flex flex-wrap gap-2">
+                            <Button
+                                variant="outline-primary"
+                                className="search-action-btn flex-fill"
+                                disabled={!phone}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (phone) window.location.href = `tel:${phone}`;
+                                }}
+                            >
+                                <FaPhone className="me-2" />
+                                {t('searchLabourModal.callNow')}
+                            </Button>
+                            <Button
+                                variant="outline-primary"
+                                className="search-action-btn flex-fill search-result-view-profile-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const id = normalizeMongoId(ent._id);
+                                    if (!id || !ENTERPRISE_ID_REGEX.test(id)) {
+                                        alert(
+                                            t('enterprisePublic.invalidId', {
+                                                defaultValue: 'Enterprise profile is unavailable (invalid ID).',
+                                            })
+                                        );
+                                        return;
+                                    }
+                                    onHide();
+                                    navigate(`/enterprise-profile/${id}`, {
+                                        state: { searchCategory: searchCategory || '' },
+                                    });
+                                }}
+                            >
+                                <FaUser className="me-2" />
+                                {t('common.viewProfile')}
+                            </Button>
+                            <Button
+                                variant="outline-secondary"
+                                className="search-action-btn flex-fill"
+                                disabled
+                                title={t('searchLabourModal.bookingNotAvailableForEnterprise')}
+                            >
+                                <FaCalendarAlt className="me-2" />
+                                {t('searchLabourModal.bookForLater')}
+                            </Button>
+                        </div>
+                        <small className="text-muted d-block mt-2">{t('searchLabourModal.bookingNotAvailableForEnterprise')}</small>
+                    </div>
+                </Card.Body>
+            </Card>
+        );
+    };
+
+    const renderLabourCard = (labour, reactKey) => (
         <Card 
-            key={labour.labourId} 
-            className="labour-card mb-3 mobile-card"
+            key={reactKey} 
+            className="labour-card mb-3 mobile-card labour-search-card"
             onClick={() => handleCardClicked(labour)}
         >
-            <Card.Body className="p-3">
-                {/* Top Row - Avatar and Rating */}
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div className="labour-avatar">
+            <Card.Body className="p-3 search-result-card-body">
+                <div className="search-result-card-top d-flex align-items-start gap-3">
+                    <div className="labour-avatar flex-shrink-0">
                         <FaUser className="text-white" size={20} />
                     </div>
-                    <div className="rating-section">
-                        {labour.rating && parseFloat(labour.rating) > 0 ? (
-                            <div className="d-flex align-items-center">
-                                <FaStar className="text-warning me-1" size={14} />
-                                <span className="fw-bold text-dark">{labour.rating}</span>
-                                <small className="text-muted ms-1">({labour.ratingCount || 0})</small>
+                    <div className="flex-grow-1 min-w-0">
+                        <div className="d-flex align-items-start justify-content-between gap-2">
+                            <div className="min-w-0">
+                                <h5 className="mb-1 fw-bold text-primary labour-name text-break">{labour.labourName}</h5>
+                                <Badge bg="primary" className="fw-semibold entity-type-badge">
+                                    {t('searchLabourModal.entityTypeLabour')}
+                                </Badge>
                             </div>
-                        ) : (
-                            <Badge bg="secondary">{t('common.noRatingsYet')}</Badge>
-                        )}
+                            {renderRatingBlock(labour.rating, labour.ratingCount)}
+                        </div>
+                        <div className="d-flex align-items-center text-muted mt-2 pt-1 border-top border-light">
+                            <FaTools className="me-2 flex-shrink-0 text-success" size={14} />
+                            <span className="service-type fw-medium text-dark">{labour.labourSkill}</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Name and Service */}
-                <div className="mb-3">
-                    <h5 className="mb-1 fw-bold text-primary labour-name">{labour.labourName}</h5>
-                    <div className="d-flex align-items-center text-muted mb-2">
-                        <FaTools className="me-2" size={14} />
-                        <span className="service-type">{labour.labourSkill}</span>
+                <div className="contact-info">
+                    <div className="d-flex align-items-start text-muted">
+                        <FaMapMarkerAlt className="me-2 text-primary mt-1 flex-shrink-0" size={14} />
+                        <span className="location-detail">{labour.labourLocation || labour.labourAddress || t('searchLabourModal.locationNotSpecified')}</span>
                     </div>
                 </div>
-                
-                {/* Location and Rating Information */}
-                <div className="contact-info mb-3">
-                    <div className="d-flex align-items-start text-muted mb-2">
-                        <FaMapMarkerAlt className="me-2 text-primary mt-1" size={14} />
-                        <span className="location-detail">{labour.labourLocation || labour.labourAddress || t('common.locationNotSpecified')}</span>
-                    </div>
-                    <div className="d-flex align-items-center text-muted">
-                        <FaStar className="me-2 text-warning" size={14} />
-                        <span className="rating-detail">
-                            {labour.rating && parseFloat(labour.rating) > 0 
-                                ? `${labour.rating} rating (${labour.ratingCount || 0} reviews)`
-                                : t('common.noRatingsYet')
-                            }
-                        </span>
-                    </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="action-buttons d-grid gap-2">
-                    <div className="d-flex gap-2">
+
+                <div className="action-buttons search-result-actions">
+                    <div className="d-flex flex-wrap gap-2">
                         <Button 
                             variant="outline-primary" 
-                            className="flex-fill call-btn"
+                            className="search-action-btn flex-fill call-btn"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 window.location.href = `tel:${labour.labourMobileNo}`;
@@ -157,18 +261,19 @@ const SearchLabourModal = ({
                             {t('searchLabourModal.callNow')}
                         </Button>
                         <Button
-                            variant="secondary"
-                            className="flex-fill view-profile-btn"
+                            variant="outline-primary"
+                            className="search-action-btn flex-fill search-result-view-profile-btn"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleViewProfile(labour);
                             }}
                         >
-                            {t('common.viewProfile') || 'View Profile'}
+                            <FaUser className="me-2" />
+                            {t('common.viewProfile')}
                         </Button>
                         <Button 
                             variant="success" 
-                            className="flex-fill book-btn"
+                            className="search-action-btn flex-fill book-btn"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleBookLabour(labour);
@@ -196,8 +301,15 @@ const SearchLabourModal = ({
                 dialogClassName="search-modal-dialog"
                 contentClassName="search-modal-content"
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>{t('searchLabourModal.searchResultsForStatic')}</Modal.Title>
+                <Modal.Header closeButton className="search-modal-header border-bottom">
+                    <Modal.Title className="h5 mb-0 fw-bold">
+                        {t('searchLabourModal.searchResultsForStatic')}
+                        {searchCategory ? (
+                            <span className="d-block small fw-normal text-muted mt-1">
+                                {searchCategory}
+                            </span>
+                        ) : null}
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {/* Controls Bar */}
@@ -243,7 +355,12 @@ const SearchLabourModal = ({
                                     </small>
                                 </div>
                                 <div className="labour-cards-container">
-                                    {searchResults.content.map(renderLabourCard)}
+                                    {searchResults.content.map((item, idx) => {
+                                        const k = searchResultItemKey(item, idx);
+                                        return getSearchResultKind(item) === 'enterprise'
+                                            ? renderEnterpriseCard(item, k)
+                                            : renderLabourCard(item, k);
+                                    })}
                                 </div>
                                 {/* Bottom Pagination (mobile-friendly) */}
                                 <div className="pagination-container mt-3 d-flex align-items-center justify-content-between">
@@ -273,9 +390,8 @@ const SearchLabourModal = ({
                 <BookingModal
                     show={showBookingModal}
                     onHide={() => setShowBookingModal(false)}
-                    selectedLabour={selectedLabourForBooking}
-                    userId={userId}
-                    userMobileNumber={userMobileNumber}
+                    labour={selectedLabourForBooking}
+                    serviceCategory={searchCategory || ''}
                     onBookingSuccess={handleBookingSuccess}
                 />
             )}

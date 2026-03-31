@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const appUrl = process.env.REACT_APP_API_BASEURL;
+const fallbackBaseUrl =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:4000'
+    : 'https://labourapp.onrender.com';
+const appUrl = process.env.REACT_APP_API_BASEURL || fallbackBaseUrl;
 const baseurl = `${appUrl}/labourapp/labourReq`;
 
 export const searchLabourByCategory = async (category, pageNumber = 0, pageSize = 10, sortBy = "rating", sortOrder = "desc") => {
