@@ -199,6 +199,26 @@ export const enterpriseService = {
     }
   },
 
+  /**
+   * All enterprise-registered labours (owner dashboard). Backend path uses ID suffix casing as deployed.
+   */
+  findLabourByEnterpriseId: async (enterpriseId, token) => {
+    try {
+      const normalizedId = requireEnterpriseId(enterpriseId);
+      const endpoint = `${baseurl}/enterprise/findLabourByEnterpriseID/${normalizedId}`;
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (token && String(token).trim() !== '') {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      const response = await axios.post(endpoint, {}, { headers });
+      return unwrapResponseDTO(response.data);
+    } catch (error) {
+      throw normalizeAxiosError(error);
+    }
+  },
+
   getEnterpriseReviews: async (
     enterpriseId,
     sortBy = 'reviewTime',

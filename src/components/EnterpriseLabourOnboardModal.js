@@ -211,7 +211,6 @@ function EnterpriseLabourOnboardModal({
       onHide={onHide}
       size="lg"
       centered
-      scrollable
       backdrop="static"
       className="enterprise-labour-onboard-modal"
       dialogClassName="enterprise-labour-onboard-dialog"

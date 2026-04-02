@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import Select from 'react-select';
-import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus } from 'react-icons/fa';
+import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus, FaEnvelope, FaSyncAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
 import CallNowModal from './CallNowModal';
@@ -10,12 +10,10 @@ import EnterpriseLabourOnboardModal from './EnterpriseLabourOnboardModal';
 import { enterpriseService } from '../services/enterpriseService';
 import {
   withEnterpriseId,
-  normalizeMongoId,
+  resolveEnterpriseMongoId,
   getStoredEnterpriseSession,
 } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDashboard.css';
-
-const ONBOARDED_LABOUR_STORAGE_PREFIX = 'labourApp_enterpriseOnboardedLabours_';
 
 function EnterpriseDashboard() {
   const [enterprise, setEnterprise] = useState(null);
@@ -28,7 +26,9 @@ function EnterpriseDashboard() {
   const [showCallModal, setShowCallModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showOnboardLabourModal, setShowOnboardLabourModal] = useState(false);
-  const [onboardedLabourers, setOnboardedLabourers] = useState([]);
+  const [enterpriseLabourers, setEnterpriseLabourers] = useState([]);
+  const [labourListLoading, setLabourListLoading] = useState(false);
+  const [labourListError, setLabourListError] = useState('');
   const [enterpriseId, setEnterpriseId] = useState(null);
   const navigate = useNavigate();
 
@@ -44,8 +44,9 @@ function EnterpriseDashboard() {
             localStorage.setItem('enterprise', JSON.stringify(enterpriseData));
           }
           
-          // Extract the MongoDB ID from localStorage
-          const extractedId = enterpriseData?.enterpriseId;
+          // Resolve 24-char hex even when `_id` is { timestamp, date } and id lives nested
+          const extractedId =
+            resolveEnterpriseMongoId(enterpriseData) || enterpriseData?.enterpriseId;
           console.log('Dashboard - Raw enterpriseData:', enterpriseData);
           console.log('Dashboard - Extracted ID:', extractedId);
           console.log('Dashboard - ID type:', typeof extractedId);
@@ -71,7 +72,12 @@ function EnterpriseDashboard() {
               });
               setEnterprise(updatedEnterprise);
               localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
-              
+              const freshHex =
+                resolveEnterpriseMongoId(updatedEnterprise) || updatedEnterprise?.enterpriseId;
+              if (freshHex && /^[0-9a-fA-F]{24}$/.test(String(freshHex))) {
+                setEnterpriseId(String(freshHex));
+              }
+
               // Check if owner name is blank or null
               const ownerName = updatedEnterprise.ownername || '';
               if (!ownerName || ownerName.trim() === '') {
@@ -102,6 +108,11 @@ function EnterpriseDashboard() {
           if (stored) {
             const enterpriseData = withEnterpriseId(JSON.parse(stored));
             setEnterprise(enterpriseData);
+            const hid =
+              resolveEnterpriseMongoId(enterpriseData) || enterpriseData?.enterpriseId;
+            if (hid && /^[0-9a-fA-F]{24}$/.test(String(hid))) {
+              setEnterpriseId(String(hid));
+            }
             const ownerName = enterpriseData.ownername || '';
             if (!ownerName || ownerName.trim() === '') {
               setShowDetailsModal(true);
@@ -113,19 +124,6 @@ function EnterpriseDashboard() {
 
     loadEnterpriseData();
   }, []);
-
-  useEffect(() => {
-    if (!enterpriseId) {
-      setOnboardedLabourers([]);
-      return;
-    }
-    try {
-      const raw = localStorage.getItem(ONBOARDED_LABOUR_STORAGE_PREFIX + enterpriseId);
-      setOnboardedLabourers(raw ? JSON.parse(raw) : []);
-    } catch {
-      setOnboardedLabourers([]);
-    }
-  }, [enterpriseId]);
 
   // Load services data
   useEffect(() => {
@@ -172,9 +170,7 @@ function EnterpriseDashboard() {
     const fromStorage = getStoredEnterpriseSession();
     const id =
       enterpriseId ||
-      normalized.enterpriseId ||
-      normalizeMongoId(enterprise?._id) ||
-      normalizeMongoId(enterprise?.returnValue?._id) ||
+      resolveEnterpriseMongoId(normalized) ||
       fromStorage.enterpriseId;
     const idStr = id != null ? String(id).trim() : '';
     const mongoOk = /^[0-9a-fA-F]{24}$/.test(idStr);
@@ -190,34 +186,39 @@ function EnterpriseDashboard() {
     return { id: mongoOk ? idStr : '', token: String(token || '').trim() };
   };
 
-  const handleEnterpriseLabourOnboardSuccess = (record) => {
-    const { id: effId } = getDashboardEnterpriseContext();
-    if (!effId || !/^[0-9a-fA-F]{24}$/.test(effId)) return;
-    const stableKey =
-      record?.enterpriseLabourId ??
-      record?._id ??
-      (typeof record?._id === 'object' && record?._id != null
-        ? JSON.stringify(record._id)
-        : null) ??
-      record?.id ??
-      `client-${Date.now()}`;
-    const entry = {
-      ...record,
-      _listKey: String(stableKey) + `-${Date.now()}`,
-      _savedAt: Date.now(),
-    };
-    setOnboardedLabourers((prev) => {
-      const next = [...prev, entry];
-      try {
-        localStorage.setItem(
-          ONBOARDED_LABOUR_STORAGE_PREFIX + effId,
-          JSON.stringify(next)
-        );
-      } catch (e) {
-        console.warn('Could not save onboarded labour list', e);
-      }
-      return next;
-    });
+  const fetchEnterpriseLabours = useCallback(async () => {
+    const { id, token } = getDashboardEnterpriseContext();
+    if (!id || !token) {
+      setEnterpriseLabourers([]);
+      setLabourListError('');
+      setLabourListLoading(false);
+      return;
+    }
+    setLabourListLoading(true);
+    setLabourListError('');
+    try {
+      const res = await enterpriseService.findLabourByEnterpriseId(id, token);
+      const list = Array.isArray(res?.returnValue) ? res.returnValue : [];
+      setEnterpriseLabourers(list);
+    } catch (e) {
+      const msg =
+        (e && typeof e === 'object' && e.message) ||
+        (e && typeof e === 'object' && e.response?.data?.message) ||
+        'Failed to load registered labours.';
+      setLabourListError(String(msg));
+      setEnterpriseLabourers([]);
+    } finally {
+      setLabourListLoading(false);
+    }
+  }, [enterpriseId, enterprise]);
+
+  useEffect(() => {
+    if (!enterprise) return;
+    fetchEnterpriseLabours();
+  }, [enterprise, fetchEnterpriseLabours]);
+
+  const handleEnterpriseLabourOnboardSuccess = async () => {
+    await fetchEnterpriseLabours();
   };
 
   const handleEnterpriseUpdate = async (updatedEnterprise) => {
@@ -340,12 +341,9 @@ function EnterpriseDashboard() {
       const servicesOffered = buildServicesOfferedObject();
       const normalizedEnterprise = withEnterpriseId(enterprise || {});
       const effectiveEnterpriseId =
-        normalizedEnterprise?.enterpriseId ||
+        resolveEnterpriseMongoId(normalizedEnterprise) ||
         enterpriseId ||
-        enterprise?._id ||
-        enterprise?.returnValue?._id ||
-        enterprise?.id ||
-        enterprise?.returnValue?.id;
+        resolveEnterpriseMongoId(enterprise || {});
 
       const token =
         enterprise?.token ||
@@ -358,7 +356,10 @@ function EnterpriseDashboard() {
           }
         })();
       
-      if (!effectiveEnterpriseId) {
+      if (
+        !effectiveEnterpriseId ||
+        !/^[0-9a-fA-F]{24}$/.test(String(effectiveEnterpriseId).trim())
+      ) {
         throw new Error('Enterprise ID not found. Please refresh and try again.');
       }
       
@@ -556,118 +557,226 @@ function EnterpriseDashboard() {
         </Col>
       </Row>
 
-      {/* Onboarded labour (this browser / enterprise session) */}
-      <Row className="mt-4">
+      {/* Registered labours (server) */}
+      <Row className="mt-4 enterprise-labour-registry-row">
         <Col xs={12}>
-          <Card className="shadow-sm border-0 enterprise-onboarded-labour-card">
-            <Card.Header className="bg-info bg-opacity-10 border-0 py-3">
-              <h4 className="mb-0 fw-bold text-dark">
-                <FaUsers className="me-2 text-info" />
-                Onboarded labour
-              </h4>
-              <p className="text-muted small mb-0 mt-1">
-                Team members added from this dashboard are listed here (saved on this device).
-              </p>
+          <Card className="shadow-sm border-0 enterprise-labour-registry-card">
+            <Card.Header className="enterprise-labour-registry-header border-0 py-3">
+              <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-3">
+                <div className="min-w-0">
+                  <h4 className="mb-0 fw-bold text-dark d-flex align-items-center flex-wrap gap-2">
+                    <FaUsers className="text-primary flex-shrink-0" />
+                    <span>Registered labours</span>
+                    {!labourListLoading && enterpriseLabourers.length > 0 ? (
+                      <Badge bg="primary" pill className="ms-md-1">
+                        {enterpriseLabourers.length}
+                      </Badge>
+                    ) : null}
+                  </h4>
+                  <p className="text-muted small mb-0 mt-2">
+                    Everyone onboarded under your enterprise. List loads when you open the dashboard.
+                  </p>
+                </div>
+                <div className="d-flex flex-column flex-sm-row gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline-primary"
+                    className="d-flex align-items-center justify-content-center gap-2"
+                    onClick={() => fetchEnterpriseLabours()}
+                    disabled={labourListLoading}
+                  >
+                    {labourListLoading ? (
+                      <>
+                        <Spinner animation="border" size="sm" role="status" />
+                        <span>Loading…</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaSyncAlt />
+                        <span>Refresh</span>
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="success"
+                    className="d-flex align-items-center justify-content-center gap-2"
+                    onClick={() => setShowOnboardLabourModal(true)}
+                  >
+                    <FaUserPlus />
+                    <span>Onboard labour</span>
+                  </Button>
+                </div>
+              </div>
             </Card.Header>
-            <Card.Body>
-              {onboardedLabourers.length === 0 ? (
-                <div className="text-center py-4 text-muted">
-                  <FaUserPlus className="mb-2 opacity-50" style={{ fontSize: '2rem' }} />
-                  <p className="mb-0">No labour onboarded yet. Use &quot;Onboard labour&quot; above.</p>
+            <Card.Body className="pt-0">
+              {labourListError ? (
+                <Alert
+                  variant="danger"
+                  className="mb-3"
+                  dismissible
+                  onClose={() => setLabourListError('')}
+                >
+                  {labourListError}
+                </Alert>
+              ) : null}
+
+              {labourListLoading && enterpriseLabourers.length === 0 ? (
+                <div className="enterprise-labour-loading text-center py-5">
+                  <Spinner animation="border" variant="primary" role="status" />
+                  <p className="text-muted small mt-3 mb-0">Fetching your team…</p>
+                </div>
+              ) : enterpriseLabourers.length === 0 ? (
+                <div className="enterprise-labour-empty text-center py-5 px-2">
+                  <FaUserPlus className="mb-3 text-muted opacity-50 enterprise-labour-empty-icon" />
+                  <p className="text-muted mb-2 fw-semibold">No registered labours yet</p>
+                  <p className="text-muted small mb-0">
+                    Use <strong>Onboard labour</strong> to add team members. They will appear here after the server saves them.
+                  </p>
                 </div>
               ) : (
-                <Row className="g-3">
-                  {onboardedLabourers.map((lab) => (
-                    <Col md={6} xl={4} key={lab._listKey}>
-                      <div className="border rounded-3 p-3 h-100 bg-light bg-opacity-50">
-                        <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
-                          <strong className="text-primary text-break">
-                            {lab.fullName || '—'}
-                          </strong>
-                          <Badge bg="secondary" className="text-uppercase flex-shrink-0">
-                            {lab.role || '—'}
-                          </Badge>
-                        </div>
-                        <div className="small text-muted mb-1">
-                          <FaPhone className="me-1" />
-                          {lab.mobile || '—'}
-                          {lab.alternateMobile ? (
-                            <span className="d-block mt-1">Alt: {lab.alternateMobile}</span>
-                          ) : null}
-                        </div>
-                        {lab.email ? (
-                          <div className="small mb-1 text-break">{lab.email}</div>
-                        ) : null}
-                        <div className="small mb-1">
-                          <strong>Skill:</strong> {lab.primarySkill || '—'}
-                        </div>
-                        <div className="small mb-1 text-break">
-                          <FaMapMarkerAlt className="me-1 text-primary" />
-                          {lab.location || '—'}
-                        </div>
-                        {lab.emergencyContactMobile ? (
-                          <div className="small mb-1">
-                            <strong>Emergency:</strong> {lab.emergencyContactMobile}
+                <div className="enterprise-labour-grid">
+                  <Row className="g-3">
+                    {enterpriseLabourers.map((lab, idx) => {
+                      const rowKey =
+                        lab.enterpriseLabourId != null
+                          ? `el-${lab.enterpriseLabourId}`
+                          : lab.id != null
+                            ? `id-${lab.id}`
+                            : `lab-${idx}-${lab.mobile || ''}`;
+                      const imgUrl = String(lab.profileImageUrl || '').trim();
+                      return (
+                        <Col key={rowKey} xs={12} sm={6} xl={4}>
+                          <div className="enterprise-labour-tile h-100">
+                            <div className="enterprise-labour-tile-inner">
+                              <div className="d-flex gap-3 mb-3">
+                                <div className="enterprise-labour-avatar flex-shrink-0">
+                                  {imgUrl ? (
+                                    <img
+                                      src={imgUrl}
+                                      alt=""
+                                      className="enterprise-labour-avatar-img"
+                                      loading="lazy"
+                                      decoding="async"
+                                      referrerPolicy="no-referrer"
+                                    />
+                                  ) : (
+                                    <div className="enterprise-labour-avatar-placeholder" aria-hidden>
+                                      <FaUsers />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-grow-1">
+                                  <div className="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-1">
+                                    <h5 className="mb-0 fw-bold text-break enterprise-labour-name">
+                                      {lab.fullName || '—'}
+                                    </h5>
+                                    <Badge bg="dark" className="text-uppercase flex-shrink-0">
+                                      {lab.role || '—'}
+                                    </Badge>
+                                  </div>
+                                  <div className="enterprise-labour-meta small text-muted">
+                                    <span className="d-inline-flex align-items-center gap-1 text-break">
+                                      <FaIdCard className="flex-shrink-0" aria-hidden />
+                                      {lab.primarySkill || '—'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <ul className="list-unstyled small enterprise-labour-details mb-0">
+                                <li className="d-flex align-items-start gap-2 mb-2">
+                                  <FaPhone className="mt-1 flex-shrink-0 text-primary" aria-hidden />
+                                  <span className="text-break">
+                                    {lab.mobile || '—'}
+                                    {lab.alternateMobile ? (
+                                      <span className="d-block text-muted">Alt: {lab.alternateMobile}</span>
+                                    ) : null}
+                                  </span>
+                                </li>
+                                {lab.email ? (
+                                  <li className="d-flex align-items-start gap-2 mb-2">
+                                    <FaEnvelope className="mt-1 flex-shrink-0 text-primary" aria-hidden />
+                                    <span className="text-break">{lab.email}</span>
+                                  </li>
+                                ) : null}
+                                <li className="d-flex align-items-start gap-2 mb-2">
+                                  <FaMapMarkerAlt className="mt-1 flex-shrink-0 text-primary" aria-hidden />
+                                  <span className="text-break">{lab.location || '—'}</span>
+                                </li>
+                                {lab.emergencyContactMobile ? (
+                                  <li className="d-flex align-items-start gap-2 mb-2">
+                                    <FaShieldAlt className="mt-1 flex-shrink-0 text-warning" aria-hidden />
+                                    <span>
+                                      Emergency: <span className="text-break">{lab.emergencyContactMobile}</span>
+                                    </span>
+                                  </li>
+                                ) : null}
+                              </ul>
+
+                              <div className="d-flex flex-wrap gap-2 mt-3">
+                                <Badge bg={lab.status === 'ACTIVE' ? 'success' : 'secondary'}>
+                                  {lab.status || '—'}
+                                </Badge>
+                                <Badge
+                                  bg={
+                                    lab.verificationStatus === 'VERIFIED'
+                                      ? 'success'
+                                      : lab.verificationStatus === 'REJECTED'
+                                        ? 'danger'
+                                        : 'warning'
+                                  }
+                                  className={lab.verificationStatus === 'PENDING' ? 'text-dark' : ''}
+                                >
+                                  {lab.verificationStatus || '—'}
+                                </Badge>
+                              </div>
+
+                              {lab.notes ? (
+                                <p className="small text-muted mt-3 mb-0 fst-italic text-break">{lab.notes}</p>
+                              ) : null}
+                              {lab.adminComments ? (
+                                <p className="small mt-2 mb-0 text-break">
+                                  <strong className="text-secondary">Admin:</strong> {lab.adminComments}
+                                </p>
+                              ) : null}
+
+                              <div className="enterprise-labour-dates small text-muted mt-3 pt-3 border-top">
+                                {lab.joinedAt ? <div>Joined: {lab.joinedAt}</div> : null}
+                                {lab.registrationTime ? <div>Registered: {lab.registrationTime}</div> : null}
+                              </div>
+
+                              {(lab.profileImageUrl || lab.idDocumentUrl) && (
+                                <div className="mt-3 d-flex flex-wrap gap-2">
+                                  {lab.profileImageUrl ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline-primary"
+                                      href={lab.profileImageUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      Profile image
+                                    </Button>
+                                  ) : null}
+                                  {lab.idDocumentUrl ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline-secondary"
+                                      href={lab.idDocumentUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      ID document
+                                    </Button>
+                                  ) : null}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        ) : null}
-                        <div className="d-flex flex-wrap gap-1 mt-2">
-                          <Badge bg={lab.status === 'ACTIVE' ? 'success' : 'secondary'}>
-                            {lab.status || '—'}
-                          </Badge>
-                          <Badge
-                            bg={
-                              lab.verificationStatus === 'VERIFIED'
-                                ? 'success'
-                                : lab.verificationStatus === 'REJECTED'
-                                  ? 'danger'
-                                  : 'warning'
-                            }
-                            className={
-                              lab.verificationStatus === 'PENDING' ? 'text-dark' : ''
-                            }
-                          >
-                            {lab.verificationStatus || '—'}
-                          </Badge>
-                        </div>
-                        {lab.notes ? (
-                          <p className="small text-muted mt-2 mb-0 fst-italic">{lab.notes}</p>
-                        ) : null}
-                        <div className="small text-muted mt-2">
-                          {lab.joinedAt ? <div>Joined: {lab.joinedAt}</div> : null}
-                          {lab.registrationTime ? (
-                            <div>Registered: {lab.registrationTime}</div>
-                          ) : null}
-                        </div>
-                        {(lab.profileImageUrl || lab.idDocumentUrl) && (
-                          <div className="mt-2 d-flex flex-wrap gap-2">
-                            {lab.profileImageUrl ? (
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                href={lab.profileImageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                Profile image
-                              </Button>
-                            ) : null}
-                            {lab.idDocumentUrl ? (
-                              <Button
-                                size="sm"
-                                variant="outline-secondary"
-                                href={lab.idDocumentUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                ID document
-                              </Button>
-                            ) : null}
-                          </div>
-                        )}
-                      </div>
-                    </Col>
-                  ))}
-                </Row>
+                        </Col>
+                      );
+                    })}
+                  </Row>
+                </div>
               )}
             </Card.Body>
           </Card>

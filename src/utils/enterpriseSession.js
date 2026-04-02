@@ -25,28 +25,98 @@ export const normalizeMongoId = (value) => {
   return '';
 };
 
+const MONGO_ID_24 = /^[0-9a-fA-F]{24}$/;
+
+const SCAVENGE_KEY_PRIORITY = [
+  'enterpriseId',
+  'id',
+  '_id',
+  'mongoId',
+  'objectId',
+];
+
+/**
+ * When `_id` is only `{ timestamp, date }` (Jackson/BSON JSON), there is no hex in that
+ * object. Walk the session tree for any 24-char hex string (e.g. nested `returnValue.id`).
+ */
+function scavengeMongoId24(root) {
+  if (!root || typeof root !== 'object') return '';
+  const seen = new WeakSet();
+
+  function walk(node, depth) {
+    if (depth > 10 || node == null) return '';
+    if (typeof node === 'string' && MONGO_ID_24.test(node)) return node;
+    if (typeof node !== 'object') return '';
+    if (seen.has(node)) return '';
+    seen.add(node);
+
+    if (Array.isArray(node)) {
+      for (const item of node) {
+        const found = walk(item, depth + 1);
+        if (found) return found;
+      }
+      return '';
+    }
+
+    const keys = Object.keys(node);
+    const ordered = [
+      ...SCAVENGE_KEY_PRIORITY.filter((k) => keys.includes(k)),
+      ...keys.filter((k) => !SCAVENGE_KEY_PRIORITY.includes(k)),
+    ];
+
+    for (const k of ordered) {
+      const v = node[k];
+      if (typeof v === 'string' && MONGO_ID_24.test(v)) return v;
+    }
+    for (const k of ordered) {
+      const v = node[k];
+      if (v && typeof v === 'object') {
+        const found = walk(v, depth + 1);
+        if (found) return found;
+      }
+    }
+    return '';
+  }
+
+  return walk(root, 0);
+}
+
+/**
+ * Picks the first valid 24-char hex id. Prefer explicit `id` / `enterpriseId` over `_id`
+ * so a BSON-shaped `_id` object does not block the string `id` from login/returnValue.
+ */
+export function resolveEnterpriseMongoId(enterpriseLike) {
+  if (!enterpriseLike || typeof enterpriseLike !== 'object') return '';
+  const candidates = [
+    enterpriseLike.enterpriseId,
+    enterpriseLike.id,
+    enterpriseLike?.returnValue?.enterpriseId,
+    enterpriseLike?.returnValue?.id,
+    enterpriseLike._id,
+    enterpriseLike?.returnValue?._id,
+  ];
+  for (const raw of candidates) {
+    const n = normalizeMongoId(raw);
+    if (n && MONGO_ID_24.test(String(n))) {
+      return String(n);
+    }
+  }
+  const scavenged = scavengeMongoId24(enterpriseLike);
+  return scavenged ? String(scavenged) : '';
+}
+
 export const withEnterpriseId = (enterpriseLike) => {
   if (!enterpriseLike || typeof enterpriseLike !== 'object') return enterpriseLike;
 
-  const id = normalizeMongoId(
-    enterpriseLike.enterpriseId ||
-      enterpriseLike._id ||
-      enterpriseLike.id ||
-      enterpriseLike?.returnValue?._id ||
-      enterpriseLike?.returnValue?.id
-  );
-
-  const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
-  if (!id || !mongoIdPattern.test(String(id))) return enterpriseLike;
-  if (String(enterpriseLike.enterpriseId || '') === String(id)) return enterpriseLike;
+  const id = resolveEnterpriseMongoId(enterpriseLike);
+  if (!id) return enterpriseLike;
+  if (String(enterpriseLike.enterpriseId || '') === id) return enterpriseLike;
 
   return {
     ...enterpriseLike,
-    enterpriseId: String(id)
+    enterpriseId: id,
   };
 };
-
-const ENTERPRISE_MONGO_ID = /^[0-9a-fA-F]{24}$/;
 
 /**
  * Reads the logged-in enterprise session from localStorage (`enterprise` key).
@@ -63,20 +133,15 @@ export function getStoredEnterpriseSession() {
     }
     const parsed = JSON.parse(raw);
     const merged = withEnterpriseId(parsed);
-    const idCandidate =
-      merged?.enterpriseId ||
-      normalizeMongoId(merged?._id) ||
-      normalizeMongoId(merged?.returnValue?._id) ||
-      normalizeMongoId(merged?.returnValue?.id);
-    const idStr = idCandidate != null ? String(idCandidate).trim() : '';
-    const enterpriseId = ENTERPRISE_MONGO_ID.test(idStr) ? idStr : '';
+    const enterpriseId = resolveEnterpriseMongoId(merged) || String(merged?.enterpriseId || '').trim();
+    const idOk = MONGO_ID_24.test(enterpriseId) ? enterpriseId : '';
     const token = String(
       merged?.token ||
         merged?.returnValue?.token ||
         merged?.accessToken ||
         ''
     ).trim();
-    return { enterpriseId, token, enterprise: merged };
+    return { enterpriseId: idOk, token, enterprise: merged };
   } catch {
     return { enterpriseId: '', token: '', enterprise: null };
   }
