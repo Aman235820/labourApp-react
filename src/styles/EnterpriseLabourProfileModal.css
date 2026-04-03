@@ -1,0 +1,94 @@
+.enterprise-labour-profile-modal .modal-dialog {
+  max-width: 520px;
+}
+
+@media (max-width: 575.98px) {
+  .enterprise-labour-profile-modal .modal-fullscreen-sm-down .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.enterprise-labour-profile-modal-content {
+  border-radius: 14px;
+}
+
+@media (max-width: 575.98px) {
+  .enterprise-labour-profile-modal-content {
+    border-radius: 0;
+  }
+}
+
+.enterprise-labour-profile-modal-header {
+  padding-bottom: 0.5rem;
+}
+
+.enterprise-labour-profile-modal-body {
+  padding-bottom: 1rem;
+}
+
+.enterprise-labour-profile-modal-footer {
+  padding-top: 0.5rem !important;
+}
+
+.enterprise-labour-profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+}
+
+.enterprise-labour-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.enterprise-labour-profile-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.enterprise-labour-profile-dl {
+  margin: 0;
+}
+
+.enterprise-labour-profile-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 34%) 1fr;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  align-items: start;
+}
+
+@media (max-width: 400px) {
+  .enterprise-labour-profile-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}
+
+.enterprise-labour-profile-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6c757d;
+}
+
+.enterprise-labour-profile-value {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.enterprise-labour-profile-modal .min-w-0 {
+  min-width: 0;
+}

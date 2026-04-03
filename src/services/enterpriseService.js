@@ -200,19 +200,26 @@ export const enterpriseService = {
   },
 
   /**
-   * All enterprise-registered labours (owner dashboard). Backend path uses ID suffix casing as deployed.
+   * All enterprise-registered labours (owner dashboard).
+   * Backend maps GET .../findLabourByEnterpriseID/{enterpriseId}.
    */
   findLabourByEnterpriseId: async (enterpriseId, token) => {
     try {
       const normalizedId = requireEnterpriseId(enterpriseId);
-      const endpoint = `${baseurl}/enterprise/findLabourByEnterpriseID/${normalizedId}`;
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      if (token && String(token).trim() !== '') {
-        headers.Authorization = `Bearer ${token}`;
+      if (!token || String(token).trim() === '') {
+        throw {
+          returnValue: null,
+          hasError: true,
+          message: 'Authentication required. Please log in again.'
+        };
       }
-      const response = await axios.post(endpoint, {}, { headers });
+      const endpoint = `${baseurl}/enterprise/findLabourByEnterpriseID/${normalizedId}`;
+      const response = await axios.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      });
       return unwrapResponseDTO(response.data);
     } catch (error) {
       throw normalizeAxiosError(error);

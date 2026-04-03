@@ -262,34 +262,18 @@ function EnterpriseRegister() {
       const response = await enterpriseService.registerEnterprise(enterpriseData, otpValue);
       
       if (response && response.token && response.returnValue) {
-        // Ensure the ID is properly extracted as a string
-        const rawId = response.returnValue.id || response.returnValue._id || '';
-        const enterpriseId = String(rawId);
-        console.log('Registration - Raw ID from API:', rawId);
-        console.log('Registration - Raw ID type:', typeof rawId);
-        console.log('Registration - String ID:', enterpriseId);
-        console.log('Registration - Full response:', response);
-        
-        // Validate that we have a proper MongoDB ObjectId format
         const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
-        if (!enterpriseId || enterpriseId === 'null' || enterpriseId === 'undefined' || !mongoIdPattern.test(enterpriseId)) {
-          console.error('Registration - Invalid enterprise ID format:', enterpriseId);
-          console.error('Registration - Expected MongoDB ObjectId format (24 hex characters)');
-          setError('Registration failed: Invalid enterprise ID format received');
+        const enterpriseId = String(response.returnValue.id || '').trim();
+        if (!mongoIdPattern.test(enterpriseId)) {
+          setError('Registration failed: Invalid enterprise ID from server');
           return;
         }
-        
-        // Store only the required details in localStorage
+
         const enterpriseData = {
-          enterpriseId: enterpriseId,
-          ownername: response.returnValue.ownername || '',
-          ownerContactInfo: response.returnValue.ownerContactInfo || formData.ownerContactInfo,
-          servicesOffered: response.returnValue.servicesOffered || servicesOffered,
-          companyName: response.returnValue.companyName || formData.companyName,
-          token: response.token
+          ...response.returnValue,
+          token: response.token,
+          enterpriseId,
         };
-        
-        console.log('Registration - Storing enterprise data:', enterpriseData);
         localStorage.setItem('enterprise', JSON.stringify(enterpriseData));
         
         // Navigate directly to dashboard

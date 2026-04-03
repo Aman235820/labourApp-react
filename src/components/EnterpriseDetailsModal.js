@@ -13,7 +13,7 @@ import {
 import { enterpriseService } from '../services/enterpriseService';
 import {
   withEnterpriseId,
-  normalizeMongoId,
+  resolveEnterpriseMongoId,
   getStoredEnterpriseSession,
 } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDetailsModal.css';
@@ -178,10 +178,10 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
           enterprise?.token || enterprise?.returnValue?.token || stored.token || ''
         ).trim();
       const resolvedId =
-        normalizeMongoId(enterpriseId) ||
-        normalizeMongoId(enterprise?._id) ||
-        normalizeMongoId(enterprise?.returnValue?._id) ||
-        stored.enterpriseId;
+        resolveEnterpriseMongoId({
+          ...enterprise,
+          enterpriseId: enterpriseId || enterprise?.enterpriseId,
+        }) || stored.enterpriseId;
 
       if (!resolvedId || !/^[0-9a-fA-F]{24}$/.test(String(resolvedId))) {
         console.error('Modal - Missing enterpriseId:', { enterpriseId, enterprise, stored });

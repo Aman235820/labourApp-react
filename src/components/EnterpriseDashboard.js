@@ -1,17 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert, Table } from 'react-bootstrap';
 import Select from 'react-select';
-import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus, FaEnvelope, FaSyncAlt } from 'react-icons/fa';
+import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus, FaSyncAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
 import CallNowModal from './CallNowModal';
 import EnterpriseDetailsModal from './EnterpriseDetailsModal';
 import EnterpriseLabourOnboardModal from './EnterpriseLabourOnboardModal';
+import EnterpriseLabourProfileModal from './EnterpriseLabourProfileModal';
 import { enterpriseService } from '../services/enterpriseService';
 import {
   withEnterpriseId,
   resolveEnterpriseMongoId,
   getStoredEnterpriseSession,
+  mergeEnterpriseSession,
 } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDashboard.css';
 
@@ -26,6 +28,7 @@ function EnterpriseDashboard() {
   const [showCallModal, setShowCallModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showOnboardLabourModal, setShowOnboardLabourModal] = useState(false);
+  const [labourProfileLab, setLabourProfileLab] = useState(null);
   const [enterpriseLabourers, setEnterpriseLabourers] = useState([]);
   const [labourListLoading, setLabourListLoading] = useState(false);
   const [labourListError, setLabourListError] = useState('');
@@ -39,37 +42,27 @@ function EnterpriseDashboard() {
         if (stored) {
           const parsed = JSON.parse(stored);
           const enterpriseData = withEnterpriseId(parsed);
-          // Self-heal older sessions by persisting enterpriseId once we can derive it
           if (enterpriseData?.enterpriseId && enterpriseData?.enterpriseId !== parsed?.enterpriseId) {
             localStorage.setItem('enterprise', JSON.stringify(enterpriseData));
           }
-          
-          // Resolve 24-char hex even when `_id` is { timestamp, date } and id lives nested
+
           const extractedId =
-            resolveEnterpriseMongoId(enterpriseData) || enterpriseData?.enterpriseId;
-          console.log('Dashboard - Raw enterpriseData:', enterpriseData);
-          console.log('Dashboard - Extracted ID:', extractedId);
-          console.log('Dashboard - ID type:', typeof extractedId);
-          
-          // Validate MongoDB ObjectId format
-          const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
-          if (extractedId && !mongoIdPattern.test(extractedId)) {
-            console.error('Dashboard - Invalid enterprise ID format in localStorage:', extractedId);
-            console.error('Dashboard - Expected MongoDB ObjectId format (24 hex characters)');
-          }
-          
-          setEnterpriseId(extractedId);
-          
+            resolveEnterpriseMongoId(enterpriseData) || enterpriseData?.enterpriseId || '';
+          const idOk = /^[0-9a-fA-F]{24}$/.test(String(extractedId).trim())
+            ? String(extractedId).trim()
+            : '';
+          setEnterpriseId(idOk || null);
+
           const token = enterpriseData.token || '';
 
-          if (extractedId && token) {
-            // Fetch fresh data from server
-            const freshData = await enterpriseService.findEnterpriseById(extractedId, token);
+          if (idOk && token) {
+            const freshData = await enterpriseService.findEnterpriseById(idOk, token);
             if (freshData && freshData.returnValue) {
-              const updatedEnterprise = withEnterpriseId({
-                ...freshData.returnValue,
-                token: token
-              });
+              const updatedEnterprise = mergeEnterpriseSession(
+                enterpriseData,
+                freshData.returnValue,
+                { token }
+              );
               setEnterprise(updatedEnterprise);
               localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
               const freshHex =
@@ -168,11 +161,22 @@ function EnterpriseDashboard() {
   const getDashboardEnterpriseContext = () => {
     const normalized = withEnterpriseId(enterprise || {});
     const fromStorage = getStoredEnterpriseSession();
-    const id =
-      enterpriseId ||
-      resolveEnterpriseMongoId(normalized) ||
-      fromStorage.enterpriseId;
-    const idStr = id != null ? String(id).trim() : '';
+    // Prefer persisted session id; React state can omit id after API merges if we ever regress.
+    const idCandidates = [
+      fromStorage.enterpriseId,
+      enterpriseId,
+      resolveEnterpriseMongoId(normalized),
+      typeof enterprise?.id === 'string' ? enterprise.id : '',
+      typeof enterprise?.returnValue?.id === 'string' ? enterprise.returnValue.id : '',
+    ];
+    let idStr = '';
+    for (const c of idCandidates) {
+      const s = c != null ? String(c).trim() : '';
+      if (/^[0-9a-fA-F]{24}$/.test(s)) {
+        idStr = s;
+        break;
+      }
+    }
     const mongoOk = /^[0-9a-fA-F]{24}$/.test(idStr);
     let token =
       enterprise?.token || enterprise?.returnValue?.token || fromStorage.token || '';
@@ -190,7 +194,15 @@ function EnterpriseDashboard() {
     const { id, token } = getDashboardEnterpriseContext();
     if (!id || !token) {
       setEnterpriseLabourers([]);
-      setLabourListError('');
+      if (enterprise) {
+        setLabourListError(
+          !id
+            ? 'Cannot load labours: enterprise ID is missing. Log in again from the enterprise login page.'
+            : 'Cannot load labours: session token is missing. Log in again.'
+        );
+      } else {
+        setLabourListError('');
+      }
       setLabourListLoading(false);
       return;
     }
@@ -198,7 +210,12 @@ function EnterpriseDashboard() {
     setLabourListError('');
     try {
       const res = await enterpriseService.findLabourByEnterpriseId(id, token);
-      const list = Array.isArray(res?.returnValue) ? res.returnValue : [];
+      const raw = res?.returnValue;
+      const list = Array.isArray(raw)
+        ? raw
+        : raw != null && typeof raw === 'object'
+          ? [raw]
+          : [];
       setEnterpriseLabourers(list);
     } catch (e) {
       const msg =
@@ -234,10 +251,11 @@ function EnterpriseDashboard() {
         const token = updated.token || '';
         const freshData = await enterpriseService.findEnterpriseById(effectiveEnterpriseId, token);
         if (freshData && freshData.returnValue) {
-          const freshEnterprise = withEnterpriseId({
-            ...freshData.returnValue,
-            token: token
-          });
+          const freshEnterprise = mergeEnterpriseSession(
+            updated,
+            freshData.returnValue,
+            { token }
+          );
           setEnterprise(freshEnterprise);
           localStorage.setItem('enterprise', JSON.stringify(freshEnterprise));
         }
@@ -370,19 +388,18 @@ function EnterpriseDashboard() {
       );
       
       if (response && !response.hasError) {
-        // Update local storage and state
-        const updatedEnterprise = withEnterpriseId({
-          ...enterprise,
-          ...(response?.returnValue || {}),
-          servicesOffered: servicesOffered,
-          token: token || enterprise?.token || enterprise?.returnValue?.token
-        });
-        
+        const tokenNext = token || enterprise?.token || enterprise?.returnValue?.token;
+        const updatedEnterprise = mergeEnterpriseSession(
+          enterprise || {},
+          response?.returnValue || {},
+          { servicesOffered, token: tokenNext }
+        );
+
         if (enterprise.returnValue) {
           updatedEnterprise.returnValue = {
             ...enterprise.returnValue,
             ...(response?.returnValue || {}),
-            servicesOffered: servicesOffered
+            servicesOffered,
           };
         }
         
@@ -574,7 +591,7 @@ function EnterpriseDashboard() {
                     ) : null}
                   </h4>
                   <p className="text-muted small mb-0 mt-2">
-                    Everyone onboarded under your enterprise. List loads when you open the dashboard.
+                    Compact list for large teams. Use <strong>View profile</strong> for full details.
                   </p>
                 </div>
                 <div className="d-flex flex-column flex-sm-row gap-2 flex-shrink-0">
@@ -633,149 +650,128 @@ function EnterpriseDashboard() {
                   </p>
                 </div>
               ) : (
-                <div className="enterprise-labour-grid">
-                  <Row className="g-3">
-                    {enterpriseLabourers.map((lab, idx) => {
-                      const rowKey =
-                        lab.enterpriseLabourId != null
-                          ? `el-${lab.enterpriseLabourId}`
-                          : lab.id != null
-                            ? `id-${lab.id}`
-                            : `lab-${idx}-${lab.mobile || ''}`;
-                      const imgUrl = String(lab.profileImageUrl || '').trim();
-                      return (
-                        <Col key={rowKey} xs={12} sm={6} xl={4}>
-                          <div className="enterprise-labour-tile h-100">
-                            <div className="enterprise-labour-tile-inner">
-                              <div className="d-flex gap-3 mb-3">
-                                <div className="enterprise-labour-avatar flex-shrink-0">
-                                  {imgUrl ? (
-                                    <img
-                                      src={imgUrl}
-                                      alt=""
-                                      className="enterprise-labour-avatar-img"
-                                      loading="lazy"
-                                      decoding="async"
-                                      referrerPolicy="no-referrer"
-                                    />
-                                  ) : (
-                                    <div className="enterprise-labour-avatar-placeholder" aria-hidden>
-                                      <FaUsers />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="min-w-0 flex-grow-1">
-                                  <div className="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-1">
-                                    <h5 className="mb-0 fw-bold text-break enterprise-labour-name">
-                                      {lab.fullName || '—'}
-                                    </h5>
-                                    <Badge bg="dark" className="text-uppercase flex-shrink-0">
-                                      {lab.role || '—'}
-                                    </Badge>
-                                  </div>
-                                  <div className="enterprise-labour-meta small text-muted">
-                                    <span className="d-inline-flex align-items-center gap-1 text-break">
+                <div className="enterprise-labour-list-wrap border rounded-3 overflow-hidden">
+                  <div className="enterprise-labour-list-scroll">
+                    <Table hover responsive className="enterprise-labour-table mb-0 align-middle">
+                      <thead className="table-light">
+                        <tr>
+                          <th scope="col" className="enterprise-labour-th-name">
+                            Name
+                          </th>
+                          <th scope="col" className="d-none d-md-table-cell">
+                            Role
+                          </th>
+                          <th scope="col" className="d-none d-lg-table-cell">
+                            Skill
+                          </th>
+                          <th scope="col" className="d-none d-sm-table-cell">
+                            Mobile
+                          </th>
+                          <th scope="col" className="d-none d-md-table-cell text-nowrap">
+                            Status
+                          </th>
+                          <th scope="col" className="text-end text-nowrap">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {enterpriseLabourers.map((lab, idx) => {
+                          const rowKey =
+                            lab.enterpriseLabourId != null
+                              ? `el-${lab.enterpriseLabourId}`
+                              : lab.id != null
+                                ? `id-${lab.id}`
+                                : `lab-${idx}-${lab.mobile || ''}`;
+                          return (
+                            <tr key={rowKey}>
+                              <td className="min-w-0">
+                                <div className="fw-semibold text-break">{lab.fullName || '—'}</div>
+                                <div className="d-md-none small text-muted text-break">
+                                  <Badge bg="dark" className="text-uppercase me-1 mt-1">
+                                    {lab.role || '—'}
+                                  </Badge>
+                                  {lab.primarySkill ? (
+                                    <span className="d-inline-flex align-items-center gap-1">
                                       <FaIdCard className="flex-shrink-0" aria-hidden />
-                                      {lab.primarySkill || '—'}
+                                      {lab.primarySkill}
                                     </span>
-                                  </div>
+                                  ) : null}
                                 </div>
-                              </div>
-
-                              <ul className="list-unstyled small enterprise-labour-details mb-0">
-                                <li className="d-flex align-items-start gap-2 mb-2">
-                                  <FaPhone className="mt-1 flex-shrink-0 text-primary" aria-hidden />
-                                  <span className="text-break">
-                                    {lab.mobile || '—'}
-                                    {lab.alternateMobile ? (
-                                      <span className="d-block text-muted">Alt: {lab.alternateMobile}</span>
-                                    ) : null}
-                                  </span>
-                                </li>
-                                {lab.email ? (
-                                  <li className="d-flex align-items-start gap-2 mb-2">
-                                    <FaEnvelope className="mt-1 flex-shrink-0 text-primary" aria-hidden />
-                                    <span className="text-break">{lab.email}</span>
-                                  </li>
-                                ) : null}
-                                <li className="d-flex align-items-start gap-2 mb-2">
-                                  <FaMapMarkerAlt className="mt-1 flex-shrink-0 text-primary" aria-hidden />
-                                  <span className="text-break">{lab.location || '—'}</span>
-                                </li>
-                                {lab.emergencyContactMobile ? (
-                                  <li className="d-flex align-items-start gap-2 mb-2">
-                                    <FaShieldAlt className="mt-1 flex-shrink-0 text-warning" aria-hidden />
-                                    <span>
-                                      Emergency: <span className="text-break">{lab.emergencyContactMobile}</span>
-                                    </span>
-                                  </li>
-                                ) : null}
-                              </ul>
-
-                              <div className="d-flex flex-wrap gap-2 mt-3">
-                                <Badge bg={lab.status === 'ACTIVE' ? 'success' : 'secondary'}>
-                                  {lab.status || '—'}
+                                <div className="d-sm-none small text-muted mt-1">
+                                  <FaPhone className="me-1 text-primary" aria-hidden />
+                                  {lab.mobile || '—'}
+                                </div>
+                                <div className="d-md-none d-flex flex-wrap gap-1 mt-2">
+                                  <Badge bg={lab.status === 'ACTIVE' ? 'success' : 'secondary'}>
+                                    {lab.status || '—'}
+                                  </Badge>
+                                  <Badge
+                                    bg={
+                                      lab.verificationStatus === 'VERIFIED'
+                                        ? 'success'
+                                        : lab.verificationStatus === 'REJECTED'
+                                          ? 'danger'
+                                          : 'warning'
+                                    }
+                                    className={
+                                      lab.verificationStatus === 'PENDING' ? 'text-dark' : ''
+                                    }
+                                  >
+                                    {lab.verificationStatus || '—'}
+                                  </Badge>
+                                </div>
+                              </td>
+                              <td className="d-none d-md-table-cell text-nowrap">
+                                <Badge bg="secondary" className="text-uppercase">
+                                  {lab.role || '—'}
                                 </Badge>
-                                <Badge
-                                  bg={
-                                    lab.verificationStatus === 'VERIFIED'
-                                      ? 'success'
-                                      : lab.verificationStatus === 'REJECTED'
-                                        ? 'danger'
-                                        : 'warning'
-                                  }
-                                  className={lab.verificationStatus === 'PENDING' ? 'text-dark' : ''}
+                              </td>
+                              <td className="d-none d-lg-table-cell small text-break">
+                                {lab.primarySkill || '—'}
+                              </td>
+                              <td className="d-none d-sm-table-cell small text-nowrap">
+                                {lab.mobile || '—'}
+                              </td>
+                              <td className="d-none d-md-table-cell">
+                                <div className="d-flex flex-wrap gap-1">
+                                  <Badge bg={lab.status === 'ACTIVE' ? 'success' : 'secondary'}>
+                                    {lab.status || '—'}
+                                  </Badge>
+                                  <Badge
+                                    bg={
+                                      lab.verificationStatus === 'VERIFIED'
+                                        ? 'success'
+                                        : lab.verificationStatus === 'REJECTED'
+                                          ? 'danger'
+                                          : 'warning'
+                                    }
+                                    className={
+                                      lab.verificationStatus === 'PENDING' ? 'text-dark' : ''
+                                    }
+                                  >
+                                    {lab.verificationStatus || '—'}
+                                  </Badge>
+                                </div>
+                              </td>
+                              <td className="text-end">
+                                <Button
+                                  type="button"
+                                  variant="outline-primary"
+                                  size="sm"
+                                  className="text-nowrap"
+                                  onClick={() => setLabourProfileLab(lab)}
                                 >
-                                  {lab.verificationStatus || '—'}
-                                </Badge>
-                              </div>
-
-                              {lab.notes ? (
-                                <p className="small text-muted mt-3 mb-0 fst-italic text-break">{lab.notes}</p>
-                              ) : null}
-                              {lab.adminComments ? (
-                                <p className="small mt-2 mb-0 text-break">
-                                  <strong className="text-secondary">Admin:</strong> {lab.adminComments}
-                                </p>
-                              ) : null}
-
-                              <div className="enterprise-labour-dates small text-muted mt-3 pt-3 border-top">
-                                {lab.joinedAt ? <div>Joined: {lab.joinedAt}</div> : null}
-                                {lab.registrationTime ? <div>Registered: {lab.registrationTime}</div> : null}
-                              </div>
-
-                              {(lab.profileImageUrl || lab.idDocumentUrl) && (
-                                <div className="mt-3 d-flex flex-wrap gap-2">
-                                  {lab.profileImageUrl ? (
-                                    <Button
-                                      size="sm"
-                                      variant="outline-primary"
-                                      href={lab.profileImageUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      Profile image
-                                    </Button>
-                                  ) : null}
-                                  {lab.idDocumentUrl ? (
-                                    <Button
-                                      size="sm"
-                                      variant="outline-secondary"
-                                      href={lab.idDocumentUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      ID document
-                                    </Button>
-                                  ) : null}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </Col>
-                      );
-                    })}
-                  </Row>
+                                  <FaEye className="me-1 d-none d-sm-inline" aria-hidden />
+                                  View profile
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </div>
                 </div>
               )}
             </Card.Body>
@@ -1012,6 +1008,12 @@ function EnterpriseDashboard() {
         enterpriseId={dashboardEnterpriseId}
         token={dashboardEnterpriseToken}
         onSuccess={handleEnterpriseLabourOnboardSuccess}
+      />
+
+      <EnterpriseLabourProfileModal
+        show={Boolean(labourProfileLab)}
+        labour={labourProfileLab}
+        onHide={() => setLabourProfileLab(null)}
       />
     </Container>
   );

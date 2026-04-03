@@ -1,24 +1,23 @@
+/**
+ * Enterprise session + generic Mongo id helpers.
+ * Login/register should persist `enterpriseId` (and `id` from API) explicitly in localStorage.
+ */
+
 export const normalizeMongoId = (value) => {
   if (!value) return '';
   if (typeof value === 'string') return value;
   if (typeof value === 'object') {
     if (typeof value.$oid === 'string') return value.$oid;
     if (typeof value.oid === 'string') return value.oid;
-
-    // Common places where id can be nested
     if (typeof value._id === 'string') return value._id;
     if (value._id && typeof value._id === 'object') return normalizeMongoId(value._id);
     if (typeof value.id === 'string') return value.id;
-
-    // BSON/ObjectId-like objects (defensive)
     if (typeof value.toHexString === 'function') {
       const hex = value.toHexString();
       if (typeof hex === 'string') return hex;
     }
     if (typeof value.toString === 'function') {
-      const s = value.toString();
-      // Handle forms like: ObjectId("...") or just the hex string
-      const m = String(s).match(/([0-9a-fA-F]{24})/);
+      const m = String(value.toString()).match(/([0-9a-fA-F]{24})/);
       if (m?.[1]) return m[1];
     }
   }
@@ -27,100 +26,60 @@ export const normalizeMongoId = (value) => {
 
 const MONGO_ID_24 = /^[0-9a-fA-F]{24}$/;
 
-const SCAVENGE_KEY_PRIORITY = [
-  'enterpriseId',
-  'id',
-  '_id',
-  'mongoId',
-  'objectId',
-];
-
 /**
- * When `_id` is only `{ timestamp, date }` (Jackson/BSON JSON), there is no hex in that
- * object. Walk the session tree for any 24-char hex string (e.g. nested `returnValue.id`).
+ * Resolves a 24-char hex enterprise id from session-like objects.
+ * Order: enterpriseId → id → nested returnValue — then normalized _id shapes (legacy APIs).
  */
-function scavengeMongoId24(root) {
-  if (!root || typeof root !== 'object') return '';
-  const seen = new WeakSet();
-
-  function walk(node, depth) {
-    if (depth > 10 || node == null) return '';
-    if (typeof node === 'string' && MONGO_ID_24.test(node)) return node;
-    if (typeof node !== 'object') return '';
-    if (seen.has(node)) return '';
-    seen.add(node);
-
-    if (Array.isArray(node)) {
-      for (const item of node) {
-        const found = walk(item, depth + 1);
-        if (found) return found;
-      }
-      return '';
-    }
-
-    const keys = Object.keys(node);
-    const ordered = [
-      ...SCAVENGE_KEY_PRIORITY.filter((k) => keys.includes(k)),
-      ...keys.filter((k) => !SCAVENGE_KEY_PRIORITY.includes(k)),
-    ];
-
-    for (const k of ordered) {
-      const v = node[k];
-      if (typeof v === 'string' && MONGO_ID_24.test(v)) return v;
-    }
-    for (const k of ordered) {
-      const v = node[k];
-      if (v && typeof v === 'object') {
-        const found = walk(v, depth + 1);
-        if (found) return found;
-      }
-    }
-    return '';
-  }
-
-  return walk(root, 0);
-}
-
-/**
- * Picks the first valid 24-char hex id. Prefer explicit `id` / `enterpriseId` over `_id`
- * so a BSON-shaped `_id` object does not block the string `id` from login/returnValue.
- */
-export function resolveEnterpriseMongoId(enterpriseLike) {
-  if (!enterpriseLike || typeof enterpriseLike !== 'object') return '';
-  const candidates = [
-    enterpriseLike.enterpriseId,
-    enterpriseLike.id,
-    enterpriseLike?.returnValue?.enterpriseId,
-    enterpriseLike?.returnValue?.id,
-    enterpriseLike._id,
-    enterpriseLike?.returnValue?._id,
+export function resolveEnterpriseMongoId(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+  const raw = [
+    obj.enterpriseId,
+    obj.id,
+    obj.returnValue?.enterpriseId,
+    obj.returnValue?.id,
+    obj._id,
+    obj.returnValue?._id,
   ];
-  for (const raw of candidates) {
-    const n = normalizeMongoId(raw);
-    if (n && MONGO_ID_24.test(String(n))) {
-      return String(n);
-    }
+  for (const v of raw) {
+    const s = (typeof v === 'string' ? v.trim() : normalizeMongoId(v)) || '';
+    if (s && MONGO_ID_24.test(s)) return s;
   }
-  const scavenged = scavengeMongoId24(enterpriseLike);
-  return scavenged ? String(scavenged) : '';
+  return '';
 }
 
-export const withEnterpriseId = (enterpriseLike) => {
-  if (!enterpriseLike || typeof enterpriseLike !== 'object') return enterpriseLike;
-
-  const id = resolveEnterpriseMongoId(enterpriseLike);
-  if (!id) return enterpriseLike;
-  if (String(enterpriseLike.enterpriseId || '') === id) return enterpriseLike;
-
-  return {
-    ...enterpriseLike,
-    enterpriseId: id,
-  };
+/** Ensures `enterpriseId` is set when a valid id can be read from the object. */
+export const withEnterpriseId = (session) => {
+  if (!session || typeof session !== 'object') return session;
+  const id = resolveEnterpriseMongoId(session);
+  if (!id) return session;
+  if (String(session.enterpriseId || '') === id) return session;
+  return { ...session, enterpriseId: id };
 };
 
 /**
- * Reads the logged-in enterprise session from localStorage (`enterprise` key).
- * Normalizes `enterpriseId` and `token` for API calls when React state is stale or missing.
+ * Merge API payload (e.g. findEnterpriseById returnValue) into the existing session without
+ * losing id/enterpriseId — many endpoints return profile fields only and omit Mongo id.
+ */
+export function mergeEnterpriseSession(prev = {}, patch = {}, extras = {}) {
+  const base = prev && typeof prev === 'object' ? { ...prev } : {};
+  const p = patch && typeof patch === 'object' ? { ...patch } : {};
+  const merged = { ...base, ...p, ...extras };
+  const id =
+    resolveEnterpriseMongoId(p) ||
+    resolveEnterpriseMongoId(base) ||
+    resolveEnterpriseMongoId(merged);
+  if (id) {
+    return withEnterpriseId({
+      ...merged,
+      enterpriseId: id,
+      id: merged.id || id,
+    });
+  }
+  return withEnterpriseId(merged);
+}
+
+/**
+ * Reads `enterprise` from localStorage. Expects login to have saved `enterpriseId` from `returnValue.id`.
  */
 export function getStoredEnterpriseSession() {
   if (typeof window === 'undefined' || !window.localStorage) {
@@ -133,15 +92,13 @@ export function getStoredEnterpriseSession() {
     }
     const parsed = JSON.parse(raw);
     const merged = withEnterpriseId(parsed);
-    const enterpriseId = resolveEnterpriseMongoId(merged) || String(merged?.enterpriseId || '').trim();
-    const idOk = MONGO_ID_24.test(enterpriseId) ? enterpriseId : '';
     const token = String(
-      merged?.token ||
-        merged?.returnValue?.token ||
-        merged?.accessToken ||
-        ''
+      merged?.token || merged?.returnValue?.token || merged?.accessToken || ''
     ).trim();
-    return { enterpriseId: idOk, token, enterprise: merged };
+    const enterpriseId = resolveEnterpriseMongoId(merged);
+    const idOk = MONGO_ID_24.test(enterpriseId) ? enterpriseId : '';
+    const enterprise = idOk ? { ...merged, enterpriseId: idOk } : merged;
+    return { enterpriseId: idOk, token, enterprise };
   } catch {
     return { enterpriseId: '', token: '', enterprise: null };
   }
