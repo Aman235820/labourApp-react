@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Container, Row, Col, Card, Spinner, InputGroup } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import { registerUser, requestOTP } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import OTPVerification from './OTPVerification';
+import '../styles/AuthFormShell.css';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -37,7 +37,8 @@ const Register = () => {
 
     const handleSendOTP = async (e) => {
         e.preventDefault();
-        
+        if (otpLoading) return;
+
         // Validate form data
         if (!formData.fullName || formData.fullName.length < 3) {
             setError(t('auth.nameMustBeAtLeast3'));
@@ -69,6 +70,7 @@ const Register = () => {
     };
 
     const handleVerifyOTP = async (otpValue) => {
+        if (isLoading) return;
         setIsLoading(true);
         setError('');
         
@@ -130,119 +132,112 @@ const Register = () => {
     }
 
     return (
-        <Container className="mt-5 mb-5">
-            <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <Card className="shadow-lg border-0">
-                        <Card.Body className="p-5">
-                            <div className="text-center mb-4">
-                                <h2 className="fw-bold text-primary">{t('auth.createAccount')}</h2>
-                                <p className="text-muted">{t('auth.joinInstaLab')}</p>
+        <div className="auth-form-shell auth-form-shell--user auth-form-shell--wide">
+            <div className="auth-form-shell__scroll">
+                <div className="auth-form-shell__inner">
+                    <header className="auth-form-hero">
+                        <p className="auth-form-hero__eyebrow mb-0">{t('home.headerTitle')}</p>
+                        <h1 className="auth-form-hero__title">{t('auth.createAccount')}</h1>
+                        <p className="auth-form-hero__subtitle">{t('auth.joinInstaLab')}</p>
+                    </header>
+
+                    <div className="auth-form-panel">
+                        {error && (
+                            <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                                {error}
                             </div>
-                            
-                            {error && (
-                                <div className="alert alert-danger d-flex align-items-center" role="alert">
-                                    <FaExclamationCircle className="me-2" />
-                                    {error}
-                                </div>
-                            )}
+                        )}
 
-                            <Form onSubmit={handleSendOTP}>
-                                <Form.Group className="mb-4">
-                                    <div className="d-flex align-items-center">
-                                        <FaUser className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">{t('auth.fullName')}</Form.Label>
-                                    </div>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder={t('auth.enterFullName')}
-                                        className="form-control-lg"
-                                        value={formData.fullName}
-                                        onChange={(e) => handleInputChange('fullName', e.target.value)}
-                                        required
-                                    />
-                                </Form.Group>
+                        <Form onSubmit={handleSendOTP}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>
+                                    <FaUser className="me-2 text-primary" aria-hidden />
+                                    {t('auth.fullName')}
+                                </Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    autoComplete="name"
+                                    placeholder={t('auth.enterFullName')}
+                                    value={formData.fullName}
+                                    onChange={(e) => handleInputChange('fullName', e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
 
-                                <Form.Group className="mb-4">
-                                    <div className="d-flex align-items-center">
-                                        <FaEnvelope className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">{t('auth.emailAddress')}</Form.Label>
-                                    </div>
-                                    <Form.Control
-                                        type="email"
-                                        placeholder={t('auth.enterEmail')}
-                                        className="form-control-lg"
-                                        value={formData.email}
-                                        onChange={(e) => handleInputChange('email', e.target.value)}
-                                        required
-                                    />
-                                </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>
+                                    <FaEnvelope className="me-2 text-primary" aria-hidden />
+                                    {t('auth.emailAddress')}
+                                </Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    autoComplete="email"
+                                    placeholder={t('auth.enterEmail')}
+                                    value={formData.email}
+                                    onChange={(e) => handleInputChange('email', e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
 
-                                <Form.Group className="mb-4">
-                                    <div className="d-flex align-items-center">
-                                        <FaPhone className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">{t('auth.mobileNumber')}</Form.Label>
-                                    </div>
-                                    <Form.Control
-                                        type="tel"
-                                        placeholder={t('auth.enterMobileNumber')}
-                                        className="form-control-lg"
-                                        value={formData.mobileNumber}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                            handleInputChange('mobileNumber', value);
-                                        }}
-                                        maxLength="10"
-                                        required
-                                    />
-                                </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>
+                                    <FaPhone className="me-2 text-primary" aria-hidden />
+                                    {t('auth.mobileNumber')}
+                                </Form.Label>
+                                <Form.Control
+                                    type="tel"
+                                    inputMode="numeric"
+                                    autoComplete="tel"
+                                    placeholder={t('auth.enterMobileNumber')}
+                                    value={formData.mobileNumber}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        handleInputChange('mobileNumber', value);
+                                    }}
+                                    maxLength={10}
+                                    required
+                                />
+                            </Form.Group>
 
+                            <div className="auth-form-sticky-cta d-grid gap-2">
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    className="d-flex align-items-center justify-content-center"
+                                    disabled={otpLoading}
+                                >
+                                    {otpLoading ? (
+                                        <>
+                                            <Spinner
+                                                as="span"
+                                                animation="border"
+                                                size="sm"
+                                                role="status"
+                                                aria-hidden="true"
+                                                className="me-2"
+                                            />
+                                            {t('auth.sendingOtp')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </Form>
 
-                                <div className="d-grid gap-2">
-                                    <Button 
-                                        variant="primary" 
-                                        type="submit" 
-                                        className="btn-lg fw-bold d-flex align-items-center justify-content-center"
-                                        disabled={otpLoading}
-                                    >
-                                        {otpLoading ? (
-                                            <>
-                                                <Spinner
-                                                    as="span"
-                                                    animation="border"
-                                                    size="sm"
-                                                    role="status"
-                                                    aria-hidden="true"
-                                                    className="me-2"
-                                                />
-                                                {t('auth.sendingOtp')}
-                                            </>
-                                        ) : (
-                                            <>
-                                                {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-
-                                <div className="text-center mt-4">
-                                    <p className="mb-0">
-                                        {t('auth.alreadyHaveAccount')}{' '}
-                                        <Button 
-                                            variant="link" 
-                                            className="p-0 text-decoration-none"
-                                            onClick={() => navigate('/login')}
-                                        >
-                                            {t('auth.loginHere')}
-                                        </Button>
-                                    </p>
-                                </div>
-                            </Form>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-        </Container>
+                        <div className="auth-form-alt-action">
+                            <span className="text-muted">{t('auth.alreadyHaveAccount')}</span>{' '}
+                            <Button type="button" variant="link" className="p-0 align-baseline" onClick={() => navigate('/login')}>
+                                {t('auth.loginHere')}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 

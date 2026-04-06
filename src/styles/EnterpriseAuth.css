@@ -1,11 +1,4 @@
-.enterprise-auth-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 2rem 1rem;
-  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 60%);
-}
-
+/* Pair with AuthFormShell.css from auth route components. Legacy card class: */
 .enterprise-auth-card {
   border: 0;
   border-radius: 16px;
@@ -73,10 +66,7 @@
 }
 
 .enterprise-sticky-footer {
-  position: sticky;
-  bottom: 0;
-  background: #fff;
-  padding-top: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 /* Mobile tweaks */

@@ -466,61 +466,68 @@ const UserHome = () => {
                                 
                                 <Row className="align-items-center">
                                     <Col lg={8} className="mb-3 mb-lg-0">
-                                        <Form.Group>
-                                            <Form.Label className="fw-semibold text-dark mb-2">
-                                                {t('userHome.whatServiceDoYouNeed')}
-                                            </Form.Label>
-                                            <InputGroup size="lg">
-                                                <InputGroup.Text className="bg-light border-end-0">
-                                                    <FaSearch className="text-muted" />
-                                                </InputGroup.Text>
-                                                <Form.Control
-                                                    placeholder={t('userHome.enterCategory')}
-                                                    value={searchCategory}
-                                                    onChange={(e) => setSearchCategory(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault();
-                                                            handleSearch();
-                                                        }
-                                                    }}
-                                                    className="border-start-0 border-end-0 bg-light"
-                                                />
-                                                <Button 
-                                                    variant="primary"
-                                                    onClick={() => handleSearch()}
-                                                    disabled={isLoading}
-                                                    className="px-3 px-md-4"
-                                                >
-                                                    {isLoading ? (
-                                                        <>
-                                                            <Spinner
-                                                                as="span"
-                                                                animation="border"
-                                                                size="sm"
-                                                                role="status"
-                                                                aria-hidden="true"
-                                                                className="me-2"
-                                                            />
-                                                            <span className="d-none d-md-inline">{t('userHome.searching')}</span>
-                                                            <span className="d-md-none">{t('userHome.searching')}</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FaSearch className="me-2" />
-                                                            <span className="d-none d-md-inline">{t('userHome.searchNow')}</span>
-                                                            <span className="d-md-none">{t('userHome.searchNow')}</span>
-                                                        </>
-                                                    )}
-                                                </Button>
-                                            </InputGroup>
-                                            {error && (
-                                                <div className="text-danger small mt-2">
-                                                    <FaBell className="me-1" />
-                                                    {error}
-                                                </div>
-                                            )}
-                                        </Form.Group>
+                                        <Form
+                                            noValidate
+                                            onSubmit={(e) => {
+                                                e.preventDefault();
+                                                if (!isLoading) handleSearch();
+                                            }}
+                                        >
+                                            <Form.Group>
+                                                <Form.Label className="fw-semibold text-dark mb-2" htmlFor="userhome-service-search">
+                                                    {t('userHome.whatServiceDoYouNeed')}
+                                                </Form.Label>
+                                                <InputGroup size="lg">
+                                                    <InputGroup.Text className="bg-light border-end-0">
+                                                        <FaSearch className="text-muted" />
+                                                    </InputGroup.Text>
+                                                    <Form.Control
+                                                        id="userhome-service-search"
+                                                        type="search"
+                                                        name="serviceSearch"
+                                                        enterKeyHint="search"
+                                                        autoComplete="off"
+                                                        placeholder={t('userHome.enterCategory')}
+                                                        value={searchCategory}
+                                                        onChange={(e) => setSearchCategory(e.target.value)}
+                                                        className="border-start-0 border-end-0 bg-light"
+                                                    />
+                                                    <Button
+                                                        variant="primary"
+                                                        type="submit"
+                                                        disabled={isLoading}
+                                                        className="px-3 px-md-4"
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <Spinner
+                                                                    as="span"
+                                                                    animation="border"
+                                                                    size="sm"
+                                                                    role="status"
+                                                                    aria-hidden="true"
+                                                                    className="me-2"
+                                                                />
+                                                                <span className="d-none d-md-inline">{t('userHome.searching')}</span>
+                                                                <span className="d-md-none">{t('userHome.searching')}</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FaSearch className="me-2" />
+                                                                <span className="d-none d-md-inline">{t('userHome.searchNow')}</span>
+                                                                <span className="d-md-none">{t('userHome.searchNow')}</span>
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </InputGroup>
+                                                {error && (
+                                                    <div className="text-danger small mt-2">
+                                                        <FaBell className="me-1" />
+                                                        {error}
+                                                    </div>
+                                                )}
+                                            </Form.Group>
+                                        </Form>
                                     </Col>
                                     <Col lg={4}>
                                         <div className="text-center text-lg-start">

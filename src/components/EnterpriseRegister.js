@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, InputGroup, Spinner } from 'react-bootstrap';
+import { Row, Col, Card, Form, Button, InputGroup, Spinner } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { enterpriseService } from '../services/enterpriseService';
 import LocationService from '../services/LocationService';
 import OTPVerification from './OTPVerification';
+import '../styles/AuthFormShell.css';
 import '../styles/EnterpriseAuth.css';
-import { 
+import {
   FaPhone,
-  FaKey,
-  FaEye,
-  FaEyeSlash,
   FaBuilding,
   FaTools,
   FaPlus,
@@ -20,7 +18,7 @@ import {
   FaLocationArrow,
   FaArrowRight,
   FaExclamationCircle,
-  FaCheckCircle
+  FaCheckCircle,
 } from 'react-icons/fa';
 
 function EnterpriseRegister() {
@@ -176,7 +174,8 @@ function EnterpriseRegister() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    
+    if (otpLoading) return;
+
     // Validate form before sending OTP
     const locationValue = formData.location?.trim();
     let finalLocation = locationValue;
@@ -237,6 +236,7 @@ function EnterpriseRegister() {
   };
 
   const handleVerifyOTP = async (otpValue) => {
+    if (submitting) return;
     setSubmitting(true);
     setError('');
     
@@ -326,30 +326,35 @@ function EnterpriseRegister() {
   }
 
   return (
-    <Container className="enterprise-auth-container">
-      <Row className="justify-content-center w-100 m-0">
-        <Col xs={12} sm={11} md={10} lg={9}>
-          <Card className="enterprise-auth-card">
-            <Card.Body>
-              <div className="enterprise-auth-header">
-                <h2 className="enterprise-auth-title"><FaBuilding className="me-2" /> Enterprise Registration</h2>
-                <p className="enterprise-auth-subtitle">Register your business to hire and manage workforce</p>
+    <div className="auth-form-shell auth-form-shell--enterprise auth-form-shell--wide">
+      <div className="auth-form-shell__scroll">
+        <div className="auth-form-shell__inner">
+          <header className="auth-form-hero">
+            <p className="auth-form-hero__eyebrow mb-0">Enterprise</p>
+            <h1 className="auth-form-hero__title">
+              <FaBuilding className="text-primary" aria-hidden />
+              Enterprise registration
+            </h1>
+            <p className="auth-form-hero__subtitle">
+              Register your business to hire and manage your workforce in one place
+            </p>
+          </header>
+
+          <div className="auth-form-panel">
+            {error && (
+              <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                {error}
               </div>
+            )}
+            {success && (
+              <div className="alert alert-success d-flex align-items-center mb-3" role="alert">
+                <FaCheckCircle className="me-2 flex-shrink-0" />
+                {success}
+              </div>
+            )}
 
-              {error && (
-                <div className="alert alert-danger d-flex align-items-center" role="alert">
-                  <FaExclamationCircle className="me-2" />
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="alert alert-success d-flex align-items-center" role="alert">
-                  <FaCheckCircle className="me-2" />
-                  {success}
-                </div>
-              )}
-
-              <Form onSubmit={handleSendOTP}>
+            <Form onSubmit={handleSendOTP}>
                 <Row className="g-3">
                   <Col md={6}>
                     <Form.Group>
@@ -442,8 +447,8 @@ function EnterpriseRegister() {
                   <Col md={12} className="mt-3">
                     <Form.Group>
                       <Form.Label className="enterprise-form-label"><FaMapMarkerAlt className="me-2" />Location</Form.Label>
-                      <InputGroup>
-                        <div style={{ flex: 1 }}>
+                      <InputGroup className="auth-form-input-group--stack">
+                        <div className="auth-form-async-select-wrap">
                           <AsyncSelect
                             name="location"
                             loadOptions={(inputValue) => new Promise((resolve) => setTimeout(() => resolve(searchCities(inputValue)), 300))}
@@ -474,25 +479,43 @@ function EnterpriseRegister() {
 
                 </Row>
 
-                <div className="enterprise-sticky-footer d-grid gap-2 mt-4">
-                  <Button type="submit" variant="primary" className="enterprise-auth-btn-lg fw-bold d-flex align-items-center justify-content-center" disabled={otpLoading}>
-                    {otpLoading ? (<><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" /> Sending OTP...</>) : (<>Send OTP <FaArrowRight className="ms-2" /></>)}
+                <div className="enterprise-sticky-footer auth-form-sticky-cta d-grid gap-2 mt-2">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="fw-bold d-flex align-items-center justify-content-center"
+                    disabled={otpLoading}
+                  >
+                    {otpLoading ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                          className="me-2"
+                        />
+                        Sending OTP…
+                      </>
+                    ) : (
+                      <>
+                        Send OTP <FaArrowRight className="ms-2" />
+                      </>
+                    )}
                   </Button>
                 </div>
-                <div className="text-center mt-4">
-                  <p className="mb-0">
-                    Already have an enterprise account?{' '}
-                    <Button variant="link" className="p-0 text-decoration-none" onClick={() => navigate('/enterpriseLogin')}>
-                      Login here
-                    </Button>
-                  </p>
+                <div className="auth-form-alt-action">
+                  <span className="text-muted">Already registered?</span>{' '}
+                  <Button type="button" variant="link" className="p-0 align-baseline" onClick={() => navigate('/enterpriseLogin')}>
+                    Sign in
+                  </Button>
                 </div>
               </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

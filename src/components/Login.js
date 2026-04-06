@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { userService, loginUser, requestOTP } from '../services/userService';
+import { loginUser, requestOTP } from '../services/userService';
 import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import OTPVerification from './OTPVerification';
-import '../styles/Login.css';
+import '../styles/AuthFormShell.css';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -34,6 +33,7 @@ const Login = () => {
 
     const handleSendOTP = async (e) => {
         e.preventDefault();
+        if (otpLoading) return;
         if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
             setError(t('auth.pleaseEnterValidMobile'));
             return;
@@ -54,6 +54,7 @@ const Login = () => {
     };
 
     const handleVerifyOTP = async (otpValue) => {
+        if (isLoading) return;
         setIsLoading(true);
         setError('');
         
@@ -114,88 +115,82 @@ const Login = () => {
     }
 
     return (
-        <Container className="mt-5 mb-5">
-            <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <Card className="shadow-lg border-0">
-                        <Card.Body className="p-5">
-                            <div className="text-center mb-4">
-                                <h2 className="fw-bold text-primary">{t('auth.welcomeBack')}</h2>
-                                <p className="text-muted">{t('auth.signInToContinue')}</p>
+        <div className="auth-form-shell auth-form-shell--user">
+            <div className="auth-form-shell__scroll">
+                <div className="auth-form-shell__inner">
+                    <header className="auth-form-hero">
+                        <p className="auth-form-hero__eyebrow mb-0">{t('home.headerTitle')}</p>
+                        <h1 className="auth-form-hero__title">{t('auth.welcomeBack')}</h1>
+                        <p className="auth-form-hero__subtitle">{t('auth.signInToContinue')}</p>
+                    </header>
+
+                    <div className="auth-form-panel">
+                        {error && (
+                            <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                                {error}
                             </div>
+                        )}
 
-                            {error && (
-                                <div className="alert alert-danger d-flex align-items-center" role="alert">
-                                    <FaExclamationCircle className="me-2" />
-                                    {error}
-                                </div>
-                            )}
+                        <Form onSubmit={handleSendOTP}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>
+                                    <FaPhone className="me-2 text-primary" aria-hidden />
+                                    {t('auth.mobileNumber')}
+                                </Form.Label>
+                                <Form.Control
+                                    type="tel"
+                                    inputMode="numeric"
+                                    autoComplete="tel"
+                                    placeholder={t('auth.enterMobileNumber')}
+                                    value={mobileNumber}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        setMobileNumber(value);
+                                    }}
+                                    maxLength={10}
+                                    required
+                                />
+                            </Form.Group>
 
-                            <Form onSubmit={handleSendOTP}>
-                                <Form.Group className="mb-4">
-                                    <div className="d-flex align-items-center">
-                                        <FaPhone className="me-2" />
-                                        <Form.Label className="fw-bold mb-0">{t('auth.mobileNumber')}</Form.Label>
-                                    </div>
-                                    <Form.Control
-                                        type="tel"
-                                        placeholder={t('auth.enterMobileNumber')}
-                                        className="form-control-lg"
-                                        value={mobileNumber}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                            setMobileNumber(value);
-                                        }}
-                                        maxLength="10"
-                                        required
-                                    />
-                                </Form.Group>
+                            <div className="auth-form-sticky-cta d-grid gap-2">
+                                <Button
+                                    variant="primary"
+                                    type="submit"
+                                    className="d-flex align-items-center justify-content-center"
+                                    disabled={otpLoading}
+                                >
+                                    {otpLoading ? (
+                                        <>
+                                            <Spinner
+                                                as="span"
+                                                animation="border"
+                                                size="sm"
+                                                role="status"
+                                                aria-hidden="true"
+                                                className="me-2"
+                                            />
+                                            {t('auth.sendingOtp')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </Form>
 
-                                <div className="d-grid gap-2">
-                                    <Button
-                                        variant="primary"
-                                        type="submit"
-                                        className="btn-lg fw-bold d-flex align-items-center justify-content-center"
-                                        disabled={otpLoading}
-                                    >
-                                        {otpLoading ? (
-                                            <>
-                                                <Spinner
-                                                    as="span"
-                                                    animation="border"
-                                                    size="sm"
-                                                    role="status"
-                                                    aria-hidden="true"
-                                                    className="me-2"
-                                                />
-                                                {t('auth.sendingOtp')}
-                                            </>
-                                        ) : (
-                                            <>
-                                                {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-
-                                <div className="text-center mt-4">
-                                    <p className="mb-0">
-                                        {t('auth.dontHaveAccount')}{' '}
-                                        <Button
-                                            variant="link"
-                                            className="p-0 text-decoration-none"
-                                            onClick={() => navigate('/register')}
-                                        >
-                                            {t('auth.registerHere')}
-                                        </Button>
-                                    </p>
-                                </div>
-                            </Form>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-        </Container>
+                        <div className="auth-form-alt-action">
+                            <span className="text-muted">{t('auth.dontHaveAccount')}</span>{' '}
+                            <Button type="button" variant="link" className="p-0 align-baseline" onClick={() => navigate('/register')}>
+                                {t('auth.registerHere')}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 

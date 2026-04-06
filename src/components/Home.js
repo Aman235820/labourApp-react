@@ -54,12 +54,20 @@ function Home() {
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
+    if (isLoading) return;
     const q = searchInput.trim();
+    setCurrentPage(0);
+    if (!q) {
+      setLabourers([]);
+      setTotalPages(0);
+      setTotalElements(0);
+      setCommittedSearchQuery('');
+      setError(null);
+      return;
+    }
     setLabourers([]);
     setTotalPages(0);
     setTotalElements(0);
-    setCurrentPage(0);
-    if (!q) return;
     setCommittedSearchQuery(q);
     await fetchLabourers(0, pageSize, q);
   };
@@ -277,7 +285,7 @@ function Home() {
       {/* Search Section */}
       <div className="search-section">
         <Container>
-          <Form onSubmit={handleSearch}>
+          <Form onSubmit={handleSearch} noValidate>
             <Row className="justify-content-center">
               <Col xs={12} md={8} lg={6}>
                 <div className="search-input-wrapper">
@@ -286,11 +294,16 @@ function Home() {
                       <FaSearch className="text-primary" />
                     </InputGroup.Text>
                     <Form.Control
-                      type="text"
+                      type="search"
+                      name="homeSearch"
+                      id="home-search-input"
+                      enterKeyHint="search"
+                      autoComplete="off"
                       placeholder={t('search.placeholder')}
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       className="search-input"
+                      aria-label={t('search.placeholder')}
                     />
                     <Button 
                       variant="primary" 

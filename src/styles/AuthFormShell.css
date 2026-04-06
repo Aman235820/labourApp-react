@@ -1,0 +1,282 @@
+/**
+ * Shared fullscreen-friendly auth layouts (login / register / OTP).
+ * Mobile: edge-to-edge panel, large touch targets, 16px inputs (iOS zoom fix).
+ */
+
+.auth-form-shell {
+  width: 100%;
+  min-height: calc(100dvh - 80px);
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: linear-gradient(165deg, #e8ecff 0%, #f1f5f9 42%, #f8fafc 100%);
+}
+
+@media (min-width: 992px) {
+  .auth-form-shell {
+    min-height: calc(100dvh - 70px);
+    min-height: calc(100vh - 70px);
+  }
+}
+
+.dark-theme .auth-form-shell {
+  background: linear-gradient(165deg, #0f172a 0%, #1e293b 45%, #0f172a 100%);
+}
+
+.auth-form-shell--enterprise {
+  background: linear-gradient(165deg, #e8ecff 0%, #eef2ff 35%, #f8fafc 100%);
+}
+
+.auth-form-shell--labour {
+  background: linear-gradient(165deg, #ecfdf5 0%, #f0fdf4 30%, #f8fafc 100%);
+}
+
+.auth-form-shell--user {
+  background: linear-gradient(165deg, #ede9fe 0%, #f5f3ff 35%, #f8fafc 100%);
+}
+
+.dark-theme .auth-form-shell--enterprise,
+.dark-theme .auth-form-shell--labour,
+.dark-theme .auth-form-shell--user {
+  background: linear-gradient(165deg, #0f172a 0%, #1e293b 45%, #0f172a 100%);
+}
+
+.auth-form-shell__scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding: 0.75rem 0.75rem 1.25rem;
+}
+
+@media (min-width: 576px) {
+  .auth-form-shell__scroll {
+    padding: 1rem 1rem 1.75rem;
+  }
+}
+
+.auth-form-shell__inner {
+  width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form-shell--wide .auth-form-shell__inner {
+  max-width: 720px;
+}
+
+.auth-form-hero {
+  padding: 0.25rem 0 1rem;
+  text-align: left;
+}
+
+@media (min-width: 576px) {
+  .auth-form-hero {
+    text-align: center;
+    padding: 0.5rem 0 1.25rem;
+  }
+}
+
+.auth-form-hero__eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4f46e5;
+  margin-bottom: 0.35rem;
+}
+
+.dark-theme .auth-form-hero__eyebrow {
+  color: #a5b4fc;
+}
+
+.auth-form-hero__title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+  color: var(--text-primary, #0f172a);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+@media (min-width: 576px) {
+  .auth-form-hero__title {
+    font-size: 1.5rem;
+    justify-content: center;
+  }
+}
+
+.auth-form-hero__subtitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #64748b);
+}
+
+.auth-form-panel {
+  background: var(--card-bg, #ffffff);
+  color: var(--card-text, #0f172a);
+  border-radius: 20px 20px 0 0;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-bottom: none;
+  box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.06);
+  padding: 1.25rem 1rem 1.5rem;
+  flex: 1;
+}
+
+@media (min-width: 576px) {
+  .auth-form-panel {
+    border-radius: 20px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.08);
+    padding: 1.5rem 1.5rem 1.75rem;
+  }
+}
+
+.dark-theme .auth-form-panel {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+}
+
+/* Inputs: 16px minimum on mobile avoids iOS zoom */
+.auth-form-shell .form-control,
+.auth-form-shell .form-select {
+  min-height: 48px;
+  font-size: 16px;
+  border-radius: 12px;
+  border-width: 1.5px;
+  padding: 0.625rem 0.875rem;
+}
+
+.auth-form-shell .form-control:focus,
+.auth-form-shell .form-select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22);
+}
+
+.auth-form-shell .form-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary, #334155);
+}
+
+.auth-form-shell .form-control-lg {
+  min-height: 48px;
+  font-size: 16px;
+  padding: 0.625rem 0.875rem;
+}
+
+.auth-form-shell .btn-primary {
+  min-height: 52px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.65rem 1.25rem;
+}
+
+.auth-form-shell .alert {
+  border-radius: 12px;
+  font-size: 0.9375rem;
+}
+
+.auth-form-sticky-cta {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(
+    to top,
+    var(--card-bg, #fff) 55%,
+    rgba(255, 255, 255, 0)
+  );
+}
+
+@media (min-width: 576px) {
+  .auth-form-sticky-cta {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.dark-theme .auth-form-sticky-cta {
+  background: linear-gradient(
+    to top,
+    var(--card-bg, #1a1a1a) 55%,
+    transparent
+  );
+}
+
+.auth-form-alt-action {
+  text-align: center;
+  margin-top: 1.25rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.auth-form-alt-action .btn-link {
+  font-weight: 600;
+  vertical-align: baseline;
+}
+
+/* react-select inside auth flows */
+.auth-form-shell .select__control {
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  border-width: 1.5px !important;
+  font-size: 16px !important;
+}
+
+.auth-form-shell .select__placeholder {
+  font-size: 16px;
+}
+
+/* Location row: stack on narrow screens */
+.auth-form-input-group--stack {
+  flex-wrap: wrap;
+}
+
+.auth-form-async-select-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 575.98px) {
+  .auth-form-input-group--stack .auth-form-async-select-wrap {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .auth-form-input-group--stack > .btn {
+    flex: 1 1 100%;
+    margin-top: 0.5rem;
+    border-radius: 12px !important;
+    min-height: 48px;
+  }
+}
+
+/* Enterprise service rows: full-width columns on mobile */
+.auth-form-shell .enterprise-service-card .row > [class*='col-'] {
+  margin-bottom: 0.25rem;
+}

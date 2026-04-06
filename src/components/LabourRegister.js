@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Card, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
+import { Form, Button, Spinner, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import LocationService from '../services/LocationService';
@@ -8,7 +8,7 @@ import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import { useTranslation } from 'react-i18next';
 import OTPVerification from './OTPVerification';
-import '../styles/LabourRegister.css';
+import '../styles/AuthFormShell.css';
 
 function LabourRegister() {
   const navigate = useNavigate();
@@ -197,7 +197,8 @@ function LabourRegister() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    
+    if (otpLoading) return;
+
     // Validate form before sending OTP
     if (selectedService && formData.labourSubSkill.length === 0) {
       setError(t('auth.pleaseSelectAtLeastOneSubSkill'));
@@ -262,6 +263,7 @@ function LabourRegister() {
   };
 
   const handleVerifyOTP = async (otpValue) => {
+    if (isLoading) return;
     setIsLoading(true);
     setError('');
     
@@ -330,223 +332,217 @@ function LabourRegister() {
   }
 
   return (
-    <Container className="mt-5 mb-5">
-      <Row className="justify-content-center">
-        <Col md={8} lg={6}>
-          <Card className="shadow-lg border-0">
-            <Card.Body className="p-5">
-              <div className="text-center mb-4">
-                <h2 className="fw-bold text-primary">{t('auth.labourRegistration')}</h2>
-                <p className="text-muted">{t('auth.joinAsSkilledProfessional')}</p>
+    <div className="auth-form-shell auth-form-shell--labour auth-form-shell--wide">
+      <div className="auth-form-shell__scroll">
+        <div className="auth-form-shell__inner">
+          <header className="auth-form-hero">
+            <p className="auth-form-hero__eyebrow mb-0">{t('home.headerTitle')}</p>
+            <h1 className="auth-form-hero__title">{t('auth.labourRegistration')}</h1>
+            <p className="auth-form-hero__subtitle">{t('auth.joinAsSkilledProfessional')}</p>
+          </header>
+
+          <div className="auth-form-panel">
+            {error && (
+              <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                {error}
               </div>
-              {error && (
-                <div className="alert alert-danger d-flex align-items-center" role="alert">
-                  <FaExclamationCircle className="me-2" />
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="alert alert-success d-flex align-items-center" role="alert">
-                  <FaCheckCircle className="me-2" />
-                  {success}
-                </div>
-              )}
-              <Form onSubmit={handleSendOTP}>
-                <Form.Group className="mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaUser className="me-2" />
-                    <Form.Label className="fw-bold mb-0">{t('auth.fullName')}</Form.Label>
-                  </div>
-                  <Form.Control
-                    type="text"
-                    name="labourName"
-                    value={formData.labourName}
-                    onChange={handleChange}
-                    required
-                    className="form-control-lg"
-                    placeholder={t('auth.enterFullName')}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaTools className="me-2" />
-                    <Form.Label className="fw-bold mb-0">{t('auth.mainSkill')}</Form.Label>
-                  </div>
-                  <Form.Select
-                    name="labourSkill"
-                    value={formData.labourSkill}
-                    onChange={handleChange}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">{t('auth.selectMainSkill')}</option>
-                    {services.map((service, index) => (
-                      <option key={index} value={service.name}>
-                        {service.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                {selectedService && (
-                  <Form.Group className="mb-4">
-                    <div className="d-flex align-items-center">
-                      <FaTools className="me-2" />
-                      <Form.Label className="fw-bold mb-0">{t('auth.subSkill')}</Form.Label>
-                    </div>
-                    <Select
-                      name="labourSubSkill"
-                      isMulti
-                      options={[
-                        { value: 'all', label: t('auth.selectAll') },
-                        ...selectedService.subCategories.map(subCategory => ({
-                          value: subCategory,
-                          label: subCategory
-                        }))
-                      ]}
-                      onChange={handleSubSkillChange}
-                      value={formData.labourSubSkill.map(subCategory => ({
+            )}
+            {success && (
+              <div className="alert alert-success d-flex align-items-center mb-3" role="alert">
+                <FaCheckCircle className="me-2 flex-shrink-0" />
+                {success}
+              </div>
+            )}
+            <Form onSubmit={handleSendOTP}>
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  <FaUser className="me-2 text-primary" aria-hidden />
+                  {t('auth.fullName')}
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  name="labourName"
+                  value={formData.labourName}
+                  onChange={handleChange}
+                  required
+                  autoComplete="name"
+                  placeholder={t('auth.enterFullName')}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  <FaTools className="me-2 text-primary" aria-hidden />
+                  {t('auth.mainSkill')}
+                </Form.Label>
+                <Form.Select
+                  name="labourSkill"
+                  value={formData.labourSkill}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">{t('auth.selectMainSkill')}</option>
+                  {services.map((service, index) => (
+                    <option key={index} value={service.name}>
+                      {service.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              {selectedService && (
+                <Form.Group className="mb-3">
+                  <Form.Label>
+                    <FaTools className="me-2 text-primary" aria-hidden />
+                    {t('auth.subSkill')}
+                  </Form.Label>
+                  <Select
+                    name="labourSubSkill"
+                    isMulti
+                    options={[
+                      { value: 'all', label: t('auth.selectAll') },
+                      ...selectedService.subCategories.map((subCategory) => ({
                         value: subCategory,
-                        label: subCategory
-                      }))}
-                      className="basic-multi-select"
-                      classNamePrefix="select"
-                      placeholder={t('auth.selectSubSkills')}
-                      menuPortalTarget={document.body}
-                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                    />
-                  </Form.Group>
-                )}
-                <Form.Group className="mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaPhone className="me-2" />
-                    <Form.Label className="fw-bold mb-0">{t('auth.mobileNumber')}</Form.Label>
-                  </div>
-                  <Form.Control
-                    type="tel"
-                    name="labourMobileNo"
-                    value={formData.labourMobileNo}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                      setFormData({
-                        ...formData,
-                        labourMobileNo: value
-                      });
-                    }}
-                    required
-                    pattern="[0-9]{10}"
-                    className="form-control-lg"
-                    placeholder={t('auth.enterMobileNumber')}
-                    maxLength="10"
+                        label: subCategory,
+                      })),
+                    ]}
+                    onChange={handleSubSkillChange}
+                    value={formData.labourSubSkill.map((subCategory) => ({
+                      value: subCategory,
+                      label: subCategory,
+                    }))}
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                    placeholder={t('auth.selectSubSkills')}
+                    menuPortalTarget={document.body}
+                    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                   />
                 </Form.Group>
-                <Form.Group className="mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaMapMarkerAlt className="me-2" />
-                    <Form.Label className="fw-bold mb-0">{t('auth.location')}</Form.Label>
+              )}
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  <FaPhone className="me-2 text-primary" aria-hidden />
+                  {t('auth.mobileNumber')}
+                </Form.Label>
+                <Form.Control
+                  type="tel"
+                  name="labourMobileNo"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  value={formData.labourMobileNo}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setFormData({
+                      ...formData,
+                      labourMobileNo: value,
+                    });
+                  }}
+                  required
+                  pattern="[0-9]{10}"
+                  placeholder={t('auth.enterMobileNumber')}
+                  maxLength={10}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  <FaMapMarkerAlt className="me-2 text-primary" aria-hidden />
+                  {t('auth.location')}
+                </Form.Label>
+                <InputGroup className="auth-form-input-group--stack">
+                  <div className="auth-form-async-select-wrap">
+                    <AsyncSelect
+                      name="labourLocation"
+                      loadOptions={(inputValue) =>
+                        new Promise((resolve) => {
+                          setTimeout(() => {
+                            resolve(searchCities(inputValue));
+                          }, 300);
+                        })
+                      }
+                      onChange={(selectedOption) => {
+                        setSelectedCity(selectedOption);
+                        setFormData((prev) => ({
+                          ...prev,
+                          labourLocation: selectedOption ? selectedOption.value : '',
+                        }));
+                      }}
+                      value={selectedCity}
+                      placeholder={t('auth.typeToSearchCities')}
+                      isClearable
+                      cacheOptions
+                      defaultOptions={cities.length > 0 ? searchCities('') : []}
+                      className="basic-single"
+                      classNamePrefix="select"
+                      menuPortalTarget={document.body}
+                      styles={{
+                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                        control: (base) => ({ ...base, minHeight: '48px' }),
+                      }}
+                      noOptionsMessage={({ inputValue }) =>
+                        inputValue
+                          ? `${t('auth.noCitiesFoundMatching')} "${inputValue}"`
+                          : t('auth.typeToSearchCities')
+                      }
+                    />
                   </div>
-                  <InputGroup>
-                    <div style={{ flex: 1 }}>
-                      <AsyncSelect
-                        name="labourLocation"
-                        loadOptions={(inputValue) => {
-                          return new Promise((resolve) => {
-                            setTimeout(() => {
-                              resolve(searchCities(inputValue));
-                            }, 300);
-                          });
-                        }}
-                        onChange={(selectedOption) => {
-                          setSelectedCity(selectedOption);
-                          setFormData(prev => ({
-                            ...prev,
-                            labourLocation: selectedOption ? selectedOption.value : ''
-                          }));
-                        }}
-                        value={selectedCity}
-                        placeholder={t('auth.typeToSearchCities')}
-                        isClearable
-                        cacheOptions
-                        defaultOptions={cities.length > 0 ? searchCities('') : []}
-                        className="basic-single"
-                        classNamePrefix="select"
-                        menuPortalTarget={document.body}
-                        styles={{ 
-                          menuPortal: base => ({ ...base, zIndex: 9999 }),
-                          control: base => ({ ...base, minHeight: '46px' })
-                        }}
-                        noOptionsMessage={({ inputValue }) => 
-                          inputValue ? `${t('auth.noCitiesFoundMatching')} "${inputValue}"` : t('auth.typeToSearchCities')
-                        }
-                      />
-                    </div>
-                    <Button
-                      variant="outline-primary"
-                      type="button"
-                      onClick={handleDetectLocation}
-                      disabled={locationLoading}
-                      style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                    >
-                      {locationLoading ? (
-                        <>
-                          <Spinner size="sm" className="me-1" />
-                          {t('auth.detecting')}
-                        </>
-                      ) : (
-                        <>
-                          <FaLocationArrow className="me-1" />
-                          {t('auth.autoDetect')}
-                        </>
-                      )}
-                    </Button>
-                  </InputGroup>
-                  <Form.Text className="text-muted">
-                    {t('auth.typeToSearchAndSelect')}
-                  </Form.Text>
-                </Form.Group>
-                <div className="d-grid gap-2">
-                  <Button 
-                    variant="primary" 
-                    type="submit" 
-                    className="btn-lg fw-bold d-flex align-items-center justify-content-center"
-                    disabled={otpLoading}
+                  <Button
+                    variant="outline-primary"
+                    type="button"
+                    onClick={handleDetectLocation}
+                    disabled={locationLoading}
+                    style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                   >
-                    {otpLoading ? (
+                    {locationLoading ? (
                       <>
-                        <Spinner
-                          as="span"
-                          animation="border"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                          className="me-2"
-                        />
-                        {t('auth.sendingOtp')}
+                        <Spinner size="sm" className="me-1" />
+                        {t('auth.detecting')}
                       </>
                     ) : (
                       <>
-                        {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
+                        <FaLocationArrow className="me-1" />
+                        {t('auth.autoDetect')}
                       </>
                     )}
                   </Button>
-                </div>
-                <div className="text-center mt-4">
-                  <p className="mb-0">
-                    {t('auth.alreadyHaveAccount')}{' '}
-                    <Button 
-                      variant="link" 
-                      className="p-0 text-decoration-none"
-                      onClick={() => navigate('/labourLogin')}
-                    >
-                      {t('auth.loginHere')}
-                    </Button>
-                  </p>
-                </div>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                </InputGroup>
+                <Form.Text className="text-muted">{t('auth.typeToSearchAndSelect')}</Form.Text>
+              </Form.Group>
+              <div className="auth-form-sticky-cta d-grid gap-2">
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="d-flex align-items-center justify-content-center"
+                  disabled={otpLoading}
+                >
+                  {otpLoading ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      {t('auth.sendingOtp')}
+                    </>
+                  ) : (
+                    <>
+                      {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Form>
+            <div className="auth-form-alt-action">
+              <span className="text-muted">{t('auth.alreadyHaveAccount')}</span>{' '}
+              <Button type="button" variant="link" className="p-0 align-baseline" onClick={() => navigate('/labourLogin')}>
+                {t('auth.loginHere')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

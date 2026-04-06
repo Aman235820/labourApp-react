@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
+import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { labourService } from '../services/labourService';
 import { useTranslation } from 'react-i18next';
 import OTPVerification from './OTPVerification';
-import '../styles/LabourLogin.css';
+import '../styles/AuthFormShell.css';
 
 function LabourLogin() {
   const [step, setStep] = useState('form'); // 'form' or 'otp'
@@ -19,6 +19,7 @@ function LabourLogin() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
+    if (otpLoading) return;
     if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
       setError(t('auth.pleaseEnterValidMobile'));
       return;
@@ -39,6 +40,7 @@ function LabourLogin() {
   };
 
   const handleVerifyOTP = async (otpValue) => {
+    if (isLoading) return;
     setIsLoading(true);
     setError(null);
     
@@ -112,42 +114,45 @@ function LabourLogin() {
   }
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col md={6} lg={5}>
-          <Card className="shadow-sm login-card">
-            <Card.Body className="p-4">
-              <div className="text-center mb-4">
-                <h2 className="display-6 mb-3">{t('auth.labourLogin')}</h2>
-                <p className="text-muted">{t('auth.enterMobileToAccess')}</p>
-              </div>
-              {error && (
-                <Alert variant="danger" className="mb-4 d-flex align-items-center">
-                  <FaExclamationCircle className="me-2" />
-                  {error}
-                </Alert>
-              )}
-              <Form onSubmit={handleSendOTP}>
-                <Form.Group className="mb-4">
-                  <Form.Label className="text-muted">
-                    <FaPhone className="me-2" />
-                    {t('auth.mobileNumber')}
-                  </Form.Label>
-                  <Form.Control
-                    type="tel"
-                    placeholder={t('auth.enterMobileNumber')}
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="py-2"
-                    pattern="[0-9]{10}"
-                    maxLength="10"
-                    required
-                  />
-                </Form.Group>
+    <div className="auth-form-shell auth-form-shell--labour">
+      <div className="auth-form-shell__scroll">
+        <div className="auth-form-shell__inner">
+          <header className="auth-form-hero">
+            <p className="auth-form-hero__eyebrow mb-0">{t('home.headerTitle')}</p>
+            <h1 className="auth-form-hero__title">{t('auth.labourLogin')}</h1>
+            <p className="auth-form-hero__subtitle">{t('auth.enterMobileToAccess')}</p>
+          </header>
+
+          <div className="auth-form-panel">
+            {error && (
+              <Alert variant="danger" className="mb-3 d-flex align-items-center">
+                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                {error}
+              </Alert>
+            )}
+            <Form onSubmit={handleSendOTP}>
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  <FaPhone className="me-2 text-primary" aria-hidden />
+                  {t('auth.mobileNumber')}
+                </Form.Label>
+                <Form.Control
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  placeholder={t('auth.enterMobileNumber')}
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  required
+                />
+              </Form.Group>
+              <div className="auth-form-sticky-cta d-grid gap-2">
                 <Button
                   variant="primary"
                   type="submit"
-                  className="w-100 py-2 d-flex align-items-center justify-content-center"
+                  className="d-flex align-items-center justify-content-center"
                   disabled={otpLoading}
                 >
                   {otpLoading ? (
@@ -168,24 +173,18 @@ function LabourLogin() {
                     </>
                   )}
                 </Button>
-              </Form>
-              <div className="text-center mt-4">
-                <p className="mb-0">
-                  {t('auth.dontHaveAccount')}{' '}
-                  <Button
-                    variant="link"
-                    className="p-0 text-decoration-none"
-                    onClick={() => navigate('/labourRegister')}
-                  >
-                    {t('auth.registerHere')}
-                  </Button>
-                </p>
               </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+            </Form>
+            <div className="auth-form-alt-action">
+              <span className="text-muted">{t('auth.dontHaveAccount')}</span>{' '}
+              <Button type="button" variant="link" className="p-0 align-baseline" onClick={() => navigate('/labourRegister')}>
+                {t('auth.registerHere')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { FaArrowLeft, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import '../styles/AuthFormShell.css';
 import '../styles/OTPVerification.css';
 
 function OTPVerification({ 
@@ -42,11 +43,20 @@ function OTPVerification({
   };
 
   const handleKeyDown = (index, e) => {
+    if (e.key === 'Enter') {
+      const otpString = otp.join('');
+      if (otpString.length === 4 && !isLoading) {
+        e.preventDefault();
+        onVerify(otpString);
+      }
+      return;
+    }
+
     // Handle backspace
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
-    
+
     // Handle arrow keys
     if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -92,95 +102,99 @@ function OTPVerification({
   const isOtpComplete = otp.every(digit => digit !== '');
 
   return (
-    <Container className="otp-verification-container">
-      <Row className="justify-content-center w-100 m-0">
-        <Col xs={12} sm={10} md={8} lg={6} xl={5}>
-          <Card className="otp-verification-card">
-            <Card.Body>
-              <div className="otp-verification-header">
-                <h2 className="otp-verification-title">{title}</h2>
-                <p className="otp-verification-subtitle">{subtitle}</p>
-                {mobileNumber && (
-                  <p className="otp-mobile-number">+91 {mobileNumber}</p>
-                )}
+    <div className="auth-form-shell auth-form-shell--otp">
+      <div className="auth-form-shell__scroll">
+        <div className="auth-form-shell__inner">
+          <header className="auth-form-hero">
+            <p className="auth-form-hero__eyebrow mb-0">Verification</p>
+            <h1 className="auth-form-hero__title">{title}</h1>
+            <p className="auth-form-hero__subtitle">{subtitle}</p>
+            {mobileNumber ? (
+              <p className="otp-mobile-number mb-0 mt-2">+91 {mobileNumber}</p>
+            ) : null}
+          </header>
+
+          <div className="auth-form-panel otp-verification-panel">
+            {error && (
+              <Alert variant="danger" className="mb-3 d-flex align-items-center">
+                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                {error}
+              </Alert>
+            )}
+
+            {success && (
+              <Alert variant="success" className="mb-3 d-flex align-items-center">
+                <FaCheckCircle className="me-2 flex-shrink-0" />
+                {success}
+              </Alert>
+            )}
+
+            <Form onSubmit={handleSubmit}>
+              <div className="otp-input-container">
+                {otp.map((digit, index) => (
+                  <Form.Control
+                    key={index}
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
+                    type="text"
+                    value={digit}
+                    onChange={(e) => handleChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
+                    className="otp-input"
+                    maxLength={1}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                  />
+                ))}
               </div>
 
-              {error && (
-                <Alert variant="danger" className="mb-4 d-flex align-items-center">
-                  <FaExclamationCircle className="me-2" />
-                  {error}
-                </Alert>
-              )}
+              <div className="otp-actions">
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="otp-verify-btn w-100"
+                  disabled={!isOtpComplete || isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Spinner size="sm" className="me-2" />
+                      Verifying…
+                    </>
+                  ) : (
+                    'Verify OTP'
+                  )}
+                </Button>
 
-              {success && (
-                <Alert variant="success" className="mb-4 d-flex align-items-center">
-                  <FaCheckCircle className="me-2" />
-                  {success}
-                </Alert>
-              )}
-
-              <Form onSubmit={handleSubmit}>
-                <div className="otp-input-container">
-                  {otp.map((digit, index) => (
-                    <Form.Control
-                      key={index}
-                      ref={el => inputRefs.current[index] = el}
-                      type="text"
-                      value={digit}
-                      onChange={e => handleChange(index, e.target.value)}
-                      onKeyDown={e => handleKeyDown(index, e)}
-                      onPaste={handlePaste}
-                      className="otp-input"
-                      maxLength={1}
-                      inputMode="numeric"
-                    />
-                  ))}
-                </div>
-
-                <div className="otp-actions">
+                <div className="otp-secondary-actions">
                   <Button
-                    variant="primary"
-                    type="submit"
-                    className="otp-verify-btn"
-                    disabled={!isOtpComplete || isLoading}
+                    variant="outline-secondary"
+                    onClick={onBack}
+                    className="otp-back-btn"
+                    disabled={isLoading}
+                    type="button"
                   >
-                    {isLoading ? (
-                      <>
-                        <Spinner size="sm" className="me-2" />
-                        Verifying...
-                      </>
-                    ) : (
-                      'Verify OTP'
-                    )}
+                    <FaArrowLeft className="me-2" />
+                    Back
                   </Button>
 
-                  <div className="otp-secondary-actions">
-                    <Button
-                      variant="outline-secondary"
-                      onClick={onBack}
-                      className="otp-back-btn"
-                      disabled={isLoading}
-                    >
-                      <FaArrowLeft className="me-2" />
-                      Back
-                    </Button>
-
-                    <Button
-                      variant="link"
-                      onClick={handleResend}
-                      className="otp-resend-btn"
-                      disabled={isLoading}
-                    >
-                      Resend OTP
-                    </Button>
-                  </div>
+                  <Button
+                    variant="link"
+                    onClick={handleResend}
+                    className="otp-resend-btn"
+                    disabled={isLoading}
+                    type="button"
+                  >
+                    Resend OTP
+                  </Button>
                 </div>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+            </Form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

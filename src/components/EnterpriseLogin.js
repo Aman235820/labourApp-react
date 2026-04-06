@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
+import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { enterpriseService } from '../services/enterpriseService';
 import OTPVerification from './OTPVerification';
+import '../styles/AuthFormShell.css';
 import '../styles/EnterpriseAuth.css';
 
 function EnterpriseLogin() {
@@ -17,6 +18,7 @@ function EnterpriseLogin() {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
+    if (otpLoading) return;
     if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
       setError('Please enter a valid 10-digit mobile number');
       return;
@@ -37,6 +39,7 @@ function EnterpriseLogin() {
   };
 
   const handleVerifyOTP = async (otpValue) => {
+    if (isLoading) return;
     setIsLoading(true);
     setError(null);
     
@@ -119,42 +122,46 @@ function EnterpriseLogin() {
   }
 
   return (
-    <Container className="enterprise-auth-container">
-      <Row className="justify-content-center w-100 m-0">
-        <Col xs={12} sm={11} md={9} lg={6} xl={5}>
-          <Card className="enterprise-auth-card">
-            <Card.Body>
-              <div className="enterprise-auth-header">
-                <h2 className="enterprise-auth-title">Enterprise Login</h2>
-                <p className="enterprise-auth-subtitle">Enter mobile to access your enterprise account</p>
-              </div>
-              {error && (
-                <Alert variant="danger" className="mb-4 d-flex align-items-center">
-                  <FaExclamationCircle className="me-2" />
-                  {error}
-                </Alert>
-              )}
-              <Form onSubmit={handleSendOTP}>
-                <Form.Group className="mb-4">
-                  <Form.Label className="text-muted">
-                    <FaPhone className="me-2" />
-                    Mobile Number
-                  </Form.Label>
-                  <Form.Control
-                    type="tel"
-                    placeholder="Enter mobile number"
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="py-2"
-                    pattern="[0-9]{10}"
-                    maxLength="10"
-                    required
-                  />
-                </Form.Group>
+    <div className="auth-form-shell auth-form-shell--enterprise">
+      <div className="auth-form-shell__scroll">
+        <div className="auth-form-shell__inner">
+          <header className="auth-form-hero">
+            <p className="auth-form-hero__eyebrow mb-0">Enterprise</p>
+            <h1 className="auth-form-hero__title">Enterprise Login</h1>
+            <p className="auth-form-hero__subtitle">
+              Enter your mobile number to sign in to your business account
+            </p>
+          </header>
+          <div className="auth-form-panel">
+            {error && (
+              <Alert variant="danger" className="mb-3 d-flex align-items-center">
+                <FaExclamationCircle className="me-2 flex-shrink-0" />
+                {error}
+              </Alert>
+            )}
+            <Form onSubmit={handleSendOTP}>
+              <Form.Group className="mb-3">
+                <Form.Label>
+                  <FaPhone className="me-2 text-primary" aria-hidden />
+                  Mobile number
+                </Form.Label>
+                <Form.Control
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  placeholder="10-digit mobile number"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  required
+                />
+              </Form.Group>
+              <div className="auth-form-sticky-cta">
                 <Button
                   variant="primary"
                   type="submit"
-                  className="w-100 enterprise-auth-btn-lg d-flex align-items-center justify-content-center"
+                  className="w-100 d-flex align-items-center justify-content-center"
                   disabled={otpLoading}
                 >
                   {otpLoading ? (
@@ -167,7 +174,7 @@ function EnterpriseLogin() {
                         aria-hidden="true"
                         className="me-2"
                       />
-                      Sending OTP...
+                      Sending OTP…
                     </>
                   ) : (
                     <>
@@ -175,24 +182,23 @@ function EnterpriseLogin() {
                     </>
                   )}
                 </Button>
-              </Form>
-              <div className="text-center mt-4">
-                <p className="mb-0">
-                  Don't have an enterprise account?{' '}
-                  <Button
-                    variant="link"
-                    className="p-0 text-decoration-none"
-                    onClick={() => navigate('/enterpriseRegister')}
-                  >
-                    Register here
-                  </Button>
-                </p>
               </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+            </Form>
+            <div className="auth-form-alt-action">
+              <span className="text-muted">No enterprise account yet?</span>{' '}
+              <Button
+                type="button"
+                variant="link"
+                className="p-0 align-baseline"
+                onClick={() => navigate('/enterpriseRegister')}
+              >
+                Register
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
