@@ -327,7 +327,9 @@ function Home() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await searchLabourByCategory(sub, 0, pageSize);
+      const res = await searchLabourByCategory(sub, 0, pageSize, 'rating', 'desc', {
+        isExactMatch: true,
+      });
       if (res && res.content) {
         // Navigate to labour list page with the data
         navigate('/labour-list', { 
@@ -337,7 +339,8 @@ function Home() {
             totalPages: res.totalPages || 0,
             service: sub,
             currentPage: 0,
-            pageSize: pageSize
+            pageSize: pageSize,
+            exactCategoryMatch: true,
           }
         });
       } else {
@@ -349,7 +352,8 @@ function Home() {
             totalPages: 0,
             service: sub,
             currentPage: 0,
-            pageSize: pageSize
+            pageSize: pageSize,
+            exactCategoryMatch: true,
           }
         });
       }
@@ -364,6 +368,7 @@ function Home() {
           service: sub,
           currentPage: 0,
           pageSize: pageSize,
+          exactCategoryMatch: true,
           error: 'Failed to fetch labourers'
         }
       });

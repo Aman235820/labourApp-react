@@ -26,7 +26,8 @@ function LabourListPage() {
     service = '',
     currentPage: initialCurrentPage = 0,
     pageSize: initialPageSize = 10,
-    error: initialError = null
+    error: initialError = null,
+    exactCategoryMatch: initialExactCategoryMatch = false,
   } = location.state || {};
   
   const [labourers, setLabourers] = useState(initialLabourers);
@@ -40,6 +41,7 @@ function LabourListPage() {
   const [showLabourModal, setShowLabourModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedLabourForBooking, setSelectedLabourForBooking] = useState(null);
+  const [exactCategoryMatch] = useState(Boolean(initialExactCategoryMatch));
 
   const handleBookLabour = (labour) => {
     // Check if user is logged in
@@ -265,7 +267,9 @@ function LabourListPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await searchLabourByCategory(service, pageNumber, size);
+      const response = await searchLabourByCategory(service, pageNumber, size, 'rating', 'desc', {
+        isExactMatch: exactCategoryMatch,
+      });
       
       if (isMounted.current && response) {
         setLabourers(response.content || []);
