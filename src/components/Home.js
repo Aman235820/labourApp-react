@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, InputGroup, Pagination, Card, Button, Spinner, Badge } from 'react-bootstrap';
-import { FaSearch, FaUser, FaTools, FaPhone, FaStar, FaUserPlus, FaClipboardList, FaUserCircle, FaTools as FaToolsIcon, FaTimes, FaBuilding } from 'react-icons/fa';
-import DataTable from 'react-data-table-component';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Form, InputGroup, Card, Button, Spinner } from 'react-bootstrap';
+import { FaSearch, FaTools as FaToolsIcon, FaTimes } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 import '../styles/SearchLabourModal.css';
+import '../styles/HomeSearchResults.css';
 import { searchLabourByCategory } from '../services/LabourSearchService';
 import LabourDetailsModal from './LabourDetailsModal';
-import LabourList from './LabourList';
+import HomeSearchResultsList from './HomeSearchResultsList';
 import { useTranslation } from 'react-i18next';
-import {
-  getSearchResultKind,
-  getRowDisplayName,
-  getRowMainServiceCategory,
-  getRowPhone,
-  summarizeEnterpriseServices,
-} from '../utils/searchCategoryResult';
+import { getSearchResultKind } from '../utils/searchCategoryResult';
 import { normalizeMongoId } from '../utils/enterpriseSession';
 
 const ENTERPRISE_ID_REGEX = /^[0-9a-fA-F]{24}$/;
@@ -39,180 +32,8 @@ function Home() {
   const [showLabourModal, setShowLabourModal] = useState(false);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-  const [showLabourListModal, setShowLabourListModal] = useState(false);
-  const columns = [
-    {
-      name: t('table.name'),
-      selector: (row) => getRowDisplayName(row),
-      sortable: true,
-      cell: (row) => {
-        const isEnt = getSearchResultKind(row) === 'enterprise';
-        return (
-          <div className="d-flex align-items-center flex-wrap gap-2">
-            {isEnt ? (
-              <FaBuilding className="text-info me-1" style={{ fontSize: '1.2rem' }} />
-            ) : (
-              <FaUser className="text-primary me-1" style={{ fontSize: '1.2rem' }} />
-            )}
-            <div className="d-flex flex-column">
-              <span className="fw-medium text-primary">{getRowDisplayName(row)}</span>
-              <Badge bg={isEnt ? 'info' : 'primary'} className={isEnt ? 'text-dark' : ''} style={{ width: 'fit-content', fontSize: '0.7rem' }}>
-                {isEnt ? t('searchLabourModal.entityTypeEnterprise') : t('searchLabourModal.entityTypeLabour')}
-              </Badge>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      name: t('table.services'),
-      selector: (row) => getRowMainServiceCategory(row, committedSearchQuery),
-      sortable: true,
-      cell: (row) => (
-        <div className="d-flex align-items-center">
-          <FaTools className="text-success me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{getRowMainServiceCategory(row, committedSearchQuery)}</span>
-        </div>
-      ),
-    },
-    {
-      name: t('table.phone'),
-      selector: (row) => getRowPhone(row),
-      cell: (row) => {
-        const phone = getRowPhone(row);
-        return (
-          <div className="d-flex align-items-center">
-            <Button
-              variant="outline-primary"
-              size="sm"
-              disabled={!phone}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (phone) window.location.href = `tel:${phone}`;
-              }}
-              className="d-flex align-items-center"
-            >
-              <FaPhone className="me-2" />
-              {t('common.callNow')}
-            </Button>
-          </div>
-        );
-      },
-    },
-    {
-      name: t('table.rating'),
-      selector: row => row.rating,
-      sortable: true,
-      cell: row => (
-        <div className="d-flex align-items-center">
-          <FaStar className="text-warning me-2" style={{ fontSize: '1.2rem' }} />
-          <span className="fw-medium">{row.rating || t('common.noRatingsYet')}</span>
-        </div>
-      ),
-    },
-    {
-      name: t('table.actions') || 'Actions',
-      button: true,
-      cell: (row) => (
-        <div className="d-flex gap-2 align-items-center">
-          <Button
-            variant="outline-primary"
-            size="sm"
-            className="search-result-view-profile-btn d-inline-flex align-items-center justify-content-center text-nowrap"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (getSearchResultKind(row) === 'enterprise') {
-                const id = normalizeMongoId(row._id);
-                if (!id || !ENTERPRISE_ID_REGEX.test(id)) {
-                  alert(
-                    t('enterprisePublic.invalidId', {
-                      defaultValue: 'Enterprise profile is unavailable (invalid ID).',
-                    })
-                  );
-                  return;
-                }
-                navigate(`/enterprise-profile/${id}`, {
-                  state: { searchCategory: committedSearchQuery },
-                });
-              } else {
-                navigate(`/labour-details/${row.labourId}`, {
-                  state: { searchCategory: row.labourSkill },
-                });
-              }
-            }}
-          >
-            <FaUser className="me-2 flex-shrink-0" />
-            {t('common.viewProfile')}
-          </Button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      minWidth: '140px'
-    },
-  ];
-
-  const customStyles = {
-    headRow: {
-      style: {
-        backgroundColor: '#f8f9fa',
-        borderBottom: '2px solid #dee2e6',
-        fontSize: '1.1rem',
-        fontWeight: 'bold',
-        padding: '1rem',
-      },
-    },
-    headCells: {
-      style: {
-        paddingLeft: '1.5rem',
-        paddingRight: '1.5rem',
-        fontSize: '1.1rem',
-        fontWeight: 'bold',
-        color: '#2c3e50',
-      },
-    },
-    cells: {
-      style: {
-        paddingLeft: '1.5rem',
-        paddingRight: '1.5rem',
-        fontSize: '1rem',
-        verticalAlign: 'middle',
-      },
-    },
-    rows: {
-      style: {
-        minHeight: '80px',
-        fontSize: '1rem',
-        backgroundColor: 'white',
-        '&:nth-of-type(odd)': {
-          backgroundColor: '#fafbfc',
-        },
-        '&:hover': {
-          backgroundColor: '#e8f4ff !important',
-          cursor: 'pointer',
-          transform: 'scale(1.01)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          transition: 'all 0.3s ease',
-        },
-      },
-    },
-    pagination: {
-      style: {
-        borderTop: '1px solid #dee2e6',
-        padding: '1rem 0',
-      },
-    },
-    table: {
-      style: {
-        marginBottom: '0',
-      },
-    },
-    tableWrapper: {
-      style: {
-        overflow: 'visible',
-      },
-    },
-  };
+  /** Subservice label currently fetching (shows spinner on that pill only). */
+  const [loadingSubservice, setLoadingSubservice] = useState(null);
 
   useEffect(() => {
     fetch('/services.json')
@@ -228,6 +49,7 @@ function Home() {
     setCurrentPage(0);
     setCommittedSearchQuery('');
     setSearchInput('');
+    setError(null);
   };
 
   const handleSearch = async (e) => {
@@ -267,14 +89,14 @@ function Home() {
     }
   };
 
-  const handlePageChange = (page) => {
+  const handleResultsPageChange = (zeroBasedPage) => {
     if (!committedSearchQuery.trim()) return;
-    fetchLabourers(page - 1, pageSize, committedSearchQuery);
+    fetchLabourers(zeroBasedPage, pageSize, committedSearchQuery);
   };
 
-  const handlePerRowsChange = async (newPerPage, page) => {
+  const handleResultsPageSizeChange = (newSize) => {
     if (!committedSearchQuery.trim()) return;
-    fetchLabourers(page - 1, newPerPage, committedSearchQuery);
+    fetchLabourers(0, newSize, committedSearchQuery);
   };
 
 
@@ -325,7 +147,7 @@ function Home() {
 
   const handleSubserviceClick = async (sub) => {
     try {
-      setIsLoading(true);
+      setLoadingSubservice(sub);
       setError(null);
       const res = await searchLabourByCategory(sub, 0, pageSize, 'rating', 'desc', {
         isExactMatch: true,
@@ -373,23 +195,8 @@ function Home() {
         }
       });
     } finally {
-      setIsLoading(false);
+      setLoadingSubservice(null);
     }
-  };
-
-  // Handler for clicking a row in LabourList
-  const handleLabourListRowClick = (labour) => {
-    setSelectedLabour(labour);
-    setShowLabourModal(true);
-  };
-
-  // Handler for closing LabourList modal
-  const handleLabourListClose = () => {
-    setShowLabourListModal(false);
-    setLabourers([]);
-    setTotalPages(0);
-    setTotalElements(0);
-    setCurrentPage(0);
   };
 
   const handlePopularServiceClick = async (serviceName) => {
@@ -539,23 +346,21 @@ function Home() {
                   </Button>
                 </div>
 
-                {/* Results Table */}
-                <div className="search-results-table">
-                  <Card className="border-0">
-                    <Card.Body className="search-results-body">
-                      <DataTable
-                        columns={columns}
-                        data={labourers}
-                        pagination
-                        paginationServer
-                        paginationTotalRows={totalElements}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onChangePage={handlePageChange}
-                        customStyles={customStyles}
-                        progressPending={isLoading}
-                        onRowClicked={(row) => handleLabourModalShow(row)}
-                        pointerOnHover
-                        noHeader
+                <div className="search-results-table border-0">
+                  <Card className="border-0 bg-transparent">
+                    <Card.Body className="search-results-body px-2 px-sm-3">
+                      <HomeSearchResultsList
+                        labourers={labourers}
+                        searchQuery={committedSearchQuery}
+                        isLoading={isLoading}
+                        error={error}
+                        pageIndex={currentPage}
+                        totalPages={totalPages}
+                        totalElements={totalElements}
+                        pageSize={pageSize}
+                        onPageChange={handleResultsPageChange}
+                        onPageSizeChange={handleResultsPageSizeChange}
+                        onCardClick={handleLabourModalShow}
                       />
                     </Card.Body>
                   </Card>
@@ -588,7 +393,7 @@ function Home() {
 
       {/* Service Images Section */}
       <div className="service-images-section">
-        {services.map((service, index) => {
+        {services.map((service) => {
           // Map service names to image paths
           const getServiceImage = (serviceName) => {
             const imageMap = {
@@ -612,9 +417,6 @@ function Home() {
           };
 
           const isSelected = selectedService && selectedService.name === service.name;
-          const servicesPerRow = Math.floor(1200 / 220); // Approximate services per row
-          const currentRow = Math.floor(index / servicesPerRow);
-          const selectedServiceRow = selectedService ? Math.floor(services.findIndex(s => s.name === selectedService.name) / servicesPerRow) : -1;
           const shouldShowSubservices = isSelected;
 
           return (
@@ -658,11 +460,29 @@ function Home() {
                     {selectedService.subCategories.map((sub, subIndex) => (
                       <button
                         key={sub}
-                        className="subservice-button"
+                        type="button"
+                        className={`subservice-button ${
+                          loadingSubservice === sub ? 'subservice-button-loading' : ''
+                        }`}
                         style={{ animationDelay: `${subIndex * 0.1}s` }}
+                        disabled={loadingSubservice !== null}
                         onClick={() => handleSubserviceClick(sub)}
                       >
-                        {sub}
+                        {loadingSubservice === sub ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              className="me-2"
+                              aria-hidden
+                            />
+                            <span>{sub}</span>
+                          </>
+                        ) : (
+                          sub
+                        )}
                       </button>
                     ))}
                   </div>
@@ -696,7 +516,7 @@ function Home() {
                   />
                   <div className="service-overlay">
                     <div className="service-icon">
-                      <FaTools />
+                      <FaToolsIcon />
                     </div>
                   </div>
                   <div className="service-badge">
@@ -728,7 +548,7 @@ function Home() {
                   />
                   <div className="service-overlay">
                     <div className="service-icon">
-                      <FaTools />
+                      <FaToolsIcon />
                     </div>
                   </div>
                   <div className="service-badge">
@@ -760,7 +580,7 @@ function Home() {
                   />
                   <div className="service-overlay">
                     <div className="service-icon">
-                      <FaTools />
+                      <FaToolsIcon />
                     </div>
                   </div>
                   <div className="service-badge">
@@ -792,7 +612,7 @@ function Home() {
                   />
                   <div className="service-overlay">
                     <div className="service-icon">
-                      <FaTools />
+                      <FaToolsIcon />
                     </div>
                   </div>
                   <div className="service-badge">
