@@ -43,6 +43,10 @@ html {
   flex: 1;
   padding-top: 70px; /* Desktop navbar height */
   transition: margin-left 0.3s ease-in-out, padding-top 0.3s ease-in-out;
+  /* Allow long pages (auth forms, etc.) to scroll; do not clip vertically */
+  overflow-x: hidden;
+  overflow-y: visible;
+  min-width: 0;
 }
 
 /* Mobile layout - adjust for mobile navigation */

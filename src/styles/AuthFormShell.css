@@ -1,25 +1,41 @@
 /**
  * Shared fullscreen-friendly auth layouts (login / register / OTP).
  * Mobile: edge-to-edge panel, large touch targets, 16px inputs (iOS zoom fix).
+ * Uses document scrolling (body) so long forms always scroll on mobile — no trapped flex height.
  */
 
-.auth-form-shell {
-  width: 100%;
-  min-height: calc(100dvh - 80px);
-  min-height: calc(100vh - 80px);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  background: linear-gradient(165deg, #e8ecff 0%, #f1f5f9 42%, #f8fafc 100%);
+:root {
+  --auth-nav-top-offset: 80px;
 }
 
 @media (min-width: 992px) {
-  .auth-form-shell {
-    min-height: calc(100dvh - 70px);
-    min-height: calc(100vh - 70px);
+  :root {
+    --auth-nav-top-offset: 70px;
   }
+}
+
+@media (max-width: 575.98px) {
+  :root {
+    --auth-nav-top-offset: 55px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 768px) {
+  :root {
+    --auth-nav-top-offset: 50px;
+  }
+}
+
+.auth-form-shell {
+  width: 100%;
+  min-height: calc(100dvh - var(--auth-nav-top-offset));
+  min-height: calc(100vh - var(--auth-nav-top-offset));
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  /* Room to scroll past last field above keyboard / home indicator */
+  padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(165deg, #e8ecff 0%, #f1f5f9 42%, #f8fafc 100%);
 }
 
 .dark-theme .auth-form-shell {
@@ -45,18 +61,14 @@
 }
 
 .auth-form-shell__scroll {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  padding: 0.75rem 0.75rem 1.25rem;
+  display: block;
+  overflow: visible;
+  padding: 0.75rem 0.75rem 0;
 }
 
 @media (min-width: 576px) {
   .auth-form-shell__scroll {
-    padding: 1rem 1rem 1.75rem;
+    padding: 1rem 1rem 0;
   }
 }
 
@@ -65,9 +77,9 @@
   max-width: 480px;
   margin-left: auto;
   margin-right: auto;
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0;
 }
 
 .auth-form-shell--wide .auth-form-shell__inner {
@@ -133,7 +145,8 @@
   border-bottom: none;
   box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.06);
   padding: 1.25rem 1rem 1.5rem;
-  flex: 1;
+  flex: 0 1 auto;
+  min-height: 0;
 }
 
 @media (min-width: 576px) {
@@ -192,39 +205,46 @@
   font-size: 0.9375rem;
 }
 
+/* Primary action: in normal flow on mobile so fields above are never covered; sticky on wide screens */
 .auth-form-sticky-cta {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  margin-top: 0.5rem;
-  padding-top: 1rem;
-  margin-left: -1rem;
-  margin-right: -1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(
-    to top,
-    var(--card-bg, #fff) 55%,
-    rgba(255, 255, 255, 0)
-  );
+  position: static;
+  z-index: auto;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  background: transparent;
 }
 
-@media (min-width: 576px) {
+@media (min-width: 768px) {
   .auth-form-sticky-cta {
+    position: sticky;
+    bottom: env(safe-area-inset-bottom, 0px);
+    z-index: 2;
+    margin-top: 1rem;
+    padding-top: 1rem;
     margin-left: -1.5rem;
     margin-right: -1.5rem;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+    padding-bottom: 0.75rem;
+    background: linear-gradient(
+      to top,
+      var(--card-bg, #fff) 70%,
+      rgba(255, 255, 255, 0)
+    );
   }
-}
 
-.dark-theme .auth-form-sticky-cta {
-  background: linear-gradient(
-    to top,
-    var(--card-bg, #1a1a1a) 55%,
-    transparent
-  );
+  .dark-theme .auth-form-sticky-cta {
+    background: linear-gradient(
+      to top,
+      var(--card-bg, #1a1a1a) 70%,
+      transparent
+    );
+  }
 }
 
 .auth-form-alt-action {
