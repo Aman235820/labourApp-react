@@ -143,35 +143,41 @@ export function flattenSubServiceLabelsFromServicesOffered(servicesOffered) {
   return list;
 }
 
-/** Display line for labour primary skills from API (JSON string in VARCHAR, array, or primarySkill string). */
+/**
+ * Parsed list of primary skill labels from API (JSON array in VARCHAR, plain string, or array).
+ */
+export function parseLabourPrimarySkillsArray(lab) {
+  if (!lab || typeof lab !== 'object') return [];
+
+  const fromStrings = (s) => {
+    const t = String(s || '').trim();
+    if (!t) return [];
+    try {
+      const parsed = JSON.parse(t);
+      if (Array.isArray(parsed)) {
+        return parsed.map((x) => String(x || '').trim()).filter(Boolean);
+      }
+    } catch {
+      return [t];
+    }
+    return [t];
+  };
+
+  if (Array.isArray(lab.primarySkills) && lab.primarySkills.length) {
+    return lab.primarySkills.map((x) => String(x || '').trim()).filter(Boolean);
+  }
+  if (typeof lab.primarySkills === 'string' && lab.primarySkills.trim()) {
+    const list = fromStrings(lab.primarySkills);
+    if (list.length) return list;
+  }
+  if (typeof lab.primarySkill === 'string' && lab.primarySkill.trim()) {
+    return fromStrings(lab.primarySkill);
+  }
+  return [];
+}
+
+/** Comma-separated line for tables/cards (uses same parsing as full profile chips). */
 export function formatLabourPrimarySkillsDisplay(lab) {
-  if (!lab || typeof lab !== 'object') return '—';
-  const psField = lab.primarySkills;
-  if (Array.isArray(psField) && psField.length) {
-    return psField.filter(Boolean).join(', ');
-  }
-  if (typeof psField === 'string' && psField.trim()) {
-    try {
-      const parsed = JSON.parse(psField);
-      if (Array.isArray(parsed) && parsed.length) {
-        return parsed.filter(Boolean).join(', ');
-      }
-    } catch {
-      return psField;
-    }
-    return psField;
-  }
-  const ps = lab.primarySkill;
-  if (typeof ps === 'string' && ps.trim()) {
-    try {
-      const parsed = JSON.parse(ps);
-      if (Array.isArray(parsed) && parsed.length) {
-        return parsed.filter(Boolean).join(', ');
-      }
-    } catch {
-      return ps;
-    }
-    return ps;
-  }
-  return '—';
+  const list = parseLabourPrimarySkillsArray(lab);
+  return list.length ? list.join(', ') : '—';
 }

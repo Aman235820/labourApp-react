@@ -92,3 +92,74 @@
 .enterprise-labour-profile-modal .min-w-0 {
   min-width: 0;
 }
+
+.enterprise-labour-profile-hero > .min-w-0 {
+  flex: 1 1 200px;
+  min-width: min(100%, 200px);
+}
+
+.enterprise-labour-profile-primary-skills {
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(13, 110, 253, 0.06);
+  border: 1px solid rgba(13, 110, 253, 0.12);
+}
+
+.enterprise-labour-profile-primary-skills-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #495057;
+  line-height: 1.2;
+}
+
+.enterprise-labour-profile-primary-skills-heading-icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.enterprise-labour-profile-primary-skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+  align-items: flex-start;
+}
+
+.enterprise-labour-profile-primary-skills-item {
+  max-width: 100%;
+  margin: 0;
+}
+
+.enterprise-labour-profile-skill-pill {
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+  padding: 0.4em 0.75em;
+  font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+  font-weight: 500;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.enterprise-labour-profile-primary-skills-empty {
+  padding: 0.15rem 0;
+}
+
+@media (max-width: 575.98px) {
+  .enterprise-labour-profile-primary-skills {
+    padding: 0.55rem 0.65rem;
+    border-radius: 10px;
+  }
+
+  .enterprise-labour-profile-primary-skills-list {
+    gap: 0.35rem 0.4rem;
+  }
+}

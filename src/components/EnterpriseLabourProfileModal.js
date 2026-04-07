@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Button, Badge } from 'react-bootstrap';
 import { FaUsers, FaMapMarkerAlt, FaShieldAlt, FaIdCard } from 'react-icons/fa';
 import '../styles/EnterpriseLabourProfileModal.css';
-import { formatLabourPrimarySkillsDisplay } from '../utils/enterpriseSession';
+import { parseLabourPrimarySkillsArray } from '../utils/enterpriseSession';
 
 function DetailRow({ label, children, empty }) {
   if (empty && (children == null || children === '')) return null;
@@ -21,6 +21,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
   if (!labour) return null;
 
   const imgUrl = String(labour.profileImageUrl || '').trim();
+  const primarySkillLabels = parseLabourPrimarySkillsArray(labour);
 
   return (
     <Modal
@@ -38,7 +39,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="enterprise-labour-profile-modal-body pt-0">
-        <div className="d-flex gap-3 mb-3 align-items-start">
+        <div className="d-flex flex-wrap gap-3 mb-3 align-items-start enterprise-labour-profile-hero">
           <div className="enterprise-labour-profile-avatar flex-shrink-0">
             {imgUrl ? (
               <img
@@ -76,12 +77,42 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
                 {labour.verificationStatus || '—'}
               </Badge>
             </div>
-            <p className="small text-muted mb-0 d-flex align-items-center gap-1">
-              <FaIdCard className="flex-shrink-0" />
-              {formatLabourPrimarySkillsDisplay(labour)}
-            </p>
           </div>
         </div>
+
+        <section
+          className="enterprise-labour-profile-primary-skills mb-3"
+          aria-labelledby="enterprise-labour-profile-skills-heading"
+        >
+          <h3
+            id="enterprise-labour-profile-skills-heading"
+            className="enterprise-labour-profile-primary-skills-heading"
+          >
+            <FaIdCard className="enterprise-labour-profile-primary-skills-heading-icon" aria-hidden />
+            Primary skills
+          </h3>
+          {primarySkillLabels.length > 0 ? (
+            <ul
+              className="enterprise-labour-profile-primary-skills-list list-unstyled mb-0"
+              role="list"
+            >
+              {primarySkillLabels.map((skill, idx) => (
+                <li key={`${idx}-${skill}`} className="enterprise-labour-profile-primary-skills-item">
+                  <Badge
+                    pill
+                    bg="light"
+                    text="dark"
+                    className="enterprise-labour-profile-skill-pill"
+                  >
+                    {skill}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="enterprise-labour-profile-primary-skills-empty text-muted small mb-0">—</p>
+          )}
+        </section>
 
         <dl className="enterprise-labour-profile-dl mb-0">
           <DetailRow label="Mobile">
