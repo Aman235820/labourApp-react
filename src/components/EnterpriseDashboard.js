@@ -14,11 +14,31 @@ import {
   resolveEnterpriseMongoId,
   getStoredEnterpriseSession,
   mergeEnterpriseSession,
+  formatLabourPrimarySkillsDisplay,
 } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDashboard.css';
 
+/** Read persisted enterprise before first paint so refresh does not flash the login card. */
+function readEnterpriseFromStorageSync() {
+  try {
+    const raw = localStorage.getItem('enterprise');
+    if (!raw) return { enterprise: null, enterpriseId: null };
+    const parsed = JSON.parse(raw);
+    const enterpriseData = withEnterpriseId(parsed);
+    const extracted =
+      resolveEnterpriseMongoId(enterpriseData) ||
+      String(enterpriseData?.enterpriseId || '').trim() ||
+      '';
+    const idOk = /^[0-9a-fA-F]{24}$/.test(extracted) ? extracted : null;
+    return { enterprise: enterpriseData, enterpriseId: idOk };
+  } catch {
+    return { enterprise: null, enterpriseId: null };
+  }
+}
+
 function EnterpriseDashboard() {
-  const [enterprise, setEnterprise] = useState(null);
+  const [enterprise, setEnterprise] = useState(() => readEnterpriseFromStorageSync().enterprise);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [services, setServices] = useState([]);
   const [isEditingServices, setIsEditingServices] = useState(false);
   const [serviceSelections, setServiceSelections] = useState([]);
@@ -32,7 +52,7 @@ function EnterpriseDashboard() {
   const [enterpriseLabourers, setEnterpriseLabourers] = useState([]);
   const [labourListLoading, setLabourListLoading] = useState(false);
   const [labourListError, setLabourListError] = useState('');
-  const [enterpriseId, setEnterpriseId] = useState(null);
+  const [enterpriseId, setEnterpriseId] = useState(() => readEnterpriseFromStorageSync().enterpriseId);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -112,6 +132,8 @@ function EnterpriseDashboard() {
             }
           }
         } catch (_) {}
+      } finally {
+        setIsBootstrapping(false);
       }
     };
 
@@ -420,6 +442,19 @@ function EnterpriseDashboard() {
     }
   };
 
+  if (!enterprise && isBootstrapping) {
+    return (
+      <Container className="py-5 enterprise-dashboard-loading">
+        <div className="d-flex flex-column justify-content-center align-items-center py-5 my-3">
+          <Spinner animation="border" variant="primary" role="status" className="mb-3">
+            <span className="visually-hidden">Loading dashboard</span>
+          </Spinner>
+          <p className="text-muted mb-0">Loading your enterprise dashboard…</p>
+        </div>
+      </Container>
+    );
+  }
+
   if (!enterprise) {
     return (
       <Container className="py-5">
@@ -683,6 +718,7 @@ function EnterpriseDashboard() {
                               : lab.id != null
                                 ? `id-${lab.id}`
                                 : `lab-${idx}-${lab.mobile || ''}`;
+                          const skillsLine = formatLabourPrimarySkillsDisplay(lab);
                           return (
                             <tr key={rowKey}>
                               <td className="min-w-0">
@@ -691,10 +727,10 @@ function EnterpriseDashboard() {
                                   <Badge bg="dark" className="text-uppercase me-1 mt-1">
                                     {lab.role || '—'}
                                   </Badge>
-                                  {lab.primarySkill ? (
+                                  {skillsLine !== '—' ? (
                                     <span className="d-inline-flex align-items-center gap-1">
                                       <FaIdCard className="flex-shrink-0" aria-hidden />
-                                      {lab.primarySkill}
+                                      {skillsLine}
                                     </span>
                                   ) : null}
                                 </div>
@@ -728,7 +764,7 @@ function EnterpriseDashboard() {
                                 </Badge>
                               </td>
                               <td className="d-none d-lg-table-cell small text-break">
-                                {lab.primarySkill || '—'}
+                                {skillsLine}
                               </td>
                               <td className="d-none d-sm-table-cell small text-nowrap">
                                 {lab.mobile || '—'}

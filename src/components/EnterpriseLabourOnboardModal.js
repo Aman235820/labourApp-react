@@ -1,8 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Button, Form, Alert, Spinner, Row, Col } from 'react-bootstrap';
-import { FaUserPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import Select from 'react-select';
+import { FaUserPlus, FaCheckCircle, FaTimesCircle, FaTools } from 'react-icons/fa';
 import { enterpriseService } from '../services/enterpriseService';
-import { getStoredEnterpriseSession } from '../utils/enterpriseSession';
+import {
+  getStoredEnterpriseSession,
+  readEnterpriseServicesOfferedFromStorage,
+  flattenSubServiceLabelsFromServicesOffered,
+} from '../utils/enterpriseSession';
 import '../styles/EnterpriseLabourOnboardModal.css';
 
 function formatDashboardDateTime(d = new Date()) {
@@ -35,7 +40,7 @@ const emptyForm = () => ({
   alternateMobile: '',
   email: '',
   role: 'SUPERVISOR',
-  primarySkill: '',
+  primarySkills: [],
   location: '',
   emergencyContactMobile: '',
   profileImageUrl: '',
@@ -62,6 +67,24 @@ function EnterpriseLabourOnboardModal({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const errorAlertRef = useRef(null);
+
+  const servicesOfferedMap = useMemo(
+    () => (show ? readEnterpriseServicesOfferedFromStorage() : {}),
+    [show]
+  );
+
+  const subServiceOptions = useMemo(() => {
+    const labels = flattenSubServiceLabelsFromServicesOffered(servicesOfferedMap);
+    return labels.map((s) => ({ value: s, label: s }));
+  }, [servicesOfferedMap]);
+
+  const primarySkillSelectOptions = useMemo(
+    () => [
+      { value: 'all', label: 'Select all' },
+      ...subServiceOptions,
+    ],
+    [subServiceOptions]
+  );
 
   useEffect(() => {
     if (show) {
@@ -95,6 +118,23 @@ function EnterpriseLabourOnboardModal({
     handleChange('fullName', sanitizeFullNameLetters(value));
   };
 
+  const handlePrimarySkillsChange = (selected) => {
+    setError('');
+    if (!selected || selected.length === 0) {
+      setForm((prev) => ({ ...prev, primarySkills: [] }));
+      return;
+    }
+    if (selected.some((o) => o.value === 'all')) {
+      const allVals = subServiceOptions.map((o) => o.value);
+      setForm((prev) => ({ ...prev, primarySkills: allVals }));
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      primarySkills: selected.map((o) => o.value).filter((v) => v && v !== 'all'),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -118,7 +158,9 @@ function EnterpriseLabourOnboardModal({
     }
     const fullName = String(form.fullName || '').trim();
     const mobile = sanitizeMobileDigits(form.mobile);
-    const primarySkill = String(form.primarySkill || '').trim();
+    const primarySkills = Array.isArray(form.primarySkills)
+      ? form.primarySkills.map((s) => String(s || '').trim()).filter(Boolean)
+      : [];
     const location = String(form.location || '').trim();
     const alternateMobile = sanitizeMobileDigits(form.alternateMobile);
     const emergencyContactMobile = sanitizeMobileDigits(form.emergencyContactMobile);
@@ -145,8 +187,8 @@ function EnterpriseLabourOnboardModal({
       setError('Emergency contact mobile must be exactly 10 digits or left empty.');
       return;
     }
-    if (!primarySkill) {
-      setError('Primary skill is required.');
+    if (primarySkills.length === 0) {
+      setError('Select at least one primary skill from your enterprise services.');
       return;
     }
     if (!location) {
@@ -164,7 +206,8 @@ function EnterpriseLabourOnboardModal({
       alternateMobile: alternateMobile,
       email: String(form.email || '').trim(),
       role: form.role || 'SUPERVISOR',
-      primarySkill,
+      primarySkills: JSON.stringify(primarySkills),
+      primarySkill: primarySkills.join(', '),
       location,
       emergencyContactMobile: emergencyContactMobile,
       profileImageUrl: String(form.profileImageUrl || '').trim(),
@@ -316,16 +359,44 @@ function EnterpriseLabourOnboardModal({
                 </Form.Select>
               </Form.Group>
             </Col>
-            <Col xs={12} md={6}>
-              <Form.Group className="mb-0">
-                <Form.Label className="fw-semibold enterprise-labour-onboard-label">Primary skill *</Form.Label>
-                <Form.Control
-                  className="enterprise-labour-onboard-input"
-                  value={form.primarySkill}
-                  onChange={(e) => handleChange('primarySkill', e.target.value)}
-                  placeholder="e.g. Electrical"
-                  required
-                />
+            <Col xs={12}>
+              <Form.Group className="mb-0 enterprise-labour-onboard-primary-skills">
+                <Form.Label className="fw-semibold enterprise-labour-onboard-label d-flex align-items-center gap-2">
+                  <FaTools className="text-success flex-shrink-0" aria-hidden />
+                  Primary skills *
+                </Form.Label>
+                {subServiceOptions.length === 0 ? (
+                  <Alert variant="warning" className="py-2 small mb-2 mb-md-3">
+                    No services are configured for your enterprise. Add services under{' '}
+                    <strong>Services offered</strong> on the dashboard (or complete enterprise registration), then
+                    open this form again.
+                  </Alert>
+                ) : (
+                  <Select
+                    isMulti
+                    inputId="enterprise-onboard-primary-skills"
+                    options={primarySkillSelectOptions}
+                    value={form.primarySkills.map((s) => ({ value: s, label: s }))}
+                    onChange={handlePrimarySkillsChange}
+                    classNamePrefix="select"
+                    placeholder="Choose sub-services (same as your enterprise catalogue)…"
+                    className="enterprise-labour-onboard-primary-skills-select"
+                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      control: (base) => ({
+                        ...base,
+                        minHeight: '3rem',
+                        borderRadius: '0.5rem',
+                      }),
+                    }}
+                    closeMenuOnSelect={false}
+                  />
+                )}
+                <Form.Text className="text-muted d-block mt-1">
+                  Options come from <strong>servicesOffered</strong> in your enterprise profile. Use{' '}
+                  <strong>Select all</strong> to add every sub-service at once.
+                </Form.Text>
               </Form.Group>
             </Col>
             <Col xs={12}>
@@ -444,7 +515,7 @@ function EnterpriseLabourOnboardModal({
             variant="success"
             type="submit"
             className="enterprise-labour-onboard-footer-btn order-1 order-sm-2 flex-sm-grow-0 flex-grow-1"
-            disabled={submitting}
+            disabled={submitting || subServiceOptions.length === 0}
           >
             {submitting ? (
               <>

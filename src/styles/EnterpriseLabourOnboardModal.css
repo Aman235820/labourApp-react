@@ -239,3 +239,17 @@
 .enterprise-labour-onboard-error-anchor {
   scroll-margin-top: 0.75rem;
 }
+
+.enterprise-labour-onboard-primary-skills .select__control {
+  min-height: 3rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.enterprise-labour-onboard-primary-skills .select__multi-value {
+  border-radius: 0.35rem;
+}
+
+.enterprise-labour-onboard-primary-skills .select__menu-portal {
+  z-index: 1060;
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Button, Badge } from 'react-bootstrap';
 import { FaUsers, FaMapMarkerAlt, FaShieldAlt, FaIdCard } from 'react-icons/fa';
 import '../styles/EnterpriseLabourProfileModal.css';
+import { formatLabourPrimarySkillsDisplay } from '../utils/enterpriseSession';
 
 function DetailRow({ label, children, empty }) {
   if (empty && (children == null || children === '')) return null;
@@ -77,7 +78,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
             </div>
             <p className="small text-muted mb-0 d-flex align-items-center gap-1">
               <FaIdCard className="flex-shrink-0" />
-              {labour.primarySkill || '—'}
+              {formatLabourPrimarySkillsDisplay(labour)}
             </p>
           </div>
         </div>

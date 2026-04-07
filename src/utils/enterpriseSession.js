@@ -103,3 +103,75 @@ export function getStoredEnterpriseSession() {
     return { enterpriseId: '', token: '', enterprise: null };
   }
 }
+
+/**
+ * `servicesOffered` shape: { "Electrician": ["AC Repair", ...], "Mechanic": [...] }
+ * Reads from persisted enterprise session in localStorage.
+ */
+export function readEnterpriseServicesOfferedFromStorage() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return {};
+  }
+  try {
+    const raw = localStorage.getItem('enterprise');
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    const so =
+      parsed?.servicesOffered ||
+      parsed?.returnValue?.servicesOffered ||
+      {};
+    return typeof so === 'object' && so !== null && !Array.isArray(so) ? so : {};
+  } catch {
+    return {};
+  }
+}
+
+/** Unique sub-service labels, stable order (by category key then subs order). */
+export function flattenSubServiceLabelsFromServicesOffered(servicesOffered) {
+  const seen = new Set();
+  const list = [];
+  Object.entries(servicesOffered || {}).forEach(([, subs]) => {
+    if (!Array.isArray(subs)) return;
+    subs.forEach((s) => {
+      const t = String(s || '').trim();
+      if (t && !seen.has(t)) {
+        seen.add(t);
+        list.push(t);
+      }
+    });
+  });
+  return list;
+}
+
+/** Display line for labour primary skills from API (JSON string in VARCHAR, array, or primarySkill string). */
+export function formatLabourPrimarySkillsDisplay(lab) {
+  if (!lab || typeof lab !== 'object') return '—';
+  const psField = lab.primarySkills;
+  if (Array.isArray(psField) && psField.length) {
+    return psField.filter(Boolean).join(', ');
+  }
+  if (typeof psField === 'string' && psField.trim()) {
+    try {
+      const parsed = JSON.parse(psField);
+      if (Array.isArray(parsed) && parsed.length) {
+        return parsed.filter(Boolean).join(', ');
+      }
+    } catch {
+      return psField;
+    }
+    return psField;
+  }
+  const ps = lab.primarySkill;
+  if (typeof ps === 'string' && ps.trim()) {
+    try {
+      const parsed = JSON.parse(ps);
+      if (Array.isArray(parsed) && parsed.length) {
+        return parsed.filter(Boolean).join(', ');
+      }
+    } catch {
+      return ps;
+    }
+    return ps;
+  }
+  return '—';
+}
