@@ -248,6 +248,89 @@ export const enterpriseService = {
       console.warn('Enterprise reviews API:', error?.message || error);
       return [];
     }
+  },
+
+  /**
+   * Excel template for bulk labour onboarding (response may be JSON with base64 returnValue or raw base64 text).
+   * Returns a Blob suitable for saving as .xlsx.
+   */
+  downloadEnterpriseLabourBulkUploadTemplate: async (token) => {
+    try {
+      const endpoint = `${baseurl}/enterprise/enterpriseLabourBulkUploadTemplate`;
+      const headers = {};
+      if (token && String(token).trim()) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      const response = await axios.get(endpoint, { headers });
+      const raw = response.data;
+      let payload;
+
+      if (typeof raw === 'string') {
+        const t = raw.trim();
+        if (t.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(t);
+            unwrapResponseDTO(parsed);
+            payload = parsed.returnValue ?? parsed.data;
+          } catch {
+            payload = raw;
+          }
+        } else {
+          payload = raw;
+        }
+      } else if (raw && typeof raw === 'object') {
+        unwrapResponseDTO(raw);
+        payload = raw.returnValue ?? raw.data;
+      }
+
+      if (typeof payload !== 'string' || !payload.trim()) {
+        throw {
+          returnValue: null,
+          hasError: true,
+          message: 'Template download returned no file data.'
+        };
+      }
+
+      const b64 = payload.replace(/\s/g, '').replace(/^data:[^;]+;base64,/i, '');
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new Blob([bytes], {
+        type:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+    } catch (error) {
+      throw normalizeAxiosError(error);
+    }
+  },
+
+  /**
+   * Bulk upload enterprise labours from an Excel file (multipart field name: file).
+   */
+  bulkUploadEnterpriseLabour: async (enterpriseId, file, token) => {
+    try {
+      const normalizedId = requireEnterpriseId(enterpriseId);
+      if (!token || String(token).trim() === '') {
+        throw {
+          returnValue: null,
+          hasError: true,
+          message: 'Authentication required. Please log in again.'
+        };
+      }
+      const endpoint = `${baseurl}/enterprise/bulkUploadEnterpriseLabour/${normalizedId}`;
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return unwrapResponseDTO(response.data);
+    } catch (error) {
+      throw normalizeAxiosError(error);
+    }
   }
 };
 

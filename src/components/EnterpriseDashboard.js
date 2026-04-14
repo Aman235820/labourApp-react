@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert, Table } from 'react-bootstrap';
 import Select from 'react-select';
-import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus, FaSyncAlt } from 'react-icons/fa';
+import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus, FaSyncAlt, FaFileDownload, FaFileExcel, FaCloudUploadAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
 import CallNowModal from './CallNowModal';
@@ -53,6 +53,11 @@ function EnterpriseDashboard() {
   const [labourListLoading, setLabourListLoading] = useState(false);
   const [labourListError, setLabourListError] = useState('');
   const [enterpriseId, setEnterpriseId] = useState(() => readEnterpriseFromStorageSync().enterpriseId);
+  const bulkLabourFileInputRef = useRef(null);
+  const [bulkLabourFile, setBulkLabourFile] = useState(null);
+  const [bulkTemplateLoading, setBulkTemplateLoading] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkFeedback, setBulkFeedback] = useState({ variant: '', message: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -258,6 +263,82 @@ function EnterpriseDashboard() {
 
   const handleEnterpriseLabourOnboardSuccess = async () => {
     await fetchEnterpriseLabours();
+  };
+
+  const handleBulkLabourTemplateDownload = async () => {
+    const { token } = getDashboardEnterpriseContext();
+    setBulkFeedback({ variant: '', message: '' });
+    setBulkTemplateLoading(true);
+    try {
+      const blob = await enterpriseService.downloadEnterpriseLabourBulkUploadTemplate(token);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'EnterpriseLabourBulkUploadTemplate.xlsx';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setBulkFeedback({
+        variant: 'success',
+        message: 'Template saved. Open it in Excel, add your team, then upload the file below.',
+      });
+    } catch (e) {
+      const msg =
+        (e && typeof e === 'object' && e.message) ||
+        e?.response?.data?.message ||
+        'Could not download the template. Try again or check your connection.';
+      setBulkFeedback({ variant: 'danger', message: String(msg) });
+    } finally {
+      setBulkTemplateLoading(false);
+    }
+  };
+
+  const handleBulkLabourFileChange = (e) => {
+    const f = e.target.files?.[0];
+    setBulkLabourFile(f || null);
+    setBulkFeedback({ variant: '', message: '' });
+  };
+
+  const handleBulkLabourUpload = async () => {
+    const { id, token } = getDashboardEnterpriseContext();
+    if (!bulkLabourFile) {
+      setBulkFeedback({
+        variant: 'warning',
+        message: 'Choose an Excel file (.xlsx or .xls) to upload.',
+      });
+      return;
+    }
+    if (!id || !token) {
+      setBulkFeedback({
+        variant: 'danger',
+        message: 'Session expired. Log in again from the enterprise login page.',
+      });
+      return;
+    }
+    setBulkUploading(true);
+    setBulkFeedback({ variant: '', message: '' });
+    try {
+      const res = await enterpriseService.bulkUploadEnterpriseLabour(id, bulkLabourFile, token);
+      const msg =
+        (res && typeof res === 'object' && res.message) ||
+        'Bulk upload completed.';
+      setBulkFeedback({ variant: 'success', message: String(msg) });
+      setBulkLabourFile(null);
+      if (bulkLabourFileInputRef.current) {
+        bulkLabourFileInputRef.current.value = '';
+      }
+      await fetchEnterpriseLabours();
+    } catch (e) {
+      const msg =
+        (e && typeof e === 'object' && e.message) ||
+        e?.response?.data?.message ||
+        'Bulk upload failed.';
+      setBulkFeedback({ variant: 'danger', message: String(msg) });
+    } finally {
+      setBulkUploading(false);
+    }
   };
 
   const handleEnterpriseUpdate = async (updatedEnterprise) => {
@@ -660,6 +741,107 @@ function EnterpriseDashboard() {
               </div>
             </Card.Header>
             <Card.Body className="pt-0">
+              <div className="enterprise-bulk-labour-panel mb-4">
+                <div className="enterprise-bulk-labour-panel-inner">
+                  <div className="d-flex align-items-start gap-3 mb-3">
+                    <div
+                      className="enterprise-bulk-labour-icon d-flex align-items-center justify-content-center flex-shrink-0"
+                      aria-hidden
+                    >
+                      <FaFileExcel />
+                    </div>
+                    <div className="min-w-0 flex-grow-1">
+                      <h5 className="enterprise-bulk-labour-title mb-1">Bulk import labours</h5>
+                      <p className="enterprise-bulk-labour-subtitle small text-muted mb-0">
+                        Download the official Excel template, enter your team in the sheet, then upload the
+                        file. Your list below refreshes after a successful upload.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Row className="g-3 align-items-stretch">
+                    <Col xs={12} lg={5}>
+                      <Button
+                        variant="outline-primary"
+                        className="enterprise-bulk-labour-btn w-100 d-flex align-items-center justify-content-center gap-2"
+                        onClick={handleBulkLabourTemplateDownload}
+                        disabled={bulkTemplateLoading}
+                        type="button"
+                      >
+                        {bulkTemplateLoading ? (
+                          <>
+                            <Spinner animation="border" size="sm" role="status" />
+                            <span>Preparing…</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaFileDownload />
+                            <span>Download Excel template</span>
+                          </>
+                        )}
+                      </Button>
+                    </Col>
+                    <Col xs={12} lg={7}>
+                      <div className="enterprise-bulk-labour-upload d-flex flex-column flex-sm-row gap-2">
+                        <input
+                          ref={bulkLabourFileInputRef}
+                          type="file"
+                          accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                          className="d-none"
+                          onChange={handleBulkLabourFileChange}
+                        />
+                        <Button
+                          variant="outline-secondary"
+                          className="enterprise-bulk-labour-btn flex-shrink-0 d-flex align-items-center justify-content-center gap-2"
+                          type="button"
+                          onClick={() => bulkLabourFileInputRef.current?.click()}
+                          disabled={bulkUploading}
+                        >
+                          <FaCloudUploadAlt />
+                          <span className="d-none d-sm-inline">Choose file</span>
+                          <span className="d-sm-none">Choose</span>
+                        </Button>
+                        <div className="enterprise-bulk-labour-filename flex-grow-1 min-w-0 d-flex align-items-center px-2 py-1 rounded border bg-white small text-muted">
+                          <span className="text-truncate w-100" title={bulkLabourFile?.name || ''}>
+                            {bulkLabourFile?.name || 'No file selected'}
+                          </span>
+                        </div>
+                        <Button
+                          variant="success"
+                          className="enterprise-bulk-labour-btn flex-shrink-0 d-flex align-items-center justify-content-center gap-2"
+                          type="button"
+                          onClick={handleBulkLabourUpload}
+                          disabled={bulkUploading || !bulkLabourFile}
+                        >
+                          {bulkUploading ? (
+                            <>
+                              <Spinner animation="border" size="sm" />
+                              <span>Uploading…</span>
+                            </>
+                          ) : (
+                            <>
+                              <FaCloudUploadAlt />
+                              <span>Upload</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </Col>
+                  </Row>
+
+                  {bulkFeedback.message ? (
+                    <Alert
+                      variant={bulkFeedback.variant || 'info'}
+                      className="mb-0 mt-3 py-2 enterprise-bulk-labour-alert"
+                      dismissible
+                      onClose={() => setBulkFeedback({ variant: '', message: '' })}
+                    >
+                      {bulkFeedback.message}
+                    </Alert>
+                  ) : null}
+                </div>
+              </div>
+
               {labourListError ? (
                 <Alert
                   variant="danger"
