@@ -17,6 +17,48 @@ const unwrapResponseDTO = (data) => {
 
 const normalizeAxiosError = (error) => error?.response?.data ?? error;
 
+const XLSX_MIME =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/** .xlsx is a ZIP container; local file header starts with "PK" (0x50 0x4B). */
+const isXlsxZipSignature = (u8) =>
+  u8 && u8.length >= 2 && u8[0] === 0x50 && u8[1] === 0x4b;
+
+const stripBase64Wrapper = (s) =>
+  String(s || '')
+    .replace(/\s/g, '')
+    .replace(/^data:[^;]+;base64,/i, '');
+
+/**
+ * Decode standard base64 (ASCII alphabet only) to bytes for Blob.
+ * Avoid passing UTF-8–misinterpreted binary strings into atob (Latin1 range error).
+ */
+const decodeBase64ToUint8Array = (b64Input) => {
+  const b64 = stripBase64Wrapper(b64Input);
+  if (!b64) {
+    throw {
+      returnValue: null,
+      hasError: true,
+      message: 'Template download returned empty base64 data.'
+    };
+  }
+  try {
+    const binary = atob(b64);
+    const out = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      out[i] = binary.charCodeAt(i);
+    }
+    return out;
+  } catch {
+    throw {
+      returnValue: null,
+      hasError: true,
+      message:
+        'Could not decode the template file. Ask the API to return raw .xlsx bytes or JSON with ASCII base64 in returnValue.'
+    };
+  }
+};
+
 const stripEmptyRegistrationFields = (payload) => {
   const next = { ...(payload || {}) };
 
@@ -251,56 +293,92 @@ export const enterpriseService = {
   },
 
   /**
-   * Excel template for bulk labour onboarding (response may be JSON with base64 returnValue or raw base64 text).
-   * Returns a Blob suitable for saving as .xlsx.
+   * Excel template for bulk labour onboarding.
+   * Supports: raw .xlsx bytes (arraybuffer), JSON { returnValue: base64 }, or plain base64 text.
+   * Uses arraybuffer first so binary xlsx is never mis-decoded as UTF-16/UTF-8 (which breaks atob).
    */
   downloadEnterpriseLabourBulkUploadTemplate: async (token) => {
     try {
       const endpoint = `${baseurl}/enterprise/enterpriseLabourBulkUploadTemplate`;
-      const headers = {};
+      const headers = {
+        Accept:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream, application/json, text/plain;q=0.9, */*;q=0.8'
+      };
       if (token && String(token).trim()) {
         headers.Authorization = `Bearer ${token}`;
       }
-      const response = await axios.get(endpoint, { headers });
-      const raw = response.data;
-      let payload;
 
-      if (typeof raw === 'string') {
-        const t = raw.trim();
-        if (t.startsWith('{')) {
-          try {
-            const parsed = JSON.parse(t);
-            unwrapResponseDTO(parsed);
-            payload = parsed.returnValue ?? parsed.data;
-          } catch {
-            payload = raw;
-          }
-        } else {
-          payload = raw;
-        }
-      } else if (raw && typeof raw === 'object') {
-        unwrapResponseDTO(raw);
-        payload = raw.returnValue ?? raw.data;
-      }
+      const response = await axios.get(endpoint, {
+        headers,
+        responseType: 'arraybuffer'
+      });
 
-      if (typeof payload !== 'string' || !payload.trim()) {
+      const buffer = response.data;
+      if (!buffer || buffer.byteLength === 0) {
         throw {
           returnValue: null,
           hasError: true,
-          message: 'Template download returned no file data.'
+          message: 'Template download returned an empty file.'
         };
       }
 
-      const b64 = payload.replace(/\s/g, '').replace(/^data:[^;]+;base64,/i, '');
-      const binary = atob(b64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i += 1) {
-        bytes[i] = binary.charCodeAt(i);
+      const u8 = new Uint8Array(buffer);
+
+      if (isXlsxZipSignature(u8)) {
+        return new Blob([buffer], { type: XLSX_MIME });
       }
-      return new Blob([bytes], {
-        type:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+
+      const text = new TextDecoder('utf-8', { fatal: false }).decode(u8);
+      const trimmed = text.replace(/^\uFEFF/, '').trim();
+
+      if (trimmed.startsWith('{')) {
+        let parsed;
+        try {
+          parsed = JSON.parse(trimmed);
+        } catch {
+          throw {
+            returnValue: null,
+            hasError: true,
+            message: 'Template response looked like JSON but could not be parsed.'
+          };
+        }
+        unwrapResponseDTO(parsed);
+        const payload = parsed.returnValue ?? parsed.data;
+        if (typeof payload !== 'string' || !stripBase64Wrapper(payload)) {
+          throw {
+            returnValue: null,
+            hasError: true,
+            message: 'Template download returned no file data in returnValue.'
+          };
+        }
+        const bytes = decodeBase64ToUint8Array(payload);
+        if (!isXlsxZipSignature(bytes)) {
+          throw {
+            returnValue: null,
+            hasError: true,
+            message: 'Decoded template is not a valid Excel (.xlsx) file.'
+          };
+        }
+        return new Blob([bytes], { type: XLSX_MIME });
+      }
+
+      if (trimmed.length > 0) {
+        const bytes = decodeBase64ToUint8Array(trimmed);
+        if (!isXlsxZipSignature(bytes)) {
+          throw {
+            returnValue: null,
+            hasError: true,
+            message: 'Decoded template is not a valid Excel (.xlsx) file.'
+          };
+        }
+        return new Blob([bytes], { type: XLSX_MIME });
+      }
+
+      throw {
+        returnValue: null,
+        hasError: true,
+        message: 'Template download returned no file data.'
+      };
     } catch (error) {
       throw normalizeAxiosError(error);
     }
