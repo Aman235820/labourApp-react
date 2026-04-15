@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const appUrl = process.env.REACT_APP_API_BASEURL;
+/** Set REACT_APP_API_BASEURL in .env (API origin only; do not include /labourapp). */
+const appUrl = String(process.env.REACT_APP_API_BASEURL || '').replace(/\/$/, '');
 const baseurl = `${appUrl}/labourapp`;
 
 /**

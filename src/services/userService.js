@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-const fallbackBaseUrl =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:4000'
-    : 'https://labourapp.onrender.com';
-const appUrl = process.env.REACT_APP_API_BASEURL || fallbackBaseUrl;
+/** Set REACT_APP_API_BASEURL in .env (origin only, no /labourapp suffix). */
+const appUrl = String(process.env.REACT_APP_API_BASEURL || '').replace(/\/$/, '');
 const baseurl = `${appUrl}/labourapp`;
 
 const unwrapResponseDTO = (data) => {

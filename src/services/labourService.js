@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const appUrl = process.env.REACT_APP_API_BASEURL || 'https://labourapp.onrender.com';
+/** Set REACT_APP_API_BASEURL in .env (origin only, no /labourapp suffix). */
+const appUrl = String(process.env.REACT_APP_API_BASEURL || '').replace(/\/$/, '');
 const baseurl = `${appUrl}/labourapp`;
 
 const unwrapResponseDTO = (data) => {
