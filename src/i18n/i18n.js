@@ -22,15 +22,19 @@ i18n
     resources,
     fallbackLng: 'en',
     debug: false,
-    
+
+    react: {
+      useSuspense: false,
+    },
+
     interpolation: {
       escapeValue: false // React already does escaping
     },
-    
+
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage']
-    }
+      caches: ['localStorage'],
+    },
   });
 
 export default i18n; 

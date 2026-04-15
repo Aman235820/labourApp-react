@@ -3,6 +3,7 @@ import { Row, Col, Card, Form, Button, InputGroup, Spinner } from 'react-bootstr
 import AsyncSelect from 'react-select/async';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { enterpriseService } from '../services/enterpriseService';
 import LocationService from '../services/LocationService';
 import OTPVerification from './OTPVerification';
@@ -22,6 +23,7 @@ import {
 } from 'react-icons/fa';
 
 function EnterpriseRegister() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState('form'); // 'form' or 'otp'
 
@@ -117,12 +119,12 @@ function EnterpriseRegister() {
       if (closestCity) {
         setSelectedCity(closestCity);
         setFormData(prev => ({ ...prev, location: closestCity.value }));
-        setSuccess(`Location detected: ${closestCity.value}`);
+        setSuccess(t('enterpriseAuth.locationDetected', { city: closestCity.value }));
       } else {
-        setError(`Could not find "${detectedCity}" in city list`);
+        setError(t('enterpriseAuth.cityNotInList', { city: detectedCity }));
       }
     } catch (e) {
-      setError(`Failed to detect location. Please select manually`);
+      setError(t('enterpriseAuth.detectLocationFailed'));
     } finally {
       setLocationLoading(false);
     }
@@ -193,26 +195,26 @@ function EnterpriseRegister() {
 
     const isValidCity = finalLocation === 'Not Specified' || cities.some(c => c.CityName === finalLocation);
     if (!isValidCity) {
-      setError('Please select a valid city');
+      setError(t('enterpriseAuth.errors.selectValidCity'));
       return;
     }
 
     const servicesOffered = buildServicesOfferedObject();
     if (Object.keys(servicesOffered).length === 0) {
-      setError('Please add at least one service with subservices');
+      setError(t('enterpriseAuth.errors.addServiceWithSubs'));
       return;
     }
     
     for (const row of serviceSelections) {
       if ((row.serviceName && row.subServices.length === 0) || (!row.serviceName && row.subServices.length > 0)) {
-        setError('Each service must have at least one subservice');
+        setError(t('enterpriseAuth.errors.eachServiceNeedsSub'));
         return;
       }
     }
 
     const mobile = formData.ownerContactInfo;
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-      setError('Please enter a valid 10-digit mobile number');
+      setError(t('enterpriseAuth.errors.invalidMobile'));
       return;
     }
 
@@ -227,9 +229,9 @@ function EnterpriseRegister() {
     try {
       await enterpriseService.requestOTP(mobile, 'ENTERPRISE');
       setStep('otp');
-      setOtpStatus('OTP sent successfully');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setError('Failed to send OTP');
+      setError(t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
@@ -265,7 +267,7 @@ function EnterpriseRegister() {
         const mongoIdPattern = /^[0-9a-fA-F]{24}$/;
         const enterpriseId = String(response.returnValue.id || '').trim();
         if (!mongoIdPattern.test(enterpriseId)) {
-          setError('Registration failed: Invalid enterprise ID from server');
+          setError(t('enterpriseAuth.errors.registrationInvalidId'));
           return;
         }
 
@@ -279,10 +281,10 @@ function EnterpriseRegister() {
         // Navigate directly to dashboard
         navigate('/enterpriseDashboard');
       } else {
-        setError('Registration failed. Please try again.');
+        setError(t('enterpriseAuth.errors.registrationFailed'));
       }
     } catch (err) {
-      setError(typeof err === 'string' ? err : 'Registration failed. Please try again.');
+      setError(typeof err === 'string' ? err : t('enterpriseAuth.errors.registrationFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -301,9 +303,9 @@ function EnterpriseRegister() {
     
     try {
       await enterpriseService.requestOTP(formData.ownerContactInfo, 'ENTERPRISE');
-      setOtpStatus('OTP sent successfully');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setError('Failed to send OTP');
+      setError(t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
@@ -319,8 +321,8 @@ function EnterpriseRegister() {
         error={error}
         success={otpStatus}
         mobileNumber={formData.ownerContactInfo}
-        title="Verify OTP"
-        subtitle="Enter the 4-digit code sent to your mobile number"
+        title={t('auth.verifyOtp')}
+        subtitle={t('auth.enterOtpSentToMobile')}
       />
     );
   }
@@ -330,13 +332,13 @@ function EnterpriseRegister() {
       <div className="auth-form-shell__scroll">
         <div className="auth-form-shell__inner">
           <header className="auth-form-hero">
-            <p className="auth-form-hero__eyebrow mb-0">Enterprise</p>
+            <p className="auth-form-hero__eyebrow mb-0">{t('enterpriseAuth.eyebrow')}</p>
             <h1 className="auth-form-hero__title">
               <FaBuilding className="text-primary" aria-hidden />
-              Enterprise registration
+              {t('enterpriseAuth.registerTitle')}
             </h1>
             <p className="auth-form-hero__subtitle">
-              Register your business to hire and manage your workforce in one place
+              {t('enterpriseAuth.registerSubtitle')}
             </p>
           </header>
 
@@ -358,12 +360,12 @@ function EnterpriseRegister() {
                 <Row className="g-3">
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label className="enterprise-form-label"><FaPhone className="me-2" />Mobile Number</Form.Label>
+                      <Form.Label className="enterprise-form-label"><FaPhone className="me-2" />{t('enterpriseAuth.mobileNumber')}</Form.Label>
                       <Form.Control
                         type="tel"
                         value={formData.ownerContactInfo}
                         onChange={(e) => setField('ownerContactInfo', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                        placeholder="10-digit mobile number"
+                        placeholder={t('enterpriseAuth.mobilePlaceholder')}
                         pattern="[0-9]{10}"
                         maxLength={10}
                         required
@@ -373,25 +375,25 @@ function EnterpriseRegister() {
 
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label className="enterprise-form-label"><FaBuilding className="me-2" />Company Name</Form.Label>
+                      <Form.Label className="enterprise-form-label"><FaBuilding className="me-2" />{t('enterpriseAuth.companyName')}</Form.Label>
                       <Form.Control
                         type="text"
                         value={formData.companyName}
                         onChange={(e) => setField('companyName', e.target.value)}
-                        placeholder="Enter company name"
+                        placeholder={t('enterpriseAuth.companyNamePlaceholder')}
                         required
                       />
                     </Form.Group>
                   </Col>
                   <Col md={12} className="mt-3">
                     <Form.Group>
-                      <Form.Label className="enterprise-form-label"><FaTools className="me-2" />Services Offered</Form.Label>
+                      <Form.Label className="enterprise-form-label"><FaTools className="me-2" />{t('enterpriseAuth.servicesOffered')}</Form.Label>
                       {serviceSelections.map((row, idx) => {
                         const available = getAvailableServicesForIndex(idx);
                         const currentService = services.find(s => s.name === row.serviceName) || null;
                         const subCategories = currentService?.subCategories || [];
                         const options = [
-                          { value: 'all', label: 'Select All' },
+                          { value: 'all', label: t('enterpriseAuth.selectAll') },
                           ...subCategories.map(sc => ({ value: sc, label: sc }))
                         ];
                         return (
@@ -399,12 +401,12 @@ function EnterpriseRegister() {
                             <Card.Body>
                               <Row className="g-3 align-items-end">
                                 <Col md={5}>
-                                  <Form.Label className="small">Service</Form.Label>
+                                  <Form.Label className="small">{t('enterpriseAuth.service')}</Form.Label>
                                   <Form.Select
                                     value={row.serviceName}
                                     onChange={(e) => handleServiceChange(idx, e.target.value)}
                                   >
-                                    <option value="">Select a service</option>
+                                    <option value="">{t('enterpriseAuth.selectService')}</option>
                                     {[...available, ...(row.serviceName ? services.filter(s => s.name === row.serviceName) : [])]
                                       .filter((v, i, arr) => arr.findIndex(x => x.name === v.name) === i)
                                       .map((s) => (
@@ -413,7 +415,7 @@ function EnterpriseRegister() {
                                   </Form.Select>
                                 </Col>
                                 <Col md={6}>
-                                  <Form.Label className="small">Subservices</Form.Label>
+                                  <Form.Label className="small">{t('enterpriseAuth.subservices')}</Form.Label>
                                   <Select
                                     isMulti
                                     isDisabled={!row.serviceName}
@@ -421,7 +423,7 @@ function EnterpriseRegister() {
                                     value={row.subServices.map(sc => ({ value: sc, label: sc }))}
                                     onChange={(opts) => handleSubServicesChange(idx, opts)}
                                     classNamePrefix="select"
-                                    placeholder={row.serviceName ? 'Select subservices' : 'Select a service first'}
+                                    placeholder={row.serviceName ? t('enterpriseAuth.selectSubservices') : t('enterpriseAuth.selectServiceFirst')}
                                     menuPortalTarget={document.body}
                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                   />
@@ -439,14 +441,14 @@ function EnterpriseRegister() {
                         );
                       })}
                       <Button variant="outline-primary" type="button" onClick={handleAddServiceRow}>
-                        <FaPlus className="me-1" /> Add Service
+                        <FaPlus className="me-1" /> {t('enterpriseAuth.addService')}
                       </Button>
                     </Form.Group>
                   </Col>
 
                   <Col md={12} className="mt-3">
                     <Form.Group>
-                      <Form.Label className="enterprise-form-label"><FaMapMarkerAlt className="me-2" />Location</Form.Label>
+                      <Form.Label className="enterprise-form-label"><FaMapMarkerAlt className="me-2" />{t('enterpriseAuth.location')}</Form.Label>
                       <InputGroup className="auth-form-input-group--stack">
                         <div className="auth-form-async-select-wrap">
                           <AsyncSelect
@@ -457,7 +459,7 @@ function EnterpriseRegister() {
                               setField('location', opt ? opt.value : '');
                             }}
                             value={selectedCity}
-                            placeholder="Type to search cities"
+                            placeholder={t('auth.typeToSearchCities')}
                             isClearable
                             cacheOptions
                             defaultOptions={cities.length > 0 ? searchCities('') : []}
@@ -465,14 +467,16 @@ function EnterpriseRegister() {
                             classNamePrefix="select"
                             menuPortalTarget={document.body}
                             styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }), control: base => ({ ...base, minHeight: '46px' }) }}
-                            noOptionsMessage={({ inputValue }) => inputValue ? `No cities found for "${inputValue}"` : 'Type to search cities'}
+                            noOptionsMessage={({ inputValue }) =>
+                              inputValue ? t('enterpriseAuth.noCitiesFor', { query: inputValue }) : t('auth.typeToSearchCities')
+                            }
                           />
                         </div>
                         <Button variant="outline-primary" type="button" onClick={handleDetectLocation} disabled={locationLoading} style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}>
-                          {locationLoading ? (<><Spinner size="sm" className="me-1" /> Detecting</>) : (<><FaLocationArrow className="me-1" /> Auto Detect</>)}
+                          {locationLoading ? (<><Spinner size="sm" className="me-1" /> {t('enterpriseAuth.detecting')}</>) : (<><FaLocationArrow className="me-1" /> {t('enterpriseAuth.autoDetect')}</>)}
                         </Button>
                       </InputGroup>
-                      <Form.Text className="text-muted">Type to search and select your city</Form.Text>
+                      <Form.Text className="text-muted">{t('enterpriseAuth.locationHint')}</Form.Text>
                     </Form.Group>
                   </Col>
 
@@ -496,19 +500,19 @@ function EnterpriseRegister() {
                           aria-hidden="true"
                           className="me-2"
                         />
-                        Sending OTP…
+                        {t('enterpriseAuth.sendingOtp')}
                       </>
                     ) : (
                       <>
-                        Send OTP <FaArrowRight className="ms-2" />
+                        {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
                       </>
                     )}
                   </Button>
                 </div>
                 <div className="auth-form-alt-action">
-                  <span className="text-muted">Already registered?</span>{' '}
+                  <span className="text-muted">{t('enterpriseAuth.alreadyRegistered')}</span>{' '}
                   <Button type="button" variant="link" className="p-0 align-baseline" onClick={() => navigate('/enterpriseLogin')}>
-                    Sign in
+                    {t('enterpriseAuth.signIn')}
                   </Button>
                 </div>
               </Form>

@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Card, Form, Spinner, Modal, Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { enterpriseService } from '../services/enterpriseService';
 import LocationModal from './LocationModal';
 import { mergeEnterpriseSession } from '../utils/enterpriseSession';
 import '../styles/EnterpriseHeaderTiles.css';
 
 function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
+  const { t } = useTranslation();
   const [editingKey, setEditingKey] = useState(null);
   const [tempValue, setTempValue] = useState('');
   const [originalValue, setOriginalValue] = useState('');
@@ -23,7 +25,7 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
     // Safely extract location as a string
     let location = ev.location || ev.returnValue?.location || '';
     if (typeof location === 'object' && location !== null) {
-      location = location.city || location.suburb || location.neighbourhood || location.state || 'Unknown';
+      location = location.city || location.suburb || location.neighbourhood || location.state || t('enterpriseHeaderTiles.unknownValue');
     }
     
     return {
@@ -32,7 +34,7 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
       workforceSize: ev.workforceSize || ev.returnValue?.workforceSize || 0,
       location: String(location)
     };
-  }, [enterprise]);
+  }, [enterprise, t]);
 
   const startEdit = (key) => {
     // Prevent editing if field is currently being saved
@@ -145,7 +147,7 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
 
   const handleLocationSelect = (locationData) => {
     // LocationModal now returns clean city names in displayName
-    const newLocation = locationData?.displayName || 'Unknown';
+    const newLocation = locationData?.displayName || t('enterpriseHeaderTiles.unknownValue');
     const currentLocation = String(values.location || '');
     
     if (newLocation !== currentLocation) {
@@ -180,7 +182,7 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
             <div 
               className={`eh-value-display ${saving === keyName ? 'eh-saving' : ''}`}
               onClick={() => startEdit(keyName)}
-              title={saving === keyName ? "Updating..." : "Click to edit"}
+              title={saving === keyName ? t('enterpriseHeaderTiles.updatingTitle') : t('enterpriseHeaderTiles.clickToEdit')}
             >
               <span className="eh-value-text">{value}</span>
               {saving === keyName && <Spinner animation="border" size="sm" className="ms-2" />}
@@ -194,42 +196,47 @@ function EnterpriseHeaderTiles({ enterprise, onUpdated }) {
   return (
     <div className="eh-wrapper">
       <div className="eh-row">
-        <Tile label="Owner name" value={values.ownername || '—'} keyName="ownername" />
-        <Tile label="Company" value={values.companyName || '—'} keyName="companyName" />
-        <Tile label="Workforce size" value={`${values.workforceSize || 0} Employees`} keyName="workforceSize" inputType="number" />
-        <Tile label="Location" value={values.location || '—'} keyName="location" />
+        <Tile label={t('enterpriseHeaderTiles.ownerName')} value={values.ownername || '—'} keyName="ownername" />
+        <Tile label={t('enterpriseHeaderTiles.company')} value={values.companyName || '—'} keyName="companyName" />
+        <Tile
+          label={t('enterpriseHeaderTiles.workforceSize')}
+          value={t('enterpriseHeaderTiles.employees', { count: values.workforceSize || 0 })}
+          keyName="workforceSize"
+          inputType="number"
+        />
+        <Tile label={t('enterpriseHeaderTiles.location')} value={values.location || '—'} keyName="location" />
       </div>
 
       {/* Confirmation Modal */}
       <Modal show={showConfirmModal} onHide={handleCancelUpdate} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Update</Modal.Title>
+          <Modal.Title>{t('enterpriseHeaderTiles.confirmTitle')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Are you sure you want to update this field?</p>
+          <p>{t('enterpriseHeaderTiles.confirmBody')}</p>
           {pendingUpdate && (
             <div className="bg-light p-3 rounded">
               <div className="mb-2">
-                <strong>Old Value:</strong> {String(originalValue || '—')}
+                <strong>{t('enterpriseHeaderTiles.oldValue')}</strong> {String(originalValue || '—')}
               </div>
               <div>
-                <strong>New Value:</strong> {String(pendingUpdate.displayValue || '—')}
+                <strong>{t('enterpriseHeaderTiles.newValue')}</strong> {String(pendingUpdate.displayValue || '—')}
               </div>
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCancelUpdate}>
-            Cancel
+            {t('enterpriseHeaderTiles.cancel')}
           </Button>
           <Button variant="primary" onClick={handleConfirmUpdate} disabled={saving}>
             {saving ? (
               <>
                 <Spinner animation="border" size="sm" className="me-2" />
-                Updating...
+                {t('enterpriseHeaderTiles.updating')}
               </>
             ) : (
-              'Yes, Update'
+              t('enterpriseHeaderTiles.yesUpdate')
             )}
           </Button>
         </Modal.Footer>

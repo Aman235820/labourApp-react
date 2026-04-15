@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import './ServicesSection.css';
 
 function ServicesSection() {
+  const { t } = useTranslation();
   const [services, setServices] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null); // None selected by default
   const [loading, setLoading] = useState(true);
@@ -17,16 +19,16 @@ function ServicesSection() {
         const response = await axios.get('/services.json');
         setServices(response.data.services || []);
       } catch (err) {
-        setError('Failed to load services.');
+        setError(t('servicesSection.loadFailed'));
       } finally {
         setLoading(false);
       }
     };
     fetchServices();
-  }, []);
+  }, [t]);
 
   if (loading) {
-    return <div className="services-section"><div className="text-center">Loading services...</div></div>;
+    return <div className="services-section"><div className="text-center">{t('servicesSection.loading')}</div></div>;
   }
   if (error) {
     return <div className="services-section"><div className="text-danger text-center">{error}</div></div>;

@@ -2,9 +2,11 @@ import React from 'react';
 import { Modal, Button, ListGroup, Badge } from 'react-bootstrap';
 import { FaPhone, FaTimes, FaCopy, FaCheck } from 'react-icons/fa';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../styles/CallNowModal.css';
 
 function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
+  const { t } = useTranslation();
   const [copiedNumber, setCopiedNumber] = useState(null);
 
   const handleCopyNumber = (number) => {
@@ -32,7 +34,7 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
       <Modal.Header className="bg-primary text-white">
         <Modal.Title className="d-flex align-items-center">
           <FaPhone className="me-2" />
-          Contact Information
+          {t('callNow.title')}
         </Modal.Title>
         <Button
           variant="link"
@@ -46,21 +48,21 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
       
       <Modal.Body className="p-4">
         <div className="text-center mb-4">
-          <h5 className="text-muted">Choose a number to call</h5>
+          <h5 className="text-muted">{t('callNow.chooseNumber')}</h5>
         </div>
 
         {/* Primary Number */}
         {primaryNumber && (
           <div className="mb-4">
             <div className="section-title">
-              <Badge className="badge-primary">Primary</Badge>
-              Primary Contact
+              <Badge className="badge-primary">{t('callNow.primary')}</Badge>
+              {t('callNow.primaryContact')}
             </div>
             <div className="primary-contact-card p-3">
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <div className="contact-number text-dark">{formatPhoneNumber(primaryNumber)}</div>
-                  <div className="contact-label">Main contact number</div>
+                  <div className="contact-label">{t('callNow.mainNumberLabel')}</div>
                 </div>
                 <div className="action-buttons">
                   <Button
@@ -82,7 +84,7 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
                     className="btn-call"
                   >
                     <FaPhone className="me-1" />
-                    Call
+                    {t('callNow.call')}
                   </Button>
                 </div>
               </div>
@@ -94,8 +96,8 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
         {alternateNumbers && alternateNumbers.length > 0 && (
           <div>
             <div className="section-title">
-              <Badge className="badge-secondary">Alt</Badge>
-              Alternate Numbers
+              <Badge className="badge-secondary">{t('callNow.alternate')}</Badge>
+              {t('callNow.alternateNumbers')}
             </div>
             <ListGroup variant="flush">
               {alternateNumbers.map((number, index) => (
@@ -104,7 +106,7 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
                     <div className="d-flex align-items-center justify-content-between">
                       <div>
                         <div className="contact-number text-dark">{formatPhoneNumber(number)}</div>
-                        <div className="contact-label">Alternate contact {index + 1}</div>
+                        <div className="contact-label">{t('callNow.alternateLabel', { n: index + 1 })}</div>
                       </div>
                       <div className="action-buttons">
                         <Button
@@ -126,7 +128,7 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
                           className="btn-call"
                         >
                           <FaPhone className="me-1" />
-                          Call
+                          {t('callNow.call')}
                         </Button>
                       </div>
                     </div>
@@ -141,14 +143,14 @@ function CallNowModal({ show, onHide, primaryNumber, alternateNumbers = [] }) {
         {!primaryNumber && (!alternateNumbers || alternateNumbers.length === 0) && (
           <div className="no-numbers-state">
             <FaPhone className="icon" style={{ fontSize: '3rem' }} />
-            <p className="text-muted">No contact numbers available</p>
+            <p className="text-muted">{t('callNow.noNumbers')}</p>
           </div>
         )}
       </Modal.Body>
       
       <Modal.Footer className="bg-light">
         <Button variant="secondary" onClick={onHide}>
-          Close
+          {t('callNow.close')}
         </Button>
       </Modal.Footer>
     </Modal>

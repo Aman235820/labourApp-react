@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { FaPhone, FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { enterpriseService } from '../services/enterpriseService';
 import OTPVerification from './OTPVerification';
 import '../styles/AuthFormShell.css';
 import '../styles/EnterpriseAuth.css';
 
 function EnterpriseLogin() {
+  const { t } = useTranslation();
   const [step, setStep] = useState('form'); // 'form' or 'otp'
   const [mobileNumber, setMobileNumber] = useState('');
   const [otpStatus, setOtpStatus] = useState('');
@@ -20,7 +22,7 @@ function EnterpriseLogin() {
     e.preventDefault();
     if (otpLoading) return;
     if (!mobileNumber || !/^[0-9]{10}$/.test(mobileNumber)) {
-      setError('Please enter a valid 10-digit mobile number');
+      setError(t('enterpriseAuth.errors.invalidMobile'));
       return;
     }
     
@@ -30,9 +32,9 @@ function EnterpriseLogin() {
     try {
       await enterpriseService.requestOTP(mobileNumber, 'ENTERPRISE');
       setStep('otp');
-      setOtpStatus('OTP sent successfully');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setError('Failed to send OTP');
+      setError(t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
@@ -49,7 +51,7 @@ function EnterpriseLogin() {
         const id = String(response.returnValue.id || '').trim();
         const mongoOk = /^[0-9a-fA-F]{24}$/.test(id);
         if (!mongoOk) {
-          setError('Login succeeded but enterprise id is missing or invalid. Please try again or contact support.');
+          setError(t('enterpriseAuth.loginInvalidId'));
           return;
         }
         const toStore = {
@@ -60,10 +62,10 @@ function EnterpriseLogin() {
         localStorage.setItem('enterprise', JSON.stringify(toStore));
         navigate('/enterpriseDashboard');
       } else {
-        setError('Invalid OTP');
+        setError(t('enterpriseAuth.invalidOtp'));
       }
     } catch (err) {
-      setError('Error during login');
+      setError(t('enterpriseAuth.errorLogin'));
       console.error('Enterprise login error:', err);
     } finally {
       setIsLoading(false);
@@ -83,9 +85,9 @@ function EnterpriseLogin() {
     
     try {
       await enterpriseService.requestOTP(mobileNumber, 'ENTERPRISE');
-      setOtpStatus('OTP sent successfully');
+      setOtpStatus(t('auth.otpSentSuccessfully'));
     } catch (err) {
-      setError('Failed to send OTP');
+      setError(t('auth.failedToSendOtp'));
     } finally {
       setOtpLoading(false);
     }
@@ -115,8 +117,8 @@ function EnterpriseLogin() {
         error={error}
         success={otpStatus}
         mobileNumber={mobileNumber}
-        title="Verify OTP"
-        subtitle="Enter the 4-digit code sent to your mobile number"
+        title={t('auth.verifyOtp')}
+        subtitle={t('auth.enterOtpSentToMobile')}
       />
     );
   }
@@ -126,10 +128,10 @@ function EnterpriseLogin() {
       <div className="auth-form-shell__scroll">
         <div className="auth-form-shell__inner">
           <header className="auth-form-hero">
-            <p className="auth-form-hero__eyebrow mb-0">Enterprise</p>
-            <h1 className="auth-form-hero__title">Enterprise Login</h1>
+            <p className="auth-form-hero__eyebrow mb-0">{t('enterpriseAuth.eyebrow')}</p>
+            <h1 className="auth-form-hero__title">{t('enterpriseAuth.loginTitle')}</h1>
             <p className="auth-form-hero__subtitle">
-              Enter your mobile number to sign in to your business account
+              {t('enterpriseAuth.loginSubtitle')}
             </p>
           </header>
           <div className="auth-form-panel">
@@ -143,13 +145,13 @@ function EnterpriseLogin() {
               <Form.Group className="mb-3">
                 <Form.Label>
                   <FaPhone className="me-2 text-primary" aria-hidden />
-                  Mobile number
+                  {t('enterpriseAuth.mobileNumber')}
                 </Form.Label>
                 <Form.Control
                   type="tel"
                   inputMode="numeric"
                   autoComplete="tel"
-                  placeholder="10-digit mobile number"
+                  placeholder={t('enterpriseAuth.mobilePlaceholder')}
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   pattern="[0-9]{10}"
@@ -174,25 +176,25 @@ function EnterpriseLogin() {
                         aria-hidden="true"
                         className="me-2"
                       />
-                      Sending OTP…
+                      {t('enterpriseAuth.sendingOtp')}
                     </>
                   ) : (
                     <>
-                      Send OTP <FaArrowRight className="ms-2" />
+                      {t('auth.sendOtp')} <FaArrowRight className="ms-2" />
                     </>
                   )}
                 </Button>
               </div>
             </Form>
             <div className="auth-form-alt-action">
-              <span className="text-muted">No enterprise account yet?</span>{' '}
+              <span className="text-muted">{t('enterpriseAuth.noAccountYet')}</span>{' '}
               <Button
                 type="button"
                 variant="link"
                 className="p-0 align-baseline"
                 onClick={() => navigate('/enterpriseRegister')}
               >
-                Register
+                {t('enterpriseAuth.registerLink')}
               </Button>
             </div>
           </div>

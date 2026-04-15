@@ -18,8 +18,10 @@ import {
 } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 import LocationModal from './LocationModal';
+import { useTranslation } from 'react-i18next';
 
 function Sidebar({ isOpen, setIsOpen, isMobile }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
@@ -298,8 +300,8 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             variant="outline-light"
             className="sidebar-toggle-btn-desktop"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle sidebar"
-            title={isOpen ? 'Close sidebar' : 'Open sidebar'}
+            aria-label={t('sidebar.toggleAria')}
+            title={isOpen ? t('sidebar.closeSidebar') : t('sidebar.openSidebar')}
           >
             <FaBars />
           </Button>
@@ -310,13 +312,13 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             <span
               onClick={() => { if (!isOpen) setIsOpen(true); }}
               style={{ cursor: !isOpen ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
-              title={!isOpen ? 'Open Sidebar' : ''}
+              title={!isOpen ? t('sidebar.openSidebar') : ''}
             >
               <FaTools className="me-2" />
             </span>
-            {isOpen && 'InstaHelp'}
+            {isOpen && t('sidebar.brand')}
           </h5>
-          {isOpen && <p className="text-muted small mb-0">Quick Navigation</p>}
+          {isOpen && <p className="text-muted small mb-0">{t('sidebar.quickNav')}</p>}
         </div>
 
         <Nav className="flex-column sidebar-nav">
@@ -326,7 +328,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
               {isOpen && (
                 <h6 className="sidebar-section-title">
                   <FaHome className="me-2" />
-                  Quick Navigation
+                  {t('sidebar.quickNav')}
                 </h6>
               )}
               <Nav.Link 
@@ -335,11 +337,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                   handleSidebarNavigation(null, '/');
                 }}
                 className={`sidebar-link ${isActive('/') ? 'active' : ''}`}
-                title={!isOpen ? 'Home' : ''}
+                title={!isOpen ? t('sidebar.home') : ''}
                 style={{ cursor: 'pointer' }}
               >
                 <FaHome className="me-2" />
-                {isOpen && 'Home'}
+                {isOpen && t('sidebar.home')}
               </Nav.Link>
               <Nav.Link 
                 onClick={(e) => {
@@ -347,11 +349,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                   handleSidebarNavigation(null, '/admin');
                 }}
                 className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
-                title={!isOpen ? 'Admin Panel' : ''}
+                title={!isOpen ? t('sidebar.adminPanel') : ''}
                 style={{ cursor: 'pointer' }}
               >
                 <FaUserShield className="me-2" />
-                {isOpen && 'Admin Panel'}
+                {isOpen && t('sidebar.adminPanel')}
               </Nav.Link>
               <Nav.Link 
                 onClick={(e) => {
@@ -359,11 +361,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                   handleLocationClick();
                 }}
                 className="sidebar-link"
-                title={!isOpen ? 'Location' : ''}
+                title={!isOpen ? t('sidebar.setLocation') : ''}
                 style={{ cursor: 'pointer' }}
               >
                 <FaMapMarkerAlt className="me-2" />
-                {isOpen && `Location: ${cityName || 'Set Location'}`}
+                {isOpen && `${t('sidebar.locationPrefix')} ${cityName || t('sidebar.setLocation')}`}
               </Nav.Link>
             </div>
           )}
@@ -376,11 +378,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/');
               }}
               className={`sidebar-link ${isActive('/') ? 'active' : ''}`}
-              title={!isOpen ? 'Home' : ''}
+              title={!isOpen ? t('sidebar.home') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaHome className="me-2" />
-              {isOpen && 'Home'}
+              {isOpen && t('sidebar.home')}
             </Nav.Link>
           </div>
 
@@ -388,7 +390,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             {isOpen && (
               <h3 className="sidebar-section-title">
                 <FaUsers className="me-2" />
-                Join us as a Customer 
+                {t('sidebar.joinAsCustomer')}
               </h3>
             )}
             <Nav.Link 
@@ -397,11 +399,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/register');
               }}
               className={`sidebar-link ${isActive('/register') ? 'active' : ''}`}
-              title={!isOpen ? 'Create Customer Account' : ''}
+              title={!isOpen ? t('sidebar.createCustomerAccount') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaUserPlus className="me-2" />
-              {isOpen && 'Create Customer Account'}
+              {isOpen && t('sidebar.createCustomerAccount')}
             </Nav.Link>
             <Nav.Link 
               onClick={(e) => {
@@ -409,20 +411,20 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/login');
               }}
               className={`sidebar-link ${isActive('/login') ? 'active' : ''}`}
-              title={!isOpen ? 'Customer Login' : ''}
+              title={!isOpen ? t('sidebar.customerLogin') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaSignInAlt className="me-2" />
-              {isOpen && 'Customer Login'}
+              {isOpen && t('sidebar.customerLogin')}
             </Nav.Link>
             <Nav.Link 
               onClick={handleUserAccountClick}
               className={`sidebar-link ${isActive('/userHome') ? 'active' : ''}`}
-              title={!isOpen ? 'My Account' : ''}
+              title={!isOpen ? t('sidebar.myAccount') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaUserCog className="me-2" />
-              {isOpen && 'My Account'}
+              {isOpen && t('sidebar.myAccount')}
             </Nav.Link>
           </div>
 
@@ -430,7 +432,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             {isOpen && (
               <h3 className="sidebar-section-title">
                 <FaUserTie className="me-2" />
-                Join us as a Service Provider
+                {t('sidebar.joinAsProvider')}
               </h3>
             )}
             <Nav.Link 
@@ -439,11 +441,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/labourRegister');
               }}
               className={`sidebar-link ${isActive('/labourRegister') ? 'active' : ''}`}
-              title={!isOpen ? 'Register as a Service Provider' : ''}
+              title={!isOpen ? t('sidebar.registerProvider') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaUserPlus className="me-2" />
-              {isOpen && 'Register as a Service Provider'}
+              {isOpen && t('sidebar.registerProvider')}
             </Nav.Link>
             <Nav.Link 
               onClick={(e) => {
@@ -451,11 +453,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/labourLogin');
               }}
               className={`sidebar-link ${isActive('/labourLogin') ? 'active' : ''}`}
-              title={!isOpen ? 'Service Provider Login' : ''}
+              title={!isOpen ? t('sidebar.providerLogin') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaSignInAlt className="me-2" />
-              {isOpen && 'Service Provider Login'}
+              {isOpen && t('sidebar.providerLogin')}
             </Nav.Link>
             <Nav.Link 
               onClick={(e) => {
@@ -463,11 +465,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/labourDashboard');
               }}
               className={`sidebar-link ${isActive('/labourDashboard') ? 'active' : ''}`}
-              title={!isOpen ? 'My Dashboard' : ''}
+              title={!isOpen ? t('sidebar.myDashboard') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaClipboardList className="me-2" />
-              {isOpen && 'My Dashboard'}
+              {isOpen && t('sidebar.myDashboard')}
             </Nav.Link>
           </div>
 
@@ -475,7 +477,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             {isOpen && (
               <h3 className="sidebar-section-title">
                 <FaBuilding className="me-2" />
-                Join us as an Enterprise
+                {t('sidebar.joinAsEnterprise')}
               </h3>
             )}
             <Nav.Link 
@@ -484,11 +486,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/enterpriseRegister');
               }}
               className={`sidebar-link ${isActive('/enterpriseRegister') ? 'active' : ''}`}
-              title={!isOpen ? 'Register as an Enterprise' : ''}
+              title={!isOpen ? t('sidebar.registerEnterprise') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaUserPlus className="me-2" />
-              {isOpen && 'Register as an Enterprise'}
+              {isOpen && t('sidebar.registerEnterprise')}
             </Nav.Link>
             <Nav.Link 
               onClick={(e) => {
@@ -496,11 +498,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/enterpriseLogin');
               }}
               className={`sidebar-link ${isActive('/enterpriseLogin') ? 'active' : ''}`}
-              title={!isOpen ? 'Enterprise Login' : ''}
+              title={!isOpen ? t('sidebar.enterpriseLogin') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaSignInAlt className="me-2" />
-              {isOpen && 'Enterprise Login'}
+              {isOpen && t('sidebar.enterpriseLogin')}
             </Nav.Link>
             <Nav.Link 
               onClick={(e) => {
@@ -508,11 +510,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/enterpriseDashboard');
               }}
               className={`sidebar-link ${isActive('/enterpriseDashboard') ? 'active' : ''}`}
-              title={!isOpen ? 'Enterprise Dashboard' : ''}
+              title={!isOpen ? t('sidebar.enterpriseDashboard') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaClipboardList className="me-2" />
-              {isOpen && 'Enterprise Dashboard'}
+              {isOpen && t('sidebar.enterpriseDashboard')}
             </Nav.Link>
           </div>
 
@@ -520,7 +522,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             {isOpen && (
               <h3 className="sidebar-section-title">
                 <FaUserShield className="me-2" />
-                Admin
+                {t('sidebar.adminSection')}
               </h3>
             )}
             <Nav.Link 
@@ -529,11 +531,11 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
                 handleSidebarNavigation(null, '/admin');
               }}
               className={`sidebar-link ${isActive('/admin') ? 'active' : ''}`}
-              title={!isOpen ? 'Admin Panel' : ''}
+              title={!isOpen ? t('sidebar.adminPanel') : ''}
               style={{ cursor: 'pointer' }}
             >
               <FaUserShield className="me-2" />
-              {isOpen && 'Admin Panel'}
+              {isOpen && t('sidebar.adminPanel')}
             </Nav.Link>
           </div>
         </Nav>
@@ -544,7 +546,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
             {isOpen && (
               <div className="user-info">
                 <p className="text-muted small mb-2">
-                  Logged in as: <strong>{userData?.name || 'Customer'}</strong>
+                  {t('sidebar.loggedInAs')} <strong>{userData?.name || t('sidebar.customerFallback')}</strong>
                 </p>
               </div>
             )}
@@ -553,10 +555,10 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
               size="sm"
               onClick={handleLogoutClick}
               className="sidebar-logout-btn"
-              title={!isOpen ? 'Logout' : ''}
+              title={!isOpen ? t('sidebar.logout') : ''}
             >
               <FaSignOutAlt className="me-2" />
-              {isOpen && 'Logout'}
+              {isOpen && t('sidebar.logout')}
             </Button>
           </div>
         )}
@@ -564,7 +566,7 @@ function Sidebar({ isOpen, setIsOpen, isMobile }) {
         <div className="sidebar-footer">
           {isOpen && (
             <p className="text-muted small mb-0">
-              © 2024 InstaHelp
+              {t('sidebar.footerCopy')}
             </p>
           )}
         </div>

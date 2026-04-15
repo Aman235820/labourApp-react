@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { FaArrowLeft, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import '../styles/AuthFormShell.css';
 import '../styles/OTPVerification.css';
@@ -12,9 +13,12 @@ function OTPVerification({
   error = '', 
   success = '',
   mobileNumber = '',
-  title = 'Verify OTP',
-  subtitle = 'Enter the 4-digit code sent to your mobile number'
+  title,
+  subtitle
 }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('auth.verifyOtp');
+  const resolvedSubtitle = subtitle ?? t('auth.enterOtpSentToMobile');
   const [otp, setOtp] = useState(['', '', '', '']);
   const inputRefs = useRef([]);
 
@@ -106,9 +110,9 @@ function OTPVerification({
       <div className="auth-form-shell__scroll">
         <div className="auth-form-shell__inner">
           <header className="auth-form-hero">
-            <p className="auth-form-hero__eyebrow mb-0">Verification</p>
-            <h1 className="auth-form-hero__title">{title}</h1>
-            <p className="auth-form-hero__subtitle">{subtitle}</p>
+            <p className="auth-form-hero__eyebrow mb-0">{t('auth.otpStepEyebrow')}</p>
+            <h1 className="auth-form-hero__title">{resolvedTitle}</h1>
+            <p className="auth-form-hero__subtitle">{resolvedSubtitle}</p>
             {mobileNumber ? (
               <p className="otp-mobile-number mb-0 mt-2">+91 {mobileNumber}</p>
             ) : null}
@@ -160,10 +164,10 @@ function OTPVerification({
                   {isLoading ? (
                     <>
                       <Spinner size="sm" className="me-2" />
-                      Verifying…
+                      {t('auth.verifying')}
                     </>
                   ) : (
-                    'Verify OTP'
+                    t('auth.verifyOtp')
                   )}
                 </Button>
 
@@ -176,7 +180,7 @@ function OTPVerification({
                     type="button"
                   >
                     <FaArrowLeft className="me-2" />
-                    Back
+                    {t('auth.back')}
                   </Button>
 
                   <Button
@@ -186,7 +190,7 @@ function OTPVerification({
                     disabled={isLoading}
                     type="button"
                   >
-                    Resend OTP
+                    {t('auth.resendOtp')}
                   </Button>
                 </div>
               </div>

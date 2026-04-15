@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Badge, Button, Form, Spinner, Alert, Table }
 import Select from 'react-select';
 import { FaBuilding, FaPhone, FaIdCard, FaUsers, FaMapMarkerAlt, FaShieldAlt, FaSignOutAlt, FaStar, FaEdit, FaTools, FaCheckCircle, FaTimesCircle, FaEye, FaAward, FaPlus, FaTrash, FaUserPlus, FaSyncAlt, FaFileDownload, FaFileExcel, FaCloudUploadAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import EnterpriseHeaderTiles from './EnterpriseHeaderTiles';
 import CallNowModal from './CallNowModal';
 import EnterpriseDetailsModal from './EnterpriseDetailsModal';
@@ -37,6 +38,7 @@ function readEnterpriseFromStorageSync() {
 }
 
 function EnterpriseDashboard() {
+  const { t } = useTranslation();
   const [enterprise, setEnterprise] = useState(() => readEnterpriseFromStorageSync().enterprise);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [services, setServices] = useState([]);
@@ -224,8 +226,8 @@ function EnterpriseDashboard() {
       if (enterprise) {
         setLabourListError(
           !id
-            ? 'Cannot load labours: enterprise ID is missing. Log in again from the enterprise login page.'
-            : 'Cannot load labours: session token is missing. Log in again.'
+            ? t('enterpriseDashboard.errors.laboursMissingId')
+            : t('enterpriseDashboard.errors.laboursMissingToken')
         );
       } else {
         setLabourListError('');
@@ -248,13 +250,13 @@ function EnterpriseDashboard() {
       const msg =
         (e && typeof e === 'object' && e.message) ||
         (e && typeof e === 'object' && e.response?.data?.message) ||
-        'Failed to load registered labours.';
+        t('enterpriseDashboard.errors.laboursLoadFailed');
       setLabourListError(String(msg));
       setEnterpriseLabourers([]);
     } finally {
       setLabourListLoading(false);
     }
-  }, [enterpriseId, enterprise]);
+  }, [enterpriseId, enterprise, t]);
 
   useEffect(() => {
     if (!enterprise) return;
@@ -282,13 +284,13 @@ function EnterpriseDashboard() {
       URL.revokeObjectURL(url);
       setBulkFeedback({
         variant: 'success',
-        message: 'Template saved. Open it in Excel, add your team, then upload the file below.',
+        message: t('enterpriseDashboard.errors.templateSaved'),
       });
     } catch (e) {
       const msg =
         (e && typeof e === 'object' && e.message) ||
         e?.response?.data?.message ||
-        'Could not download the template. Try again or check your connection.';
+        t('enterpriseDashboard.errors.templateDownloadFailed');
       setBulkFeedback({ variant: 'danger', message: String(msg) });
     } finally {
       setBulkTemplateLoading(false);
@@ -306,14 +308,14 @@ function EnterpriseDashboard() {
     if (!bulkLabourFile) {
       setBulkFeedback({
         variant: 'warning',
-        message: 'Choose an Excel file (.xlsx or .xls) to upload.',
+        message: t('enterpriseDashboard.errors.chooseExcel'),
       });
       return;
     }
     if (!id || !token) {
       setBulkFeedback({
         variant: 'danger',
-        message: 'Session expired. Log in again from the enterprise login page.',
+        message: t('enterpriseDashboard.errors.sessionExpired'),
       });
       return;
     }
@@ -323,7 +325,7 @@ function EnterpriseDashboard() {
       const res = await enterpriseService.bulkUploadEnterpriseLabour(id, bulkLabourFile, token);
       const msg =
         (res && typeof res === 'object' && res.message) ||
-        'Bulk upload completed.';
+        t('enterpriseDashboard.errors.bulkComplete');
       setBulkFeedback({ variant: 'success', message: String(msg) });
       setBulkLabourFile(null);
       if (bulkLabourFileInputRef.current) {
@@ -334,7 +336,7 @@ function EnterpriseDashboard() {
       const msg =
         (e && typeof e === 'object' && e.message) ||
         e?.response?.data?.message ||
-        'Bulk upload failed.';
+        t('enterpriseDashboard.errors.bulkFailed');
       setBulkFeedback({ variant: 'danger', message: String(msg) });
     } finally {
       setBulkUploading(false);
@@ -436,15 +438,15 @@ function EnterpriseDashboard() {
   const validateServicesData = () => {
     const servicesOffered = buildServicesOfferedObject();
     if (Object.keys(servicesOffered).length === 0) {
-      return 'Please add at least one service with subservices';
+      return t('enterpriseDashboard.errors.addServiceWithSubs');
     }
-    
+
     for (const row of serviceSelections) {
       if ((row.serviceName && row.subServices.length === 0) || (!row.serviceName && row.subServices.length > 0)) {
-        return 'Each service must have at least one subservice';
+        return t('enterpriseDashboard.errors.eachServiceNeedsSub');
       }
     }
-    
+
     return null;
   };
 
@@ -481,7 +483,7 @@ function EnterpriseDashboard() {
         !effectiveEnterpriseId ||
         !/^[0-9a-fA-F]{24}$/.test(String(effectiveEnterpriseId).trim())
       ) {
-        throw new Error('Enterprise ID not found. Please refresh and try again.');
+        throw new Error(t('enterpriseDashboard.errors.enterpriseIdMissing'));
       }
       
       const response = await enterpriseService.updateEnterpriseFields(
@@ -510,14 +512,16 @@ function EnterpriseDashboard() {
         setEnterpriseId(updatedEnterprise.enterpriseId || effectiveEnterpriseId);
         localStorage.setItem('enterprise', JSON.stringify(updatedEnterprise));
         
-        setServicesSuccess('Services updated successfully!');
+        setServicesSuccess(t('enterpriseDashboard.servicesUpdated'));
         setIsEditingServices(false);
       } else {
-        throw new Error(response?.message || 'Failed to update services');
+        throw new Error(response?.message || t('enterpriseDashboard.errors.updateServicesFailedMsg'));
       }
     } catch (error) {
       console.error('Error updating services:', error);
-      setServicesError(typeof error === 'string' ? error : error.message || 'Failed to update services. Please try again.');
+      setServicesError(
+        typeof error === 'string' ? error : error.message || t('enterpriseDashboard.errors.updateServicesFailed')
+      );
     } finally {
       setIsSavingServices(false);
     }
@@ -528,9 +532,9 @@ function EnterpriseDashboard() {
       <Container className="py-5 enterprise-dashboard-loading">
         <div className="d-flex flex-column justify-content-center align-items-center py-5 my-3">
           <Spinner animation="border" variant="primary" role="status" className="mb-3">
-            <span className="visually-hidden">Loading dashboard</span>
+            <span className="visually-hidden">{t('enterpriseDashboard.loadingSrOnly')}</span>
           </Spinner>
-          <p className="text-muted mb-0">Loading your enterprise dashboard…</p>
+          <p className="text-muted mb-0">{t('enterpriseDashboard.loadingBody')}</p>
         </div>
       </Container>
     );
@@ -542,10 +546,10 @@ function EnterpriseDashboard() {
         <Card className="shadow-sm">
           <Card.Body className="p-4">
             <div className="d-flex justify-content-between align-items-center">
-              <h4 className="mb-0">Enterprise Dashboard</h4>
-              <Button variant="primary" onClick={() => navigate('/enterpriseLogin')}>Login</Button>
+              <h4 className="mb-0">{t('enterpriseDashboard.noSessionTitle')}</h4>
+              <Button variant="primary" onClick={() => navigate('/enterpriseLogin')}>{t('enterpriseDashboard.login')}</Button>
             </div>
-            <p className="text-muted mt-3 mb-0">No enterprise session found.</p>
+            <p className="text-muted mt-3 mb-0">{t('enterpriseDashboard.noSession')}</p>
           </Card.Body>
         </Card>
       </Container>
@@ -574,7 +578,7 @@ function EnterpriseDashboard() {
     <Container className="py-4">
       
       {/* Header Tiles */}
-      <EnterpriseHeaderTiles enterprise={enterprise} />
+      <EnterpriseHeaderTiles enterprise={enterprise} onUpdated={setEnterprise} />
 
       {/* Main Dashboard Content */}
       <Row className="mt-4">
@@ -584,34 +588,34 @@ function EnterpriseDashboard() {
             <Card.Header className="bg-primary text-white">
               <h5 className="mb-0">
                 <FaBuilding className="me-2" />
-                Enterprise Details
+                {t('enterpriseDashboard.detailsTitle')}
               </h5>
             </Card.Header>
             <Card.Body>
               <div className="mb-3">
                 <div className="d-flex align-items-center mb-2">
                   <FaBuilding className="text-primary me-2" />
-                  <strong>Company:</strong>
-                  <span className="ms-2">{companyName || 'Not provided'}</span>
+                  <strong>{t('enterpriseDashboard.company')}</strong>
+                  <span className="ms-2">{companyName || t('enterpriseDashboard.notProvided')}</span>
                 </div>
                 <div className="d-flex align-items-center mb-2">
                   <FaIdCard className="text-primary me-2" />
-                  <strong>Owner:</strong>
-                  <span className="ms-2">{ownername || 'Not provided'}</span>
+                  <strong>{t('enterpriseDashboard.owner')}</strong>
+                  <span className="ms-2">{ownername || t('enterpriseDashboard.notProvided')}</span>
                 </div>
                 <div className="d-flex align-items-center mb-2">
                   <FaPhone className="text-primary me-2" />
-                  <strong>Contact:</strong>
-                  <span className="ms-2">{ownerContactInfo || 'Not provided'}</span>
+                  <strong>{t('enterpriseDashboard.contact')}</strong>
+                  <span className="ms-2">{ownerContactInfo || t('enterpriseDashboard.notProvided')}</span>
                 </div>
                 <div className="d-flex align-items-center mb-2">
                   <FaIdCard className="text-primary me-2" />
-                  <strong>GST:</strong>
-                  <span className="ms-2">{gstNumber || 'Not provided'}</span>
+                  <strong>{t('enterpriseDashboard.gst')}</strong>
+                  <span className="ms-2">{gstNumber || t('enterpriseDashboard.notProvided')}</span>
                 </div>
                 <div className="d-flex align-items-center mb-2">
                   <FaShieldAlt className="text-primary me-2" />
-                  <strong>Status:</strong>
+                  <strong>{t('enterpriseDashboard.status')}</strong>
                   <Badge 
                     bg={verificationStatus === 'APPROVED' ? 'success' : verificationStatus === 'REJECTED' ? 'danger' : 'warning'}
                     className="ms-2"
@@ -621,8 +625,10 @@ function EnterpriseDashboard() {
                 </div>
                 <div className="d-flex align-items-center">
                   <FaStar className="text-warning me-2" />
-                  <strong>Rating:</strong>
-                  <span className="ms-2">{rating} ({ratingCount} reviews)</span>
+                  <strong>{t('enterpriseDashboard.rating')}</strong>
+                  <span className="ms-2">
+                    {t('enterpriseDashboard.reviewsCount', { rating, count: ratingCount })}
+                  </span>
                 </div>
               </div>
             </Card.Body>
@@ -635,7 +641,7 @@ function EnterpriseDashboard() {
             <Card.Header className="bg-success text-white">
               <h5 className="mb-0">
                 <FaUsers className="me-2" />
-                Quick Actions
+                {t('enterpriseDashboard.quickActions')}
               </h5>
             </Card.Header>
             <Card.Body className="d-flex flex-column">
@@ -645,11 +651,11 @@ function EnterpriseDashboard() {
                 onClick={() => setShowCallModal(true)}
               >
                 <FaPhone className="me-2" />
-                Call Now
+                {t('enterpriseDashboard.callNow')}
               </Button>
               <Button variant="outline-primary" className="mb-3 d-flex align-items-center">
                 <FaEye className="me-2" />
-                View All Bookings
+                {t('enterpriseDashboard.viewAllBookings')}
               </Button>
               <Button
                 variant="outline-success"
@@ -657,7 +663,7 @@ function EnterpriseDashboard() {
                 onClick={() => setShowDetailsModal(true)}
               >
                 <FaMapMarkerAlt className="me-2" />
-                Update Details
+                {t('enterpriseDashboard.updateDetails')}
               </Button>
               <Button
                 variant="outline-primary"
@@ -665,7 +671,7 @@ function EnterpriseDashboard() {
                 onClick={() => setShowOnboardLabourModal(true)}
               >
                 <FaUserPlus className="me-2" />
-                Onboard labour
+                {t('enterpriseDashboard.onboardLabour')}
               </Button>
               <Button
                 variant="outline-warning"
@@ -673,7 +679,7 @@ function EnterpriseDashboard() {
                 onClick={() => setShowDetailsModal(true)}
               >
                 <FaAward className="me-2" />
-                Documents / Certificates
+                {t('enterpriseDashboard.documentsCertificates')}
               </Button>
               <div className="mt-auto">
                 <Button 
@@ -682,7 +688,7 @@ function EnterpriseDashboard() {
                   className="w-100 d-flex align-items-center justify-content-center"
                 >
                   <FaSignOutAlt className="me-2" />
-                  Logout
+                  {t('enterpriseDashboard.logout')}
                 </Button>
               </div>
             </Card.Body>
@@ -699,7 +705,7 @@ function EnterpriseDashboard() {
                 <div className="min-w-0">
                   <h4 className="mb-0 fw-bold text-dark d-flex align-items-center flex-wrap gap-2">
                     <FaUsers className="text-primary flex-shrink-0" />
-                    <span>Registered labours</span>
+                    <span>{t('enterpriseDashboard.registeredLabours')}</span>
                     {!labourListLoading && enterpriseLabourers.length > 0 ? (
                       <Badge bg="primary" pill className="ms-md-1">
                         {enterpriseLabourers.length}
@@ -707,7 +713,7 @@ function EnterpriseDashboard() {
                     ) : null}
                   </h4>
                   <p className="text-muted small mb-0 mt-2">
-                    Compact list for large teams. Use <strong>View profile</strong> for full details.
+                    {t('enterpriseDashboard.registeredLaboursHint')}
                   </p>
                 </div>
                 <div className="d-flex flex-column flex-sm-row gap-2 flex-shrink-0">
@@ -720,12 +726,12 @@ function EnterpriseDashboard() {
                     {labourListLoading ? (
                       <>
                         <Spinner animation="border" size="sm" role="status" />
-                        <span>Loading…</span>
+                        <span>{t('enterpriseDashboard.loadingShort')}</span>
                       </>
                     ) : (
                       <>
                         <FaSyncAlt />
-                        <span>Refresh</span>
+                        <span>{t('enterpriseDashboard.refresh')}</span>
                       </>
                     )}
                   </Button>
@@ -735,7 +741,7 @@ function EnterpriseDashboard() {
                     onClick={() => setShowOnboardLabourModal(true)}
                   >
                     <FaUserPlus />
-                    <span>Onboard labour</span>
+                    <span>{t('enterpriseDashboard.onboardLabour')}</span>
                   </Button>
                 </div>
               </div>
@@ -751,10 +757,9 @@ function EnterpriseDashboard() {
                       <FaFileExcel />
                     </div>
                     <div className="min-w-0 flex-grow-1">
-                      <h5 className="enterprise-bulk-labour-title mb-1">Bulk import labours</h5>
+                      <h5 className="enterprise-bulk-labour-title mb-1">{t('enterpriseDashboard.bulkImportTitle')}</h5>
                       <p className="enterprise-bulk-labour-subtitle small text-muted mb-0">
-                        Download the official Excel template, enter your team in the sheet, then upload the
-                        file. Your list below refreshes after a successful upload.
+                        {t('enterpriseDashboard.bulkImportDesc')}
                       </p>
                     </div>
                   </div>
@@ -771,12 +776,12 @@ function EnterpriseDashboard() {
                         {bulkTemplateLoading ? (
                           <>
                             <Spinner animation="border" size="sm" role="status" />
-                            <span>Preparing…</span>
+                            <span>{t('enterpriseDashboard.preparing')}</span>
                           </>
                         ) : (
                           <>
                             <FaFileDownload />
-                            <span>Download Excel template</span>
+                            <span>{t('enterpriseDashboard.downloadTemplate')}</span>
                           </>
                         )}
                       </Button>
@@ -798,12 +803,12 @@ function EnterpriseDashboard() {
                           disabled={bulkUploading}
                         >
                           <FaCloudUploadAlt />
-                          <span className="d-none d-sm-inline">Choose file</span>
-                          <span className="d-sm-none">Choose</span>
+                          <span className="d-none d-sm-inline">{t('enterpriseDashboard.chooseFile')}</span>
+                          <span className="d-sm-none">{t('enterpriseDashboard.choose')}</span>
                         </Button>
                         <div className="enterprise-bulk-labour-filename flex-grow-1 min-w-0 d-flex align-items-center px-2 py-1 rounded border bg-white small text-muted">
                           <span className="text-truncate w-100" title={bulkLabourFile?.name || ''}>
-                            {bulkLabourFile?.name || 'No file selected'}
+                            {bulkLabourFile?.name || t('enterpriseDashboard.noFileSelected')}
                           </span>
                         </div>
                         <Button
@@ -816,12 +821,12 @@ function EnterpriseDashboard() {
                           {bulkUploading ? (
                             <>
                               <Spinner animation="border" size="sm" />
-                              <span>Uploading…</span>
+                              <span>{t('enterpriseDashboard.uploading')}</span>
                             </>
                           ) : (
                             <>
                               <FaCloudUploadAlt />
-                              <span>Upload</span>
+                              <span>{t('enterpriseDashboard.upload')}</span>
                             </>
                           )}
                         </Button>
@@ -856,14 +861,14 @@ function EnterpriseDashboard() {
               {labourListLoading && enterpriseLabourers.length === 0 ? (
                 <div className="enterprise-labour-loading text-center py-5">
                   <Spinner animation="border" variant="primary" role="status" />
-                  <p className="text-muted small mt-3 mb-0">Fetching your team…</p>
+                  <p className="text-muted small mt-3 mb-0">{t('enterpriseDashboard.fetchingTeam')}</p>
                 </div>
               ) : enterpriseLabourers.length === 0 ? (
                 <div className="enterprise-labour-empty text-center py-5 px-2">
                   <FaUserPlus className="mb-3 text-muted opacity-50 enterprise-labour-empty-icon" />
-                  <p className="text-muted mb-2 fw-semibold">No registered labours yet</p>
+                  <p className="text-muted mb-2 fw-semibold">{t('enterpriseDashboard.noLaboursYet')}</p>
                   <p className="text-muted small mb-0">
-                    Use <strong>Onboard labour</strong> to add team members. They will appear here after the server saves them.
+                    {t('enterpriseDashboard.noLaboursHint')}
                   </p>
                 </div>
               ) : (
@@ -873,22 +878,22 @@ function EnterpriseDashboard() {
                       <thead className="table-light">
                         <tr>
                           <th scope="col" className="enterprise-labour-th-name">
-                            Name
+                            {t('enterpriseDashboard.colName')}
                           </th>
                           <th scope="col" className="d-none d-md-table-cell">
-                            Role
+                            {t('enterpriseDashboard.colRole')}
                           </th>
                           <th scope="col" className="d-none d-lg-table-cell">
-                            Skill
+                            {t('enterpriseDashboard.colSkill')}
                           </th>
                           <th scope="col" className="d-none d-sm-table-cell">
-                            Mobile
+                            {t('enterpriseDashboard.colMobile')}
                           </th>
                           <th scope="col" className="d-none d-md-table-cell text-nowrap">
-                            Status
+                            {t('enterpriseDashboard.colStatus')}
                           </th>
                           <th scope="col" className="text-end text-nowrap">
-                            Action
+                            {t('enterpriseDashboard.colAction')}
                           </th>
                         </tr>
                       </thead>
@@ -981,7 +986,7 @@ function EnterpriseDashboard() {
                                   onClick={() => setLabourProfileLab(lab)}
                                 >
                                   <FaEye className="me-1 d-none d-sm-inline" aria-hidden />
-                                  View profile
+                                  {t('enterpriseDashboard.viewProfile')}
                                 </Button>
                               </td>
                             </tr>
@@ -1006,11 +1011,11 @@ function EnterpriseDashboard() {
                 <div>
                   <h4 className="mb-0 fw-bold">
                     <FaTools className="me-3 text-primary" />
-                    <span className="d-none d-sm-inline">Services Portfolio</span>
-                    <span className="d-inline d-sm-none">Services</span>
+                    <span className="d-none d-sm-inline">{t('enterpriseDashboard.servicesPortfolio')}</span>
+                    <span className="d-inline d-sm-none">{t('enterpriseDashboard.servicesShort')}</span>
                   </h4>
                   <p className="text-muted mb-0 mt-2 d-none d-md-block">
-                    Manage your service categories and specializations
+                    {t('enterpriseDashboard.servicesSubtitle')}
                   </p>
                 </div>
                 
@@ -1021,8 +1026,8 @@ function EnterpriseDashboard() {
                     className="d-flex align-items-center justify-content-center"
                   >
                     <FaEdit className="me-2" />
-                    <span className="d-none d-sm-inline">Edit Services</span>
-                    <span className="d-inline d-sm-none">Edit</span>
+                    <span className="d-none d-sm-inline">{t('enterpriseDashboard.editServices')}</span>
+                    <span className="d-inline d-sm-none">{t('enterpriseDashboard.edit')}</span>
                   </Button>
                 )}
               </div>
@@ -1043,10 +1048,10 @@ function EnterpriseDashboard() {
                   {Object.keys(servicesOffered).length === 0 ? (
                     <div className="text-center py-5">
                       <FaTools className="text-muted mb-3" style={{ fontSize: '3rem' }} />
-                      <p className="text-muted mb-3">No services configured yet</p>
+                      <p className="text-muted mb-3">{t('enterpriseDashboard.noServicesYet')}</p>
                       <Button variant="primary" onClick={handleEditServices}>
                         <FaPlus className="me-2" />
-                        Add Services
+                        {t('enterpriseDashboard.addServices')}
                       </Button>
                     </div>
                   ) : (
@@ -1060,7 +1065,9 @@ function EnterpriseDashboard() {
                               </div>
                               <div>
                                 <h5 className="fw-bold mb-1 text-primary">{category}</h5>
-                                <small className="text-muted">{items.length} specialization{items.length !== 1 ? 's' : ''}</small>
+                                <small className="text-muted">
+                                  {t('enterpriseDashboard.specCount', { count: items.length })}
+                                </small>
                               </div>
                             </div>
                             
@@ -1086,7 +1093,7 @@ function EnterpriseDashboard() {
                 /* Edit Mode */
                 <div className="enterprise-services-edit">
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="mb-0">Edit Services Portfolio</h5>
+                    <h5 className="mb-0">{t('enterpriseDashboard.editPortfolioTitle')}</h5>
                     <Button
                       variant="outline-success"
                       size="sm"
@@ -1094,7 +1101,7 @@ function EnterpriseDashboard() {
                       className="d-flex align-items-center"
                     >
                       <FaPlus className="me-1" />
-                      Add Service
+                      {t('enterpriseDashboard.addService')}
                     </Button>
                   </div>
 
@@ -1106,7 +1113,7 @@ function EnterpriseDashboard() {
                     return (
                       <div key={idx} className="enterprise-service-edit-row mb-4 p-3 border rounded">
                         <div className="d-flex justify-content-between align-items-start mb-3">
-                          <h6 className="mb-0">Service Category {idx + 1}</h6>
+                          <h6 className="mb-0">{t('enterpriseDashboard.serviceCategoryN', { n: idx + 1 })}</h6>
                           {serviceSelections.length > 1 && (
                             <Button
                               variant="outline-danger"
@@ -1121,12 +1128,12 @@ function EnterpriseDashboard() {
                         <Row>
                           <Col md={6} className="mb-3">
                             <Form.Group>
-                              <Form.Label className="fw-semibold">Service Category *</Form.Label>
+                              <Form.Label className="fw-semibold">{t('enterpriseDashboard.serviceCategoryLabel')}</Form.Label>
                               <Select
                                 value={row.serviceName ? { value: row.serviceName, label: row.serviceName } : null}
                                 onChange={(option) => handleServiceChange(idx, option?.value || '')}
                                 options={availableServices.map(s => ({ value: s.name, label: s.name }))}
-                                placeholder="Select a service category..."
+                                placeholder={t('enterpriseDashboard.selectCategoryPlaceholder')}
                                 isClearable
                                 className="enterprise-service-select"
                                 classNamePrefix="select"
@@ -1136,16 +1143,20 @@ function EnterpriseDashboard() {
                           
                           <Col md={6} className="mb-3">
                             <Form.Group>
-                              <Form.Label className="fw-semibold">Specializations *</Form.Label>
+                              <Form.Label className="fw-semibold">{t('enterpriseDashboard.specializationsLabel')}</Form.Label>
                               <Select
                                 isMulti
                                 value={row.subServices.map(ss => ({ value: ss, label: ss }))}
                                 onChange={(options) => handleSubServicesChange(idx, options)}
                                 options={[
-                                  { value: 'all', label: 'Select All' },
+                                  { value: 'all', label: t('enterpriseDashboard.selectAll') },
                                   ...availableSubServices.map(ss => ({ value: ss, label: ss }))
                                 ]}
-                                placeholder={row.serviceName ? "Select specializations..." : "First select a service category"}
+                                placeholder={
+                                  row.serviceName
+                                    ? t('enterpriseDashboard.selectSpecsPlaceholder')
+                                    : t('enterpriseDashboard.selectCategoryFirst')
+                                }
                                 isDisabled={!row.serviceName}
                                 className="enterprise-service-select"
                                 classNamePrefix="select"
@@ -1174,7 +1185,7 @@ function EnterpriseDashboard() {
                       className="d-flex align-items-center justify-content-center"
                     >
                       <FaTimesCircle className="me-2" />
-                      Cancel
+                      {t('enterpriseDashboard.cancel')}
                     </Button>
                     <Button
                       variant="primary"
@@ -1185,12 +1196,12 @@ function EnterpriseDashboard() {
                       {isSavingServices ? (
                         <>
                           <Spinner animation="border" size="sm" className="me-2" />
-                          Saving...
+                          {t('enterpriseDashboard.saving')}
                         </>
                       ) : (
                         <>
                           <FaCheckCircle className="me-2" />
-                          Save Services
+                          {t('enterpriseDashboard.saveServices')}
                         </>
                       )}
                     </Button>
