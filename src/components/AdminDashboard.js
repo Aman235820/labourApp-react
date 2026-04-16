@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Table, Spinner, Alert, Badge, Button, Nav, Tab, ProgressBar } from 'react-bootstrap';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import DataTable from 'react-data-table-component';
@@ -37,6 +38,7 @@ import AdminStats from './AdminStats';
 import '../styles/AdminDashboard.css';
 
 function AdminDashboard() {
+  const { t } = useTranslation();
   const [labours, setLabours] = useState([]);
   const [users, setUsers] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -217,25 +219,25 @@ function AdminDashboard() {
   const [deletingBookingId, setDeletingBookingId] = useState(null);
   const [viewingBookingId, setViewingBookingId] = useState(null);
 
-  const getStatusBadge = (statusCode) => {
+  const getStatusBadge = useCallback((statusCode) => {
     switch (statusCode) {
       case -1:
-        return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> Rejected</Badge>;
+        return <Badge bg="danger" className="status-badge"><FaTimesCircle className="me-1" /> {t('adminDashboard.bookingRejected')}</Badge>;
       case 1:
-        return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> Pending</Badge>;
+        return <Badge bg="warning" className="status-badge"><FaClock className="me-1" /> {t('adminDashboard.bookingPending')}</Badge>;
       case 2:
-        return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> Accepted</Badge>;
+        return <Badge bg="primary" className="status-badge"><FaCheckCircle className="me-1" /> {t('adminDashboard.bookingAccepted')}</Badge>;
       case 3:
-        return <Badge bg="success" className="status-badge"><FaCheck className="me-1" /> Completed</Badge>;
+        return <Badge bg="success" className="status-badge"><FaCheck className="me-1" /> {t('adminDashboard.bookingCompleted')}</Badge>;
       default:
-        return <Badge bg="secondary" className="status-badge"><FaExclamationTriangle className="me-1" /> Unknown</Badge>;
+        return <Badge bg="secondary" className="status-badge"><FaExclamationTriangle className="me-1" /> {t('adminDashboard.bookingUnknown')}</Badge>;
     }
-  };
+  }, [t]);
 
   // Enhanced Columns Configuration for Labours
   const labourColumns = [
     {
-      name: 'Labour',
+      name: t('adminDashboard.colLabour'),
       selector: row => row.labourName,
       sortable: true,
       sortField: 'labourName',
@@ -254,7 +256,7 @@ function AdminDashboard() {
       minWidth: '280px',
     },
     {
-      name: 'Skill',
+      name: t('adminDashboard.colSkill'),
       selector: row => row.labourSkill,
       sortable: true,
       sortField: 'labourSkill',
@@ -268,7 +270,7 @@ function AdminDashboard() {
       minWidth: '180px',
     },
     {
-      name: 'Rating',
+      name: t('adminDashboard.colRating'),
       selector: row => parseFloat(row.rating),
       sortable: true,
       sortField: 'rating',
@@ -283,20 +285,20 @@ function AdminDashboard() {
       minWidth: '160px',
     },
     {
-      name: 'Status',
+      name: t('adminDashboard.colStatus'),
       selector: row => row.status,
       sortable: true,
       sortField: 'status',
       cell: row => (
         <Badge bg={row.status === 'active' ? 'success' : 'secondary'} className="status-badge">
-          {row.status === 'active' ? 'Active' : 'Inactive'}
+          {row.status === 'active' ? t('adminDashboard.active') : t('adminDashboard.inactive')}
         </Badge>
       ),
       width: '140px',
       minWidth: '140px',
     },
     {
-      name: 'Actions',
+      name: t('adminDashboard.colActions'),
       cell: row => (
         <div className="d-flex gap-2">
           <Button
@@ -338,7 +340,7 @@ function AdminDashboard() {
   // Enhanced Columns Configuration for Users
   const userColumns = [
     {
-      name: 'User',
+      name: t('adminDashboard.colUser'),
       selector: row => row.fullName,
       sortable: true,
       sortField: 'fullName',
@@ -357,7 +359,7 @@ function AdminDashboard() {
       minWidth: '280px',
     },
     {
-      name: 'Contact',
+      name: t('adminDashboard.colContact'),
       selector: row => row.mobileNumber,
       sortable: true,
       sortField: 'mobileNo',
@@ -371,20 +373,20 @@ function AdminDashboard() {
       minWidth: '200px',
     },
     {
-      name: 'Status',
+      name: t('adminDashboard.colStatus'),
       selector: row => row.status,
       sortable: true,
       sortField: 'status',
       cell: row => (
         <Badge bg={row.status === 'active' ? 'success' : 'secondary'} className="status-badge">
-          {row.status === 'active' ? 'Active' : 'Inactive'}
+          {row.status === 'active' ? t('adminDashboard.active') : t('adminDashboard.inactive')}
         </Badge>
       ),
       width: '140px',
       minWidth: '140px',
     },
     {
-      name: 'Actions',
+      name: t('adminDashboard.colActions'),
       cell: row => (
         <div className="d-flex gap-2">
           <Button
@@ -426,7 +428,7 @@ function AdminDashboard() {
   // Enhanced Columns Configuration for Bookings
   const bookingColumns = [
     {
-      name: 'Booking ID',
+      name: t('adminDashboard.colBookingId'),
       selector: row => row.bookingId,
       sortable: true,
       sortField: 'bookingId',
@@ -437,7 +439,7 @@ function AdminDashboard() {
       minWidth: '140px',
     },
     {
-      name: 'Customer',
+      name: t('adminDashboard.colCustomer'),
       selector: row => row.userName,
       sortable: true,
       sortField: 'userName',
@@ -453,7 +455,7 @@ function AdminDashboard() {
       minWidth: '180px',
     },
     {
-      name: 'Labour',
+      name: t('adminDashboard.colLabour'),
       selector: row => row.labourName,
       sortable: true,
       sortField: 'labourName',
@@ -469,7 +471,7 @@ function AdminDashboard() {
       minWidth: '180px',
     },
     {
-      name: 'Service',
+      name: t('adminDashboard.colService'),
       selector: row => row.serviceName,
       sortable: true,
       sortField: 'serviceName',
@@ -483,7 +485,7 @@ function AdminDashboard() {
       minWidth: '160px',
     },
     {
-      name: 'Status',
+      name: t('adminDashboard.colStatus'),
       selector: row => row.bookingStatusCode,
       sortable: true,
       sortField: 'bookingStatusCode',
@@ -492,7 +494,7 @@ function AdminDashboard() {
       minWidth: '160px',
     },
     {
-      name: 'Date',
+      name: t('adminDashboard.colDate'),
       selector: row => row.bookingTime,
       sortable: true,
       sortField: 'bookingTime',
@@ -506,7 +508,7 @@ function AdminDashboard() {
       minWidth: '140px',
     },
     {
-      name: 'Actions',
+      name: t('adminDashboard.colActions'),
       cell: row => (
         <div className="d-flex gap-2">
           <Button
@@ -555,10 +557,10 @@ function AdminDashboard() {
         setTotalLabourElements(response.totalElements || 0);
         setTotalLabourPages(response.totalPages || 0);
       } else {
-        setError('Failed to fetch labours');
+        setError(t('adminDashboard.errFetchLabours'));
       }
     } catch (err) {
-      setError('Error fetching labours');
+      setError(t('adminDashboard.errFetchLaboursGeneric'));
       console.error('Error fetching labours:', err);
     } finally {
       setIsLoadingLabours(false);
@@ -574,10 +576,10 @@ function AdminDashboard() {
         setTotalUserElements(response.totalElements || 0);
         setTotalUserPages(response.totalPages || 0);
       } else {
-        setError('Failed to fetch users');
+        setError(t('adminDashboard.errFetchUsers'));
       }
     } catch (err) {
-      setError('Error fetching users');
+      setError(t('adminDashboard.errFetchUsersGeneric'));
       console.error('Error fetching users:', err);
     } finally {
       setIsLoadingUsers(false);
@@ -593,10 +595,10 @@ function AdminDashboard() {
         setTotalBookingElements(response.totalElements || 0);
         setTotalBookingPages(response.totalPages || 0);
       } else {
-        setError('Failed to fetch bookings');
+        setError(t('adminDashboard.errFetchBookings'));
       }
     } catch (err) {
-      setError('Error fetching bookings');
+      setError(t('adminDashboard.errFetchBookingsGeneric'));
       console.error('Error fetching bookings:', err);
     } finally {
       setIsLoadingBookings(false);
@@ -604,7 +606,7 @@ function AdminDashboard() {
   };
 
   const handleRemoveLabour = async (labourId) => {
-    if (!window.confirm('Are you sure you want to remove this labour?')) return;
+    if (!window.confirm(t('adminDashboard.confirmRemoveLabour'))) return;
     
     try {
       setDeletingLabourId(labourId);
@@ -612,10 +614,10 @@ function AdminDashboard() {
       if (response && !response.hasError) {
         fetchLabours();
       } else {
-        setError('Failed to remove labour');
+        setError(t('adminDashboard.errRemoveLabour'));
       }
     } catch (err) {
-      setError('Error removing labour');
+      setError(t('adminDashboard.errRemoveLabourGeneric'));
       console.error('Error removing labour:', err);
     } finally {
       setDeletingLabourId(null);
@@ -623,7 +625,7 @@ function AdminDashboard() {
   };
 
   const handleRemoveUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to remove this user?')) return;
+    if (!window.confirm(t('adminDashboard.confirmRemoveUser'))) return;
     
     try {
       setDeletingUserId(userId);
@@ -631,10 +633,10 @@ function AdminDashboard() {
       if (response && !response.hasError) {
         fetchUsers();
       } else {
-        setError('Failed to remove user');
+        setError(t('adminDashboard.errRemoveUser'));
       }
     } catch (err) {
-      setError('Error removing user');
+      setError(t('adminDashboard.errRemoveUserGeneric'));
       console.error('Error removing user:', err);
     } finally {
       setDeletingUserId(null);
@@ -649,10 +651,10 @@ function AdminDashboard() {
         setSelectedLabour(response.returnValue);
         setLabourModalOpen(true);
       } else {
-        setError('Failed to fetch labour details');
+        setError(t('adminDashboard.errLabourDetails'));
       }
     } catch (err) {
-      setError('Error fetching labour details');
+      setError(t('adminDashboard.errLabourDetailsGeneric'));
       console.error('Error fetching labour details:', err);
     } finally {
       setViewingLabourId(null);
@@ -670,7 +672,7 @@ function AdminDashboard() {
   };
 
   const handleDeleteBooking = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to delete this booking?')) return;
+    if (!window.confirm(t('adminDashboard.confirmDeleteBooking'))) return;
     
     try {
       setDeletingBookingId(bookingId);
@@ -678,10 +680,10 @@ function AdminDashboard() {
       if (response && !response.hasError) {
         fetchBookings();
       } else {
-        setError('Failed to delete booking');
+        setError(t('adminDashboard.errDeleteBooking'));
       }
     } catch (err) {
-      setError('Error deleting booking');
+      setError(t('adminDashboard.errDeleteBookingGeneric'));
       console.error('Error deleting booking:', err);
     } finally {
       setDeletingBookingId(null);
@@ -714,7 +716,7 @@ function AdminDashboard() {
     if (!file) return;
 
     if (!file.name.match(/\.(xlsx|xls)$/)) {
-      setUploadError('Please upload an Excel file (.xlsx or .xls)');
+      setUploadError(t('adminDashboard.uploadExcelOnly'));
       return;
     }
 
@@ -734,10 +736,10 @@ function AdminDashboard() {
           setTotalLabourPages(updatedResponse.totalPages || 0);
         }
       } else {
-        setUploadError(response?.message || 'Failed to upload labours');
+        setUploadError(response?.message || t('adminDashboard.errUploadLabours'));
       }
     } catch (error) {
-      setUploadError(error.response?.data?.message || 'Error uploading file');
+      setUploadError(error.response?.data?.message || t('adminDashboard.errUploadFile'));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -780,18 +782,18 @@ function AdminDashboard() {
           <div>
             <h1 className="admin-title mb-2">
               <FaShieldAlt className="me-3 text-primary" />
-              Admin Dashboard
+              {t('adminDashboard.title')}
             </h1>
-            <p className="text-muted mb-0">Manage your labour services platform</p>
+            <p className="text-muted mb-0">{t('adminDashboard.subtitle')}</p>
           </div>
           <div className="admin-actions">
             <Button variant="outline-primary" className="me-2">
               <FaDownload className="me-2" />
-              Export Data
+              {t('adminDashboard.exportData')}
             </Button>
             <Button variant="primary">
               <FaPlus className="me-2" />
-              Add New
+              {t('adminDashboard.addNew')}
             </Button>
           </div>
         </div>
@@ -807,25 +809,25 @@ function AdminDashboard() {
             <Nav.Item>
               <Nav.Link eventKey="overview" className="admin-tab">
                 <FaChartLine className="me-2" />
-                Overview
+                {t('adminDashboard.tabOverview')}
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="labours" className="admin-tab">
                 <FaUserTie className="me-2" />
-                Labour Management
+                {t('adminDashboard.tabLabours')}
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="users" className="admin-tab">
                 <FaUsers className="me-2" />
-                User Management
+                {t('adminDashboard.tabUsers')}
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="bookings" className="admin-tab">
                 <FaClipboardList className="me-2" />
-                Booking Management
+                {t('adminDashboard.tabBookings')}
               </Nav.Link>
             </Nav.Item>
           </Nav>
@@ -840,15 +842,15 @@ function AdminDashboard() {
                       <Card.Body>
                         <h5 className="card-title">
                           <FaUserTie className="me-2 text-primary" />
-                          Recent Labours
+                          {t('adminDashboard.recentLabours')}
                         </h5>
                         <div className="recent-list">
                           {isLoadingLabours ? (
                             <div className="text-center py-4">
                               <Spinner animation="border" role="status" variant="primary" size="sm">
-                                <span className="visually-hidden">Loading...</span>
+                                <span className="visually-hidden">{t('adminDashboard.loading')}</span>
                               </Spinner>
-                              <p className="text-muted mt-2 mb-0">Loading recent labours...</p>
+                              <p className="text-muted mt-2 mb-0">{t('adminDashboard.loadingRecentLabours')}</p>
                             </div>
                           ) : labours.length > 0 ? (
                             // Sort labours by ID (latest first) and show top 5 most recent labours
@@ -872,7 +874,7 @@ function AdminDashboard() {
                                   </div>
                                   <div className="d-flex align-items-center">
                                     <Badge bg="success" className="status-badge me-2">
-                                      Active
+                                      {t('adminDashboard.active')}
                                     </Badge>
                                     <Button
                                       variant="outline-primary"
@@ -884,7 +886,7 @@ function AdminDashboard() {
                                       }}
                                     >
                                       <FaEye className="me-1" />
-                                      View
+                                      {t('adminDashboard.view')}
                                     </Button>
                                   </div>
                                 </div>
@@ -893,7 +895,7 @@ function AdminDashboard() {
                           ) : (
                             <div className="text-center py-4">
                               <FaUserTie className="text-muted mb-3" size={32} />
-                              <p className="text-muted mb-0">No recent labours</p>
+                              <p className="text-muted mb-0">{t('adminDashboard.noRecentLabours')}</p>
                             </div>
                           )}
                         </div>
@@ -905,15 +907,15 @@ function AdminDashboard() {
                       <Card.Body>
                         <h5 className="card-title">
                           <FaClipboardList className="me-2 text-primary" />
-                          Recent Bookings
+                          {t('adminDashboard.recentBookings')}
                         </h5>
                         <div className="recent-list">
                           {isLoadingBookings ? (
                             <div className="text-center py-4">
                               <Spinner animation="border" role="status" variant="primary" size="sm">
-                                <span className="visually-hidden">Loading...</span>
+                                <span className="visually-hidden">{t('adminDashboard.loading')}</span>
                               </Spinner>
-                              <p className="text-muted mt-2 mb-0">Loading recent bookings...</p>
+                              <p className="text-muted mt-2 mb-0">{t('adminDashboard.loadingRecentBookings')}</p>
                             </div>
                           ) : bookings.length > 0 ? (
                             // Sort bookings by time (latest first) and show top 5 most recent bookings
@@ -947,7 +949,7 @@ function AdminDashboard() {
                                       }}
                                     >
                                       <FaEye className="me-1" />
-                                      View
+                                      {t('adminDashboard.view')}
                                     </Button>
                                   </div>
                                 </div>
@@ -956,7 +958,7 @@ function AdminDashboard() {
                           ) : (
                             <div className="text-center py-4">
                               <FaClipboardList className="text-muted mb-3" size={32} />
-                              <p className="text-muted mb-0">No recent bookings</p>
+                              <p className="text-muted mb-0">{t('adminDashboard.noRecentBookings')}</p>
                             </div>
                           )}
                         </div>
@@ -974,9 +976,9 @@ function AdminDashboard() {
                     <div>
                       <h4 className="section-title">
                         <FaUserTie className="me-2" />
-                        Labour Management
+                        {t('adminDashboard.labourSectionTitle')}
                       </h4>
-                      <p className="text-muted mb-0">Manage service providers and their details</p>
+                      <p className="text-muted mb-0">{t('adminDashboard.labourSectionDesc')}</p>
                     </div>
                     <div className="d-flex gap-2">
                       <input
@@ -995,12 +997,12 @@ function AdminDashboard() {
                         {isUploading ? (
                           <>
                             <Spinner as="span" animation="border" size="sm" className="me-2" />
-                            Uploading...
+                            {t('adminDashboard.uploading')}
                           </>
                         ) : (
                           <>
                             <FaUpload className="me-2" />
-                            Bulk Upload
+                            {t('adminDashboard.bulkUpload')}
                           </>
                         )}
                       </Button>
@@ -1017,7 +1019,7 @@ function AdminDashboard() {
                 {uploadSuccess && (
                   <Alert variant="success" onClose={() => setUploadSuccess(false)} dismissible className="mb-3">
                     <FaCheck className="me-2" />
-                    Labours uploaded successfully!
+                    {t('adminDashboard.uploadSuccess')}
                   </Alert>
                 )}
 
@@ -1043,7 +1045,7 @@ function AdminDashboard() {
                     noDataComponent={
                       <div className="text-center py-4">
                         <FaUserTie className="text-muted mb-3" size={48} />
-                        <p className="text-muted mb-0">No labours found</p>
+                        <p className="text-muted mb-0">{t('adminDashboard.noLabours')}</p>
                       </div>
                     }
                     customStyles={customStyles}
@@ -1062,9 +1064,9 @@ function AdminDashboard() {
                     <div>
                       <h4 className="section-title">
                         <FaUsers className="me-2" />
-                        User Management
+                        {t('adminDashboard.userSectionTitle')}
                       </h4>
-                      <p className="text-muted mb-0">Manage customer accounts and information</p>
+                      <p className="text-muted mb-0">{t('adminDashboard.userSectionDesc')}</p>
                     </div>
                   </div>
                 </div>
@@ -1091,7 +1093,7 @@ function AdminDashboard() {
                     noDataComponent={
                       <div className="text-center py-4">
                         <FaUsers className="text-muted mb-3" size={48} />
-                        <p className="text-muted mb-0">No users found</p>
+                        <p className="text-muted mb-0">{t('adminDashboard.noUsers')}</p>
                       </div>
                     }
                     customStyles={customStyles}
@@ -1110,16 +1112,16 @@ function AdminDashboard() {
                     <div>
                       <h4 className="section-title">
                         <FaClipboardList className="me-2" />
-                        Booking Management
+                        {t('adminDashboard.bookingSectionTitle')}
                       </h4>
-                      <p className="text-muted mb-0">Monitor and manage service bookings</p>
+                      <p className="text-muted mb-0">{t('adminDashboard.bookingSectionDesc')}</p>
                     </div>
                     <div className="d-flex gap-2">
                       <div className="search-box">
                         <FaSearch className="search-icon" />
                         <input
                           type="text"
-                          placeholder="Search bookings..."
+                          placeholder={t('adminDashboard.searchBookingsPh')}
                           className="search-input"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
@@ -1130,11 +1132,11 @@ function AdminDashboard() {
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
                       >
-                        <option value="all">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="completed">Completed</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="all">{t('adminDashboard.filterAll')}</option>
+                        <option value="pending">{t('adminDashboard.filterPending')}</option>
+                        <option value="accepted">{t('adminDashboard.filterAccepted')}</option>
+                        <option value="completed">{t('adminDashboard.filterCompleted')}</option>
+                        <option value="rejected">{t('adminDashboard.filterRejected')}</option>
                       </select>
                     </div>
                   </div>
@@ -1162,7 +1164,7 @@ function AdminDashboard() {
                     noDataComponent={
                       <div className="text-center py-4">
                         <FaClipboardList className="text-muted mb-3" size={48} />
-                        <p className="text-muted mb-0">No bookings found</p>
+                        <p className="text-muted mb-0">{t('adminDashboard.noBookings')}</p>
                       </div>
                     }
                     customStyles={customStyles}
@@ -1182,7 +1184,7 @@ function AdminDashboard() {
         <ModalHeader toggle={toggleLabourModal} className="admin-modal-header">
           <div className="d-flex align-items-center">
             <FaUserTie className="me-2 text-primary" />
-            Labour Details
+            {t('adminDashboard.labourDetails')}
           </div>
         </ModalHeader>
         <ModalBody className="admin-modal-body">
@@ -1208,7 +1210,7 @@ function AdminDashboard() {
                   <div className="detail-item">
                     <label className="detail-label">
                       <FaPhone className="me-2" />
-                      Mobile Number
+                      {t('adminDashboard.mobileNumber')}
                     </label>
                     <div className="detail-value">{selectedLabour.labourMobileNo}</div>
                   </div>
@@ -1217,12 +1219,12 @@ function AdminDashboard() {
                   <div className="detail-item">
                     <label className="detail-label">
                       <FaStar className="me-2" />
-                      Rating
+                      {t('adminDashboard.rating')}
                     </label>
                     <div className="detail-value">
                       {selectedLabour.rating && Number(selectedLabour.rating) > 0 
-                        ? `${selectedLabour.rating} (${selectedLabour.ratingCount || 0} reviews)`
-                        : 'No ratings yet'
+                        ? t('adminDashboard.reviewsCount', { rating: selectedLabour.rating, count: selectedLabour.ratingCount || 0 })
+                        : t('adminDashboard.noRatingsYet')
                       }
                     </div>
                   </div>
@@ -1232,7 +1234,7 @@ function AdminDashboard() {
                     <div className="detail-item">
                       <label className="detail-label">
                         <FaTools className="me-2" />
-                        Sub Skills
+                        {t('adminDashboard.subSkills')}
                       </label>
                       <div className="detail-value">
                         <div className="d-flex flex-wrap gap-2">
@@ -1251,7 +1253,7 @@ function AdminDashboard() {
           )}
         </ModalBody>
         <ModalFooter className="admin-modal-footer">
-          <Button color="secondary" onClick={toggleLabourModal}>Close</Button>
+          <Button color="secondary" onClick={toggleLabourModal}>{t('adminDashboard.close')}</Button>
         </ModalFooter>
       </Modal>
 
@@ -1259,7 +1261,7 @@ function AdminDashboard() {
         <ModalHeader toggle={toggleUserModal} className="admin-modal-header">
           <div className="d-flex align-items-center">
             <FaUser className="me-2 text-primary" />
-            User Details
+            {t('adminDashboard.userDetails')}
           </div>
         </ModalHeader>
         <ModalBody className="admin-modal-body">
@@ -1271,8 +1273,8 @@ function AdminDashboard() {
                     <FaUser className="text-white" size={24} />
                   </div>
                   <div>
-                    <h4 className="mb-1">User #{selectedUser.userId}</h4>
-                    <Badge bg="success" className="status-badge-large">Active</Badge>
+                    <h4 className="mb-1">{t('adminDashboard.userNumber', { id: selectedUser.userId })}</h4>
+                    <Badge bg="success" className="status-badge-large">{t('adminDashboard.active')}</Badge>
                   </div>
                 </div>
               </div>
@@ -1282,7 +1284,7 @@ function AdminDashboard() {
                   <div className="detail-item">
                     <label className="detail-label">
                       <FaPhone className="me-2" />
-                      Mobile Number
+                      {t('adminDashboard.mobileNumber')}
                     </label>
                     <div className="detail-value">{selectedUser.mobileNumber}</div>
                   </div>
@@ -1291,9 +1293,9 @@ function AdminDashboard() {
                   <div className="detail-item">
                     <label className="detail-label">
                       <FaEnvelope className="me-2" />
-                      Email
+                      {t('adminDashboard.email')}
                     </label>
-                    <div className="detail-value">{selectedUser.email || 'Not provided'}</div>
+                    <div className="detail-value">{selectedUser.email || t('adminDashboard.notProvided')}</div>
                   </div>
                 </Col>
               </Row>
@@ -1301,7 +1303,7 @@ function AdminDashboard() {
           )}
         </ModalBody>
         <ModalFooter className="admin-modal-footer">
-          <Button color="secondary" onClick={toggleUserModal}>Close</Button>
+          <Button color="secondary" onClick={toggleUserModal}>{t('adminDashboard.close')}</Button>
         </ModalFooter>
       </Modal>
 

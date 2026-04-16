@@ -29,6 +29,7 @@ import {
 import { useStats } from '../context/StatsContext';
 import { formatDate } from '../utils/statsUtils';
 import '../styles/AdminStats.css';
+import { useTranslation } from 'react-i18next';
 
 // Register ChartJS components
 ChartJS.register(
@@ -45,6 +46,7 @@ ChartJS.register(
 );
 
 const AdminStats = () => {
+  const { t } = useTranslation();
   const { statsData, refreshStats } = useStats();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -101,9 +103,9 @@ const AdminStats = () => {
       <div className="stats-loading">
         <div className="text-center py-5">
           <Spinner animation="border" role="status" variant="primary">
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden">{t('adminStats.loading')}</span>
           </Spinner>
-          <p className="mt-3 text-muted">Loading analytics...</p>
+          <p className="mt-3 text-muted">{t('adminStats.loadingAnalytics')}</p>
         </div>
       </div>
     );
@@ -122,7 +124,7 @@ const AdminStats = () => {
     return (
       <Alert variant="warning" className="stats-error">
         <FaClock className="me-2" />
-        No statistics available
+        {t('adminStats.noStatsAvailable')}
       </Alert>
     );
   }
@@ -166,7 +168,12 @@ const AdminStats = () => {
 
   // Booking Status Data
   const bookingStatusData = {
-    labels: ['Completed', 'Pending', 'Accepted', 'Rejected'],
+    labels: [
+      t('adminStats.statusCompleted'),
+      t('adminStats.statusPending'),
+      t('adminStats.statusAccepted'),
+      t('adminStats.statusRejected'),
+    ],
     datasets: [{
       data: [
         stats.bookingStatusStats?.completed || 0,
@@ -192,7 +199,12 @@ const AdminStats = () => {
   
   // Fallback data for testing (remove this in production)
   const fallbackBookingData = {
-    labels: ['Completed', 'Pending', 'Accepted', 'Rejected'],
+    labels: [
+      t('adminStats.statusCompleted'),
+      t('adminStats.statusPending'),
+      t('adminStats.statusAccepted'),
+      t('adminStats.statusRejected'),
+    ],
     datasets: [{
       data: [15, 8, 12, 3],
       backgroundColor: [
@@ -209,9 +221,15 @@ const AdminStats = () => {
 
   // Rating Distribution Data - Bar Chart
   const ratingData = {
-    labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
+    labels: [
+      t('adminStats.chartStar5'),
+      t('adminStats.chartStar4'),
+      t('adminStats.chartStar3'),
+      t('adminStats.chartStar2'),
+      t('adminStats.chartStar1'),
+    ],
     datasets: [{
-      label: 'Number of Labourers',
+      label: t('adminStats.chartLabelLabourers'),
       data: [
         stats.labourRatingStats?.rating_5 || 0,
         stats.labourRatingStats?.rating_4 || 0,
@@ -264,7 +282,7 @@ const AdminStats = () => {
             const value = context.parsed.y;
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-            return `${label}: ${value} labourers (${percentage}%)`;
+            return t('adminStats.tooltipLabourersLine', { label, value, pct: percentage });
           }
         }
       }
@@ -284,7 +302,7 @@ const AdminStats = () => {
         },
         title: {
           display: true,
-          text: 'Number of Labourers',
+          text: t('adminStats.chartLabelLabourers'),
           color: '#64748b',
           font: {
             size: 14,
@@ -304,7 +322,7 @@ const AdminStats = () => {
         },
         title: {
           display: true,
-          text: 'Rating',
+          text: t('adminStats.chartAxisRating'),
           color: '#64748b',
           font: {
             size: 14,
@@ -319,7 +337,7 @@ const AdminStats = () => {
   const skillData = {
     labels: Object.keys(stats.availableSkillStats || {}),
     datasets: [{
-      label: 'Available Labourers',
+      label: t('adminStats.chartLabelAvailable'),
       data: Object.values(stats.availableSkillStats || {}),
       backgroundColor: 'rgba(59, 130, 246, 0.8)',
       borderColor: '#3b82f6',
@@ -414,9 +432,9 @@ const AdminStats = () => {
       {/* Header with refresh button */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h4 className="stats-title mb-1">Analytics Overview</h4>
+          <h4 className="stats-title mb-1">{t('adminStats.analyticsOverview')}</h4>
           <p className="text-muted mb-0">
-            Last updated: {formatDate(statsData.lastUpdated)}
+            {t('adminStats.lastUpdated', { date: formatDate(statsData.lastUpdated) })}
           </p>
         </div>
         <button 
@@ -425,7 +443,7 @@ const AdminStats = () => {
           disabled={statsData.isLoading}
         >
           <FaSync className={`me-1 ${statsData.isLoading ? 'fa-spin' : ''}`} />
-          Refresh
+          {t('adminStats.refresh')}
         </button>
       </div>
 
@@ -436,10 +454,10 @@ const AdminStats = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="metric-label">Total Users</h6>
+                  <h6 className="metric-label">{t('adminStats.totalUsers')}</h6>
                   <h3 className="metric-value">{totalUsers.toLocaleString()}</h3>
                   {renderGrowthIndicator(userGrowth)}
-                  <small className="text-muted">vs last 7 days</small>
+                  <small className="text-muted">{t('adminStats.vsLastWeek')}</small>
                 </div>
                 <div className="metric-icon users-icon">
                   <FaUsers />
@@ -454,10 +472,10 @@ const AdminStats = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="metric-label">Total Labourers</h6>
+                  <h6 className="metric-label">{t('adminStats.totalLabourers')}</h6>
                   <h3 className="metric-value">{totalLabours.toLocaleString()}</h3>
                   {renderGrowthIndicator(labourGrowth)}
-                  <small className="text-muted">vs last 7 days</small>
+                  <small className="text-muted">{t('adminStats.vsLastWeek')}</small>
                 </div>
                 <div className="metric-icon labourers-icon">
                   <FaUserTie />
@@ -472,10 +490,10 @@ const AdminStats = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="metric-label">Total Bookings</h6>
+                  <h6 className="metric-label">{t('adminStats.totalBookings')}</h6>
                   <h3 className="metric-value">{totalBookings.toLocaleString()}</h3>
                   {renderGrowthIndicator(bookingGrowth)}
-                  <small className="text-muted">vs last 7 days</small>
+                  <small className="text-muted">{t('adminStats.vsLastWeek')}</small>
                 </div>
                 <div className="metric-icon bookings-icon">
                   <FaClipboardList />
@@ -490,11 +508,11 @@ const AdminStats = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="metric-label">Previous Week Data</h6>
+                  <h6 className="metric-label">{t('adminStats.previousWeek')}</h6>
                   <div className="previous-stats">
-                    <small className="text-muted d-block">Users: {statsData.previous.users}</small>
-                    <small className="text-muted d-block">Labourers: {statsData.previous.labours}</small>
-                    <small className="text-muted d-block">Bookings: {statsData.previous.bookings}</small>
+                    <small className="text-muted d-block">{t('adminStats.prevUsers', { n: statsData.previous.users })}</small>
+                    <small className="text-muted d-block">{t('adminStats.prevLabourers', { n: statsData.previous.labours })}</small>
+                    <small className="text-muted d-block">{t('adminStats.prevBookings', { n: statsData.previous.bookings })}</small>
                   </div>
                 </div>
                 <div className="metric-icon history-icon">
@@ -514,10 +532,10 @@ const AdminStats = () => {
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="chart-title">
                   <FaClipboardList className="me-2" />
-                  Booking Status Distribution
+                  {t('adminStats.chartBookingsTitle')}
                 </h5>
                 <Badge bg="info" className="chart-badge">
-                  {hasBookingData ? totalBookingStatus : 38} Total
+                  {t('adminStats.bookingTotalBadge', { n: hasBookingData ? totalBookingStatus : 38 })}
                 </Badge>
               </div>
               <div className="chart-container">
@@ -537,10 +555,10 @@ const AdminStats = () => {
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="chart-title">
                   <FaStar className="me-2" />
-                  Rating Distribution
+                  {t('adminStats.chartRatingsTitle')}
                 </h5>
                 <Badge bg="warning" className="chart-badge">
-                  {totalRatings} Labourers
+                  {t('adminStats.labourersRatedBadge', { n: totalRatings })}
                 </Badge>
               </div>
               <div className="chart-container">
@@ -550,8 +568,8 @@ const AdminStats = () => {
                   <div className="d-flex align-items-center justify-content-center h-100">
                     <div className="text-center text-muted">
                       <FaStar className="mb-3" style={{ fontSize: '3rem', opacity: 0.5 }} />
-                      <p className="mb-0">No rating data available</p>
-                      <small>Ratings will appear here once labourers receive reviews</small>
+                      <p className="mb-0">{t('adminStats.noRatingData')}</p>
+                      <small>{t('adminStats.ratingsEmptySub')}</small>
                     </div>
                   </div>
                 )}
@@ -566,10 +584,10 @@ const AdminStats = () => {
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="chart-title">
                   <FaUserTie className="me-2" />
-                  Available Labourers by Skill
+                  {t('adminStats.chartSkillsHeading')}
                 </h5>
                 <Badge bg="primary" className="chart-badge">
-                  {Object.values(stats.availableSkillStats || {}).reduce((a, b) => a + b, 0)} Available
+                  {t('adminStats.availableBadge', { n: Object.values(stats.availableSkillStats || {}).reduce((a, b) => a + b, 0) })}
                 </Badge>
               </div>
               <div className="chart-container">

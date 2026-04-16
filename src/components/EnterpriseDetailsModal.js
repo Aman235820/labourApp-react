@@ -17,8 +17,10 @@ import {
   getStoredEnterpriseSession,
 } from '../utils/enterpriseSession';
 import '../styles/EnterpriseDetailsModal.css';
+import { useTranslation } from 'react-i18next';
 
 function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpdate }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     ownername: '',
     companyName: '',
@@ -118,11 +120,11 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
     const newErrors = {};
 
     if (!formData.ownername || formData.ownername.trim().length < 2) {
-      newErrors.ownername = 'Owner name must be at least 2 characters';
+      newErrors.ownername = t('enterpriseDetailsModal.errOwnerName');
     }
 
     if (!formData.workforceSize || isNaN(formData.workforceSize) || parseInt(formData.workforceSize) < 1) {
-      newErrors.workforceSize = 'Workforce size must be a valid number greater than 0';
+      newErrors.workforceSize = t('enterpriseDetailsModal.errWorkforceSize');
     }
 
     // No validation for contact numbers - they are optional
@@ -132,7 +134,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
   };
 
   const getErrorMessage = (err) => {
-    if (!err) return 'Failed to update details. Please try again.';
+    if (!err) return t('enterpriseDetailsModal.errUpdateFailed');
     if (typeof err === 'string') return err;
     if (typeof err !== 'object') return String(err);
 
@@ -157,7 +159,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
     try {
       return JSON.stringify(err);
     } catch {
-      return 'Failed to update details. Please try again.';
+      return t('enterpriseDetailsModal.errUpdateFailed');
     }
   };
 
@@ -185,7 +187,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
 
       if (!resolvedId || !/^[0-9a-fA-F]{24}$/.test(String(resolvedId))) {
         console.error('Modal - Missing enterpriseId:', { enterpriseId, enterprise, stored });
-        throw new Error('Enterprise session not found');
+        throw new Error(t('enterpriseDetailsModal.errSessionNotFound'));
       }
 
       // Filter out empty contact numbers, but allow empty array if no numbers provided
@@ -207,7 +209,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
 
       await enterpriseService.updateEnterpriseFields(resolvedId, updateData, token);
 
-      setSuccess('Details updated successfully!');
+      setSuccess(t('enterpriseDetailsModal.successUpdated'));
       
       // Update the enterprise data in localStorage
       const updatedEnterprise = withEnterpriseId({
@@ -249,7 +251,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
       <Modal.Header className="bg-primary text-white">
         <Modal.Title className="d-flex align-items-center">
           <FaBuilding className="me-2" />
-          Complete Your Business Profile
+          {t('enterpriseDetailsModal.title')}
         </Modal.Title>
         <Button
           variant="link"
@@ -263,7 +265,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
       
       <Modal.Body className="p-4">
         <div className="text-center mb-4">
-          <p className="text-muted">Please provide some additional details about your business to complete your profile.</p>
+          <p className="text-muted">{t('enterpriseDetailsModal.intro')}</p>
         </div>
         
         {success && (
@@ -280,13 +282,13 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaUser className="me-2 text-primary" />
-                  Owner Name *
+                  {t('enterpriseDetailsModal.ownerName')}
                 </Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.ownername}
                   onChange={(e) => handleInputChange('ownername', e.target.value)}
-                  placeholder="Enter owner name"
+                  placeholder={t('enterpriseDetailsModal.ownerNamePh')}
                   isInvalid={!!errors.ownername}
                 />
                 <Form.Control.Feedback type="invalid">
@@ -300,13 +302,13 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaBuilding className="me-2 text-primary" />
-                  Company Name
+                  {t('enterpriseDetailsModal.companyName')}
                 </Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder={t('enterpriseDetailsModal.companyNamePh')}
                 />
               </Form.Group>
             </Col>
@@ -316,13 +318,13 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaBuilding className="me-2 text-primary" />
-                  Workforce Size *
+                  {t('enterpriseDetailsModal.workforceSize')}
                 </Form.Label>
                 <Form.Control
                   type="number"
                   value={formData.workforceSize}
                   onChange={(e) => handleInputChange('workforceSize', e.target.value)}
-                  placeholder="Enter workforce size"
+                  placeholder={t('enterpriseDetailsModal.workforceSizePh')}
                   min="1"
                   isInvalid={!!errors.workforceSize}
                 />
@@ -337,13 +339,13 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaIdCard className="me-2 text-primary" />
-                  Location
+                  {t('enterpriseDetailsModal.location')}
                 </Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  placeholder="Enter city/location"
+                  placeholder={t('enterpriseDetailsModal.locationPh')}
                 />
               </Form.Group>
             </Col>
@@ -353,10 +355,10 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaPhone className="me-2 text-primary" />
-                  Additional Contact Numbers
+                  {t('enterpriseDetailsModal.additionalContacts')}
                 </Form.Label>
                 <Form.Text className="text-muted mb-3">
-                  Optional: Add additional contact numbers for your business
+                  {t('enterpriseDetailsModal.additionalContactsHint')}
                 </Form.Text>
                 {formData.otherContactNumbers.map((number, index) => (
                   <div key={index} className="mb-2">
@@ -364,7 +366,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
                       <InputGroup.Text><FaPhone /></InputGroup.Text>
                       <Form.Control
                         type="tel"
-                        placeholder="Enter 10-digit contact number"
+                        placeholder={t('enterpriseDetailsModal.contactPh')}
                         value={number}
                         onChange={(e) => handleContactNumberChange(index, e.target.value.replace(/\D/g, '').slice(0, 10))}
                         maxLength={10}
@@ -373,7 +375,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
                         <Button 
                           variant="outline-danger" 
                           onClick={() => removeContactNumber(index)}
-                          title="Remove this contact number"
+                          title={t('enterpriseDetailsModal.removeContactTitle')}
                         >
                           <FaTrash />
                         </Button>
@@ -388,7 +390,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
                   className="mt-2"
                 >
                   <FaPlus className="me-1" />
-                  Add Another Number
+                  {t('enterpriseDetailsModal.addAnotherNumber')}
                 </Button>
               </Form.Group>
             </Col>
@@ -398,7 +400,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaIdCard className="me-2 text-primary" />
-                  GST Number
+                  {t('enterpriseDetailsModal.gstNumber')}
                 </Form.Label>
                 <Form.Control
                   type="text"
@@ -411,7 +413,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
                         .slice(0, 15)
                     )
                   }
-                  placeholder="Enter GST number (optional)"
+                  placeholder={t('enterpriseDetailsModal.gstPh')}
                   maxLength={15}
                 />
               </Form.Group>
@@ -422,13 +424,13 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
               <Form.Group>
                 <Form.Label>
                   <FaIdCard className="me-2 text-primary" />
-                  Registration Certificate Link
+                  {t('enterpriseDetailsModal.regCertLink')}
                 </Form.Label>
                 <Form.Control
                   type="url"
                   value={formData.registrationCertificateLink}
                   onChange={(e) => handleInputChange('registrationCertificateLink', e.target.value)}
-                  placeholder="Paste link (optional)"
+                  placeholder={t('enterpriseDetailsModal.regCertPh')}
                 />
               </Form.Group>
             </Col>
@@ -436,24 +438,24 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
             {/* Other Document Links */}
             <Col md={12} className="mt-3">
               <Form.Group>
-                <Form.Label className="fw-semibold">Other Document Links</Form.Label>
+                <Form.Label className="fw-semibold">{t('enterpriseDetailsModal.otherDocLinks')}</Form.Label>
                 <Row>
                   <Col md={6} className="mt-2">
-                    <Form.Label className="text-muted mb-1">License</Form.Label>
+                    <Form.Label className="text-muted mb-1">{t('enterpriseDetailsModal.license')}</Form.Label>
                     <Form.Control
                       type="url"
                       value={formData.otherDocumentLinks.license}
                       onChange={(e) => handleDocumentLinkChange('license', e.target.value)}
-                      placeholder="Paste license link"
+                      placeholder={t('enterpriseDetailsModal.pasteLicense')}
                     />
                   </Col>
                   <Col md={6} className="mt-2">
-                    <Form.Label className="text-muted mb-1">Insurance</Form.Label>
+                    <Form.Label className="text-muted mb-1">{t('enterpriseDetailsModal.insurance')}</Form.Label>
                     <Form.Control
                       type="url"
                       value={formData.otherDocumentLinks.insurance}
                       onChange={(e) => handleDocumentLinkChange('insurance', e.target.value)}
-                      placeholder="Paste insurance link"
+                      placeholder={t('enterpriseDetailsModal.pasteInsurance')}
                     />
                   </Col>
                 </Row>
@@ -473,7 +475,7 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
 
         <div className="d-flex justify-content-end gap-2 w-100">
           <Button variant="outline-secondary" onClick={handleSkip}>
-            Skip for Now
+            {t('enterpriseDetailsModal.skipForNow')}
           </Button>
           <Button 
             variant="primary" 
@@ -483,12 +485,12 @@ function EnterpriseDetailsModal({ show, onHide, enterprise, enterpriseId, onUpda
             {isLoading ? (
               <>
                 <Spinner animation="border" size="sm" className="me-2" />
-                Updating...
+                {t('enterpriseDetailsModal.updating')}
               </>
             ) : (
               <>
                 <FaCheckCircle className="me-2" />
-                Update Details
+                {t('enterpriseDetailsModal.updateDetails')}
               </>
             )}
           </Button>

@@ -3,6 +3,7 @@ import { Modal, Button, Badge } from 'react-bootstrap';
 import { FaUsers, FaMapMarkerAlt, FaShieldAlt, FaIdCard } from 'react-icons/fa';
 import '../styles/EnterpriseLabourProfileModal.css';
 import { parseLabourPrimarySkillsArray } from '../utils/enterpriseSession';
+import { useTranslation } from 'react-i18next';
 
 function DetailRow({ label, children, empty }) {
   if (empty && (children == null || children === '')) return null;
@@ -18,6 +19,7 @@ function DetailRow({ label, children, empty }) {
  * Full labour profile for enterprise dashboard (opened from compact list rows).
  */
 function EnterpriseLabourProfileModal({ show, onHide, labour }) {
+  const { t } = useTranslation();
   if (!labour) return null;
 
   const imgUrl = String(labour.profileImageUrl || '').trim();
@@ -35,7 +37,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
     >
       <Modal.Header closeButton className="enterprise-labour-profile-modal-header border-0">
         <Modal.Title className="h5 mb-0 text-break pe-2">
-          {labour.fullName || 'Labour profile'}
+          {labour.fullName || t('enterpriseLabourProfile.titleFallback')}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="enterprise-labour-profile-modal-body pt-0">
@@ -89,7 +91,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
             className="enterprise-labour-profile-primary-skills-heading"
           >
             <FaIdCard className="enterprise-labour-profile-primary-skills-heading-icon" aria-hidden />
-            Primary skills
+            {t('enterpriseLabourProfile.primarySkills')}
           </h3>
           {primarySkillLabels.length > 0 ? (
             <ul
@@ -115,24 +117,24 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
         </section>
 
         <dl className="enterprise-labour-profile-dl mb-0">
-          <DetailRow label="Mobile">
+          <DetailRow label={t('enterpriseLabourProfile.mobile')}>
             {labour.mobile || '—'}
             {labour.alternateMobile ? (
               <span className="d-block text-muted small mt-1">
-                Alt: {labour.alternateMobile}
+                {t('enterpriseLabourProfile.altPrefix')} {labour.alternateMobile}
               </span>
             ) : null}
           </DetailRow>
-          <DetailRow label="Email" empty>
+          <DetailRow label={t('enterpriseLabourProfile.email')} empty>
             {labour.email}
           </DetailRow>
-          <DetailRow label="Location">
+          <DetailRow label={t('enterpriseLabourProfile.location')}>
             <span className="d-inline-flex align-items-start gap-1">
               <FaMapMarkerAlt className="text-primary mt-1 flex-shrink-0" />
               {labour.location || '—'}
             </span>
           </DetailRow>
-          <DetailRow label="Emergency contact" empty>
+          <DetailRow label={t('enterpriseLabourProfile.emergencyContact')} empty>
             {labour.emergencyContactMobile ? (
               <span className="d-inline-flex align-items-center gap-1">
                 <FaShieldAlt className="text-warning" />
@@ -140,20 +142,20 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
               </span>
             ) : null}
           </DetailRow>
-          <DetailRow label="Enterprise labour ID">
+          <DetailRow label={t('enterpriseLabourProfile.enterpriseLabourId')}>
             {labour.enterpriseLabourId != null ? String(labour.enterpriseLabourId) : '—'}
           </DetailRow>
-          <DetailRow label="Enterprise ID" empty>
+          <DetailRow label={t('enterpriseLabourProfile.enterpriseId')} empty>
             {labour.enterpriseId}
           </DetailRow>
-          <DetailRow label="Joined">{labour.joinedAt || '—'}</DetailRow>
-          <DetailRow label="Registered">{labour.registrationTime || '—'}</DetailRow>
-          <DetailRow label="Notes" empty>
+          <DetailRow label={t('enterpriseLabourProfile.joined')}>{labour.joinedAt || '—'}</DetailRow>
+          <DetailRow label={t('enterpriseLabourProfile.registered')}>{labour.registrationTime || '—'}</DetailRow>
+          <DetailRow label={t('enterpriseLabourProfile.notes')} empty>
             {labour.notes ? (
               <span className="fst-italic text-muted">{labour.notes}</span>
             ) : null}
           </DetailRow>
-          <DetailRow label="Admin comments" empty>
+          <DetailRow label={t('enterpriseLabourProfile.adminComments')} empty>
             {labour.adminComments}
           </DetailRow>
         </dl>
@@ -168,7 +170,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Open profile image
+                {t('enterpriseLabourProfile.openProfileImage')}
               </Button>
             ) : null}
             {labour.idDocumentUrl ? (
@@ -179,7 +181,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Open ID document
+                {t('enterpriseLabourProfile.openIdDocument')}
               </Button>
             ) : null}
           </div>
@@ -187,7 +189,7 @@ function EnterpriseLabourProfileModal({ show, onHide, labour }) {
       </Modal.Body>
       <Modal.Footer className="border-0 pt-0 enterprise-labour-profile-modal-footer">
         <Button variant="primary" className="w-100" onClick={onHide}>
-          Close
+          {t('enterpriseLabourProfile.close')}
         </Button>
       </Modal.Footer>
     </Modal>
